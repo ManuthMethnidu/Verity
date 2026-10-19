@@ -5,12 +5,13 @@
  */
 
 export class DetectorLoop {
-  constructor({ videoElement, canvasElement, onStableFace, onMetricsUpdate }) {
+  constructor({ videoElement, canvasElement, onStableFace, onMetricsUpdate, isMirrored = true }) {
     this.video = videoElement;
     this.canvas = canvasElement;
     this.ctx = canvasElement.getContext('2d');
     this.onStableFace = onStableFace;
     this.onMetricsUpdate = onMetricsUpdate;
+    this.isMirrored = isMirrored;
 
     this.isRunning = false;
     this.animationId = null;
@@ -38,6 +39,10 @@ export class DetectorLoop {
     this.isMatching = false;
     this.lastTriggerTime = 0;
     this.TRIGGER_COOLDOWN_MS = 2500;
+  }
+
+  setMirrored(mirrored) {
+    this.isMirrored = Boolean(mirrored);
   }
 
   /**
@@ -280,8 +285,9 @@ export class DetectorLoop {
    * Renders bounding box with futuristic corners and stability status
    */
   drawBoundingBox(bbox, isStable) {
-    const { ctx } = this;
-    const { x, y, width: w, height: h } = bbox;
+    const { ctx, canvas } = this;
+    const { y, width: w, height: h } = bbox;
+    const x = this.isMirrored ? (canvas.width - bbox.x - w) : bbox.x;
     const cornerLength = Math.min(w, h) * 0.2;
 
     const color = isStable ? '#10b981' : '#f59e0b'; // Green when stable, Amber when acquiring

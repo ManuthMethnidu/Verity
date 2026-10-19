@@ -1,4 +1,5 @@
 import { cosineSimilarity, findBestMatch } from './CosineMatcher.js';
+import { extractEmbeddingFromImageData } from './featureExtractor.js';
 
 let ortSession = null;
 let isInitializing = false;
@@ -59,56 +60,6 @@ function preprocessImage(imageBitmap) {
   return { float32Data, imageData };
 }
 
-/**
- * High-speed perceptual feature extractor fallback (128-D normalized unit vector)
- */
-function extractPerceptualEmbedding(imageData) {
-  const { data, width, height } = imageData;
-  const embedding = new Float32Array(128);
-
-  // Divide 112x112 into 8x8 spatial regions (64 bins) and compute multi-channel energy
-  const blockW = Math.floor(width / 8);
-  const blockH = Math.floor(height / 8);
-
-  let binIdx = 0;
-  for (let by = 0; by < 8; by++) {
-    for (let bx = 0; bx < 8; bx++) {
-      let rSum = 0;
-      let gSum = 0;
-      let bSum = 0;
-      let count = 0;
-
-      for (let y = by * blockH; y < (by + 1) * blockH; y++) {
-        for (let x = bx * blockW; x < (bx + 1) * blockW; x++) {
-          const idx = (y * width + x) * 4;
-          rSum += data[idx];
-          gSum += data[idx + 1];
-          bSum += data[idx + 2];
-          count++;
-        }
-      }
-
-      const meanLum = (0.299 * rSum + 0.587 * gSum + 0.114 * bSum) / (count * 255.0);
-      const colorDiff = (rSum - bSum) / (count * 255.0);
-
-      embedding[binIdx] = meanLum;
-      embedding[binIdx + 64] = colorDiff;
-      binIdx++;
-    }
-  }
-
-  // L2-normalize to unit sphere
-  let norm = 0;
-  for (let i = 0; i < 128; i++) {
-    norm += embedding[i] * embedding[i];
-  }
-  norm = Math.sqrt(norm) || 1.0;
-  for (let i = 0; i < 128; i++) {
-    embedding[i] /= norm;
-  }
-
-  return embedding;
-}
 
 self.onmessage = async (e) => {
   const { type, payload } = e.data;
@@ -137,7 +88,7 @@ self.onmessage = async (e) => {
         probeEmbedding = output.data;
       } else {
         // High-speed perceptual feature extractor fallback
-        probeEmbedding = extractPerceptualEmbedding(imageData);
+        probeEmbedding = extractEmbeddingFromImageData(imageData);
       }
 
       // Close ImageBitmap to prevent memory leaks in worker

@@ -14,7 +14,8 @@
     "dev": "concurrently -n backend,frontend -c blue,green \"npm:dev:backend\" \"npm:dev:frontend\"",
     "build": "npm --workspace=backend run build && npm --workspace=frontend run build",
     "test": "npm --workspace=backend run test",
-    "test:benchmark": "node scripts/benchmark.js"
+    "test:benchmark": "node scripts/benchmark.js",
+    "db:setup:supabase": "node scripts/setup-supabase.js"
   },
   "devDependencies": {
     "concurrently": "^9.1.2",
