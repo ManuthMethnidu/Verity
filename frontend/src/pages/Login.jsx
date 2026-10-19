@@ -29,9 +29,10 @@ export function Login() {
       navigate('/dashboard');
     } catch (err) {
       console.error('Authentication failure:', err);
-      setError(
-        err.response?.data?.error || err.message || 'Authentication failed. Please check credentials.'
-      );
+      const serverError = err.response?.data?.detail
+        ? `${err.response.data.error} (${err.response.data.detail})`
+        : err.response?.data?.error;
+      setError(serverError || err.message || 'Authentication failed. Please check credentials.');
     } finally {
       setLoading(false);
     }
