@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS tenant_settings (
     target_fps INT DEFAULT 30,
     model_quality TEXT DEFAULT 'medium',
     battery_saver BOOLEAN DEFAULT FALSE,
+    confidence_threshold REAL DEFAULT 0.70,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

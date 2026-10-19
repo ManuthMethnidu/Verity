@@ -27,6 +27,8 @@ export class DetectorLoop {
     // Match overlay state
     this.currentMatchFeedback = null;
     this.feedbackTimeout = null;
+    this.lastMatchedName = null;
+    this.lastMatchedConfidence = null;
 
     // Performance metrics
     this.lastFrameTime = performance.now();
@@ -115,10 +117,20 @@ export class DetectorLoop {
     this.currentMatchFeedback = feedback;
     this.isMatching = false;
 
+    if (feedback?.success && feedback?.name) {
+      this.lastMatchedName = feedback.name;
+      this.lastMatchedConfidence = feedback.confidence;
+    } else if (feedback && !feedback.success) {
+      this.lastMatchedName = 'Unrecognized Face';
+      this.lastMatchedConfidence = feedback.confidence;
+    }
+
     if (this.feedbackTimeout) clearTimeout(this.feedbackTimeout);
     this.feedbackTimeout = setTimeout(() => {
       this.currentMatchFeedback = null;
-    }, 3500);
+      this.lastMatchedName = null;
+      this.lastMatchedConfidence = null;
+    }, 4500);
   }
 
   /**
@@ -290,8 +302,14 @@ export class DetectorLoop {
     const x = this.isMirrored ? (canvas.width - bbox.x - w) : bbox.x;
     const cornerLength = Math.min(w, h) * 0.2;
 
-    const color = isStable ? '#10b981' : '#f59e0b'; // Green when stable, Amber when acquiring
-    ctx.lineWidth = 3;
+    const isMatchSuccess = this.currentMatchFeedback?.success;
+    const isUnrecognized = this.lastMatchedName === 'Unrecognized Face';
+
+    let color = isStable ? '#10b981' : '#f59e0b';
+    if (isMatchSuccess) color = '#10b981';
+    else if (isUnrecognized) color = '#ef4444';
+
+    ctx.lineWidth = isMatchSuccess ? 4 : 3;
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
 
@@ -315,29 +333,42 @@ export class DetectorLoop {
     ctx.lineTo(x, y + h - cornerLength);
     ctx.stroke();
 
-    // Stability bar / indicator badge
-    const badgeText = isStable
-      ? '✓ FACE STABLE (MATCHING)'
-      : `ALIGNING... (${this.stableFrames}/${this.REQUIRED_STABLE_FRAMES})`;
+    // Person nameplate badge directly attached to this face
+    let badgeText = '';
+    if (isMatchSuccess) {
+      const confPct = Math.round((this.lastMatchedConfidence || 0.95) * 100);
+      badgeText = `👤 ${this.lastMatchedName} • ${confPct}%`;
+    } else if (isUnrecognized) {
+      badgeText = '⚠️ Unrecognized Student Face';
+    } else if (isStable) {
+      badgeText = '✓ Face Steady (Verifying...)';
+    } else {
+      badgeText = `Align Face (${this.stableFrames}/${this.REQUIRED_STABLE_FRAMES})`;
+    }
 
-    ctx.font = '600 12px sans-serif';
+    ctx.font = 'bold 13px sans-serif';
     const textWidth = ctx.measureText(badgeText).width;
-    const badgeW = textWidth + 18;
-    const badgeH = 24;
+    const badgeW = textWidth + 20;
+    const badgeH = 28;
     const badgeX = x + (w - badgeW) / 2;
-    const badgeY = y - 30 > 10 ? y - 30 : y + h + 10;
+    const badgeY = y - 34 > 8 ? y - 34 : y + h + 10;
 
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+    // Pill background
+    ctx.fillStyle = isMatchSuccess
+      ? 'rgba(6, 78, 59, 0.95)'
+      : isUnrecognized
+      ? 'rgba(127, 29, 29, 0.95)'
+      : 'rgba(15, 23, 42, 0.90)';
     ctx.beginPath();
-    ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 6);
+    ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 8);
     ctx.fill();
 
     ctx.strokeStyle = color;
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    ctx.fillStyle = isStable ? '#34d399' : '#fbbf24';
-    ctx.fillText(badgeText, badgeX + 9, badgeY + 16);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(badgeText, badgeX + 10, badgeY + 18);
   }
 
   /**

@@ -54,7 +54,7 @@ app.use((err, req, res, next) => {
   });
 });
 
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Verity Backend listening on http://0.0.0.0:${PORT}`);
     console.log(`📊 Health check available at http://localhost:${PORT}/api/health`);
