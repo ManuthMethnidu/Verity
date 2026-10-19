@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id         String          @id @default(uuid())
+  name       String
+  createdAt  DateTime        @default(now()) @map("created_at")
+  admins     Admin[]
+  students   Student[]
+  attendance Attendance[]
+  settings   TenantSettings?
+
+  @@map("tenants")
+}
+
+model Admin {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  tenantId     String   @map("tenant_id")
+  tenant       Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("admins")
+}
+
+model Student {
+  id            String       @id @default(uuid())
+  tenantId      String       @map("tenant_id")
+  tenant        Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  studentIdCode String?      @map("student_id_code")
+  name          String
+  imageUrl      String?      @map("image_url")
+  embedding     Bytes?
+  createdAt     DateTime     @default(now()) @map("created_at")
+  attendance    Attendance[]
+
+  @@index([tenantId], name: "idx_students_tenant")
+  @@map("students")
+}
+
+model Attendance {
+  id         String   @id @default(uuid())
+  tenantId   String   @map("tenant_id")
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  studentId  String   @map("student_id")
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  timestamp  DateTime @default(now())
+  deviceId   String   @map("device_id")
+  confidence Float?
+
+  @@index([tenantId, timestamp], name: "idx_attendance_tenant_timestamp")
+  @@index([studentId], name: "idx_attendance_student")
+  @@map("attendance")
+}
+
+model TenantSettings {
+  id                  String   @id @default(uuid())
+  tenantId            String   @unique @map("tenant_id")
+  tenant              Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  targetFps           Int      @default(30) @map("target_fps")
+  modelQuality        String   @default("medium") @map("model_quality")
+  batterySaver        Boolean  @default(false) @map("battery_saver")
+  confidenceThreshold Float    @default(0.70) @map("confidence_threshold")
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("tenant_settings")
+}

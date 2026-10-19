@@ -1,0 +1,388 @@
+openapi: 3.0.3
+info:
+  title: Verity Face-Recognition Attendance System API
+  description: High-performance lightweight REST API for tenant management, roster synchronization, settings persistence, and real-time attendance logging.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /api/health:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  timestamp:
+                    type: string
+                    format: date-time
+
+  /api/auth/register:
+    post:
+      summary: Register a new admin and default tenant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, tenantName]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                tenantName:
+                  type: string
+      responses:
+        '201':
+          description: Admin and tenant created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+
+  /api/auth/login:
+    post:
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        '200':
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+
+  /api/tenant/create:
+    post:
+      summary: Provision a new tenant database/schema
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name]
+              properties:
+                name:
+                  type: string
+      responses:
+        '201':
+          description: Tenant created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tenantId:
+                    type: string
+                    format: uuid
+                  name:
+                    type: string
+
+  /api/roster:
+    get:
+      summary: Get student roster with 128-D embeddings
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Array of student records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Student'
+
+  /api/roster/batch:
+    post:
+      summary: Batch upload student roster with embeddings
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [students]
+              properties:
+                students:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/StudentInput'
+      responses:
+        '201':
+          description: Roster batch inserted or updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  students:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Student'
+
+  /api/roster/{id}:
+    put:
+      summary: Update a student record
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudentInput'
+      responses:
+        '200':
+          description: Student updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Student'
+    delete:
+      summary: Delete a student record
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Student deleted
+
+  /api/settings:
+    get:
+      summary: Get tenant performance settings
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Tenant settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+    put:
+      summary: Update tenant performance settings
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Settings'
+      responses:
+        '200':
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+
+  /api/attendance:
+    post:
+      summary: Record attendance verification event
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttendanceLog'
+      responses:
+        '201':
+          description: Attendance recorded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  id:
+                    type: string
+                    format: uuid
+
+  /api/attendance/report:
+    get:
+      summary: Fetch attendance report for today or date range
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: date
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: Attendance logs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AttendanceRecord'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        tenantId:
+          type: string
+          format: uuid
+        admin:
+          type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            email:
+              type: string
+            tenantName:
+              type: string
+
+    Student:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        studentIdCode:
+          type: string
+        name:
+          type: string
+        imageUrl:
+          type: string
+        embedding:
+          type: string
+          description: Base64-encoded Float32Array (128-D) or array of floats
+        createdAt:
+          type: string
+          format: date-time
+
+    StudentInput:
+      type: object
+      required: [name]
+      properties:
+        studentIdCode:
+          type: string
+        name:
+          type: string
+        imageUrl:
+          type: string
+        embedding:
+          type: string
+          description: Base64-encoded Float32Array (≤ 4KB) or float array
+
+    Settings:
+      type: object
+      properties:
+        targetFps:
+          type: integer
+          enum: [15, 30, 60]
+          default: 30
+        modelQuality:
+          type: string
+          enum: [low, medium, high]
+          default: medium
+        batterySaver:
+          type: boolean
+          default: false
+        confidenceThreshold:
+          type: number
+          default: 0.70
+
+    AttendanceLog:
+      type: object
+      required: [studentId, timestamp, deviceId]
+      properties:
+        studentId:
+          type: string
+          format: uuid
+        timestamp:
+          type: string
+          format: date-time
+        deviceId:
+          type: string
+        confidence:
+          type: number
+
+    AttendanceRecord:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        studentId:
+          type: string
+          format: uuid
+        studentName:
+          type: string
+        studentCode:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        deviceId:
+          type: string
+        confidence:
+          type: number
