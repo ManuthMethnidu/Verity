@@ -18,7 +18,11 @@ import {
 import { api } from '../auth/auth.js';
 import { cacheRoster, getCachedRoster } from '../storage/attendanceStore.js';
 import { CameraManager } from '../vision/cameraManager.js';
-import { captureFaceFromVideo } from '../vision/featureExtractor.js';
+import {
+  detectSingleFaceWithDescriptor,
+  extractFaceThumbnail,
+  loadFaceApiModels,
+} from '../vision/faceApiService.js';
 
 export function RosterPage() {
   const [students, setStudents] = useState([]);
@@ -36,6 +40,7 @@ export function RosterPage() {
   const [enrollCameraActive, setEnrollCameraActive] = useState(false);
   const [enrollMirrored, setEnrollMirrored] = useState(true);
   const [capturedFace, setCapturedFace] = useState(null); // { thumbnailUrl, embeddingVector }
+  const [isExtractingFace, setIsExtractingFace] = useState(false);
   const enrollVideoRef = useRef(null);
   const enrollCameraManagerRef = useRef(null);
 
@@ -107,40 +112,92 @@ export function RosterPage() {
     setEnrollCameraActive(false);
   };
 
-  const handleSnapFace = () => {
+  const handleSnapFace = async () => {
     if (!enrollVideoRef.current || !enrollCameraActive) return;
+    setIsExtractingFace(true);
     try {
-      const result = captureFaceFromVideo(enrollVideoRef.current);
+      const detection = await detectSingleFaceWithDescriptor(enrollVideoRef.current);
+      if (!detection) {
+        showNotice(
+          'No face detected! Please ensure your face is well-lit and looking directly at the camera.',
+          'warning'
+        );
+        setIsExtractingFace(false);
+        return;
+      }
+
+      const thumbUrl = extractFaceThumbnail(enrollVideoRef.current, detection.box);
+      const result = {
+        thumbnailUrl: thumbUrl,
+        embeddingVector: detection.descriptor,
+      };
+
       setCapturedFace(result);
-      setFormImage(result.thumbnailUrl);
-      showNotice('Face captured! 128-D biometric embedding generated.');
+      setFormImage(thumbUrl);
+      showNotice('Face verified! 128-D neural face descriptor extracted (ResNet-34).');
     } catch (err) {
       console.error('Snap face failed:', err);
-      showNotice('Failed to extract face embedding: ' + err.message, 'error');
+      showNotice('Failed to extract face biometrics: ' + err.message, 'error');
+    } finally {
+      setIsExtractingFace(false);
     }
   };
 
-  // Helper fallback to generate normalized 128-D vector if manual entry
-  const createMockEmbedding = (name) => {
-    const vec = new Float32Array(128);
-    let norm = 0;
-    const seed = name.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    for (let i = 0; i < 128; i++) {
-      const val = Math.sin(seed * 77 + i * 23);
-      vec[i] = val;
-      norm += val * val;
-    }
-    norm = Math.sqrt(norm);
-    for (let i = 0; i < 128; i++) vec[i] /= norm;
-    return Array.from(vec);
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsExtractingFace(true);
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const dataUrl = event.target.result;
+      const img = new Image();
+      img.onload = async () => {
+        try {
+          const detection = await detectSingleFaceWithDescriptor(img);
+          if (!detection) {
+            showNotice(
+              'No human face detected in uploaded photo. Please upload a clear portrait photo.',
+              'warning'
+            );
+            setIsExtractingFace(false);
+            return;
+          }
+
+          const thumbUrl = extractFaceThumbnail(img, detection.box);
+          const result = {
+            thumbnailUrl: thumbUrl,
+            embeddingVector: detection.descriptor,
+          };
+
+          setCapturedFace(result);
+          setFormImage(thumbUrl);
+          showNotice('Photo processed! 128-D neural biometrics extracted from portrait.');
+        } catch (err) {
+          console.error('Photo face detection failed:', err);
+          showNotice('Could not extract biometrics from image: ' + err.message, 'error');
+        } finally {
+          setIsExtractingFace(false);
+        }
+      };
+      img.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleAddStudent = async (e) => {
     e.preventDefault();
+    if (!capturedFace || !capturedFace.embeddingVector) {
+      showNotice(
+        'Please capture a face from camera or upload a student portrait photo before saving.',
+        'warning'
+      );
+      return;
+    }
+
     try {
-      // Use real biometric embedding from camera capture if available
-      const embedding = capturedFace?.embeddingVector || createMockEmbedding(formName);
-      const imageUrl = capturedFace?.thumbnailUrl || formImage || null;
+      const embedding = capturedFace.embeddingVector;
+      const imageUrl = capturedFace.thumbnailUrl || formImage || null;
 
       await api.post('/roster/batch', {
         students: [
@@ -153,7 +210,7 @@ export function RosterPage() {
         ],
       });
 
-      showNotice(`Student ${formName} enrolled with 128-D face embedding.`);
+      showNotice(`Student ${formName} enrolled with real 128-D neural face descriptor.`);
       closeAddModal();
       fetchRoster();
     } catch (err) {
@@ -492,11 +549,21 @@ export function RosterPage() {
                   <div className="flex items-center justify-between gap-3 bg-slate-800/50 p-3 rounded-xl border border-slate-700/60">
                     <button
                       type="button"
+                      disabled={isExtractingFace}
                       onClick={handleSnapFace}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-lg text-sm transition shadow-lg shadow-emerald-500/20 active:scale-95"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-slate-950 font-bold rounded-lg text-sm transition shadow-lg shadow-emerald-500/20 active:scale-95"
                     >
-                      <Camera className="w-4 h-4" />
-                      <span>Snap Face & Extract Biometrics</span>
+                      {isExtractingFace ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          <span>Extracting Neural Biometrics...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Camera className="w-4 h-4" />
+                          <span>Snap Face & Extract Biometrics</span>
+                        </>
+                      )}
                     </button>
 
                     {capturedFace && (
@@ -515,8 +582,49 @@ export function RosterPage() {
                     <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2">
                       <CheckCircle className="w-4 h-4 flex-shrink-0" />
                       <span>
-                        ✓ Real 128-D Biometric Embedding Locked ({capturedFace.embeddingVector.length} features)
+                        ✓ Real 128-D Neural Biometrics Locked ({capturedFace.embeddingVector.length} features)
                       </span>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {enrollTab === 'manual' && (
+                <div className="space-y-3">
+                  <div className="p-4 rounded-xl border border-dashed border-slate-700 bg-slate-800/40 text-center space-y-2">
+                    <div className="flex justify-center">
+                      <Upload className="w-8 h-8 text-emerald-400" />
+                    </div>
+                    <p className="text-xs text-slate-300 font-medium">
+                      Upload a student portrait photo to extract neural biometrics
+                    </p>
+                    <label className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs font-semibold cursor-pointer transition">
+                      <span>Choose Portrait Photo</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={handlePhotoUpload}
+                      />
+                    </label>
+                  </div>
+
+                  {capturedFace && (
+                    <div className="flex items-center gap-3 p-3 bg-slate-800/60 rounded-xl border border-emerald-500/40">
+                      <img
+                        src={capturedFace.thumbnailUrl}
+                        alt="Enrolled portrait"
+                        className="w-12 h-12 rounded-lg object-cover border border-emerald-500"
+                      />
+                      <div className="text-xs">
+                        <div className="font-semibold text-emerald-400 flex items-center gap-1.5">
+                          <CheckCircle className="w-3.5 h-3.5" />
+                          <span>Face Extracted Successfully</span>
+                        </div>
+                        <div className="text-slate-400 mt-0.5">
+                          128-D ResNet-34 descriptor ready for enrollment
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>

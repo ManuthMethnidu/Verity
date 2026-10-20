@@ -1,34 +1,59 @@
 /**
- * High-performance Face Detection & Stability Evaluator loop.
- * Runs in main thread, tracks bounding boxes on canvas overlay,
- * and delegates stable face ImageBitmap captures to Web Worker.
+ * High-performance Real-Time Neural Face Detection & Recognition Loop.
+ * Powered by face-api.js (@vladmandic/face-api):
+ * - Multi-face TinyFaceDetector with 68-point facial landmarks
+ * - 128-D deep neural face recognition descriptors (ResNet-34)
+ * - Real-time Euclidean distance biometric matching against student roster
+ * - Individual bounding boxes and floating nameplates rendered directly on each person's face
  */
 
+import {
+  loadFaceApiModels,
+  detectAllFacesWithDescriptors,
+  matchDescriptorToRoster,
+} from './faceApiService.js';
+
 export class DetectorLoop {
-  constructor({ videoElement, canvasElement, onStableFace, onMetricsUpdate, isMirrored = true }) {
+  constructor({
+    videoElement,
+    canvasElement,
+    roster = [],
+    onVerifiedMatch = null,
+    onStableFace = null,
+    onMetricsUpdate = null,
+    isMirrored = true,
+    threshold = 0.55,
+  }) {
     this.video = videoElement;
     this.canvas = canvasElement;
     this.ctx = canvasElement.getContext('2d');
+    this.roster = roster || [];
+    this.onVerifiedMatch = onVerifiedMatch;
     this.onStableFace = onStableFace;
     this.onMetricsUpdate = onMetricsUpdate;
-    this.isMirrored = isMirrored;
+    this.isMirrored = Boolean(isMirrored);
+    this.threshold = threshold;
 
     this.isRunning = false;
     this.animationId = null;
-    this.faceDetector = null;
     this.detectorReady = false;
+    this.isDetecting = false;
 
-    // Stability Evaluator state
-    this.stableFrames = 0;
-    this.REQUIRED_STABLE_FRAMES = 5;
-    this.JITTER_THRESHOLD = 20; // max allowed center pixel jitter
-    this.lastBbox = null;
+    // Quality setting
+    this.inputSize = 320;
+    this.scoreThreshold = 0.45;
 
-    // Match overlay state
+    // Active detected & matched faces
+    this.currentFaces = [];
+    this.lastDetectionTime = 0;
+
+    // Student attendance log cooldown (prevent multiple logs within 5 seconds for the same student)
+    this.studentCooldowns = new Map();
+    this.COOLDOWN_MS = 5000;
+
+    // Match overlay feedback banner (at top of screen)
     this.currentMatchFeedback = null;
     this.feedbackTimeout = null;
-    this.lastMatchedName = null;
-    this.lastMatchedConfidence = null;
 
     // Performance metrics
     this.lastFrameTime = performance.now();
@@ -36,53 +61,47 @@ export class DetectorLoop {
     this.frameCount = 0;
     this.lastFpsUpdate = performance.now();
     this.targetFps = 30;
-
-    // Throttle inference triggers (cooldown after successful match)
-    this.isMatching = false;
-    this.lastTriggerTime = 0;
-    this.TRIGGER_COOLDOWN_MS = 2500;
   }
 
   setMirrored(mirrored) {
     this.isMirrored = Boolean(mirrored);
   }
 
+  setRoster(roster) {
+    this.roster = Array.isArray(roster) ? roster : [];
+  }
+
+  setThreshold(threshold) {
+    this.threshold = Number(threshold) || 0.55;
+  }
+
   /**
-   * Initializes MediaPipe BlazeFace face detector
+   * Initializes face-api neural network models (TinyFaceDetector, Landmarks, ResNet FaceRecognition)
    */
   async initDetector(quality = 'medium') {
+    if (quality === 'low') {
+      this.inputSize = 224;
+      this.scoreThreshold = 0.40;
+    } else if (quality === 'high') {
+      this.inputSize = 416;
+      this.scoreThreshold = 0.50;
+    } else {
+      this.inputSize = 320;
+      this.scoreThreshold = 0.45;
+    }
+
     try {
-      const vision = await import('@mediapipe/tasks-vision');
-      const wasmFileset = await vision.FilesetResolver.forVisionTasks(
-        'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm'
-      );
-
-      // Model quality selection
-      let modelPath =
-        'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
-
-      this.faceDetector = await vision.FaceDetector.createFromOptions(wasmFileset, {
-        baseOptions: {
-          modelAssetPath: modelPath,
-          delegate: 'GPU',
-        },
-        runningMode: 'VIDEO',
-        minDetectionConfidence: quality === 'low' ? 0.4 : 0.5,
-      });
-
+      await loadFaceApiModels();
       this.detectorReady = true;
-      console.log('✅ MediaPipe BlazeFace detector initialized successfully');
+      console.log('✅ Neural Face-API detector & 128-D recognizer initialized successfully');
     } catch (err) {
-      console.warn(
-        'MediaPipe BlazeFace CDN unavailable or offline; using high-speed native canvas tracking fallback:',
-        err.message
-      );
+      console.error('Failed to load Face-API models:', err);
       this.detectorReady = false;
     }
   }
 
   /**
-   * Starts tracking loop
+   * Starts tracking and recognition loop
    */
   start(targetFps = 30) {
     if (this.isRunning) return;
@@ -115,26 +134,15 @@ export class DetectorLoop {
 
   setMatchFeedback(feedback) {
     this.currentMatchFeedback = feedback;
-    this.isMatching = false;
-
-    if (feedback?.success && feedback?.name) {
-      this.lastMatchedName = feedback.name;
-      this.lastMatchedConfidence = feedback.confidence;
-    } else if (feedback && !feedback.success) {
-      this.lastMatchedName = 'Unrecognized Face';
-      this.lastMatchedConfidence = feedback.confidence;
-    }
 
     if (this.feedbackTimeout) clearTimeout(this.feedbackTimeout);
     this.feedbackTimeout = setTimeout(() => {
       this.currentMatchFeedback = null;
-      this.lastMatchedName = null;
-      this.lastMatchedConfidence = null;
-    }, 4500);
+    }, 4000);
   }
 
   /**
-   * Main video frame callback loop
+   * Main render & animation frame loop
    */
   loop = () => {
     if (!this.isRunning) return;
@@ -162,9 +170,29 @@ export class DetectorLoop {
       }
     }
 
-    // Process frame if video is playing
-    if (this.video && this.video.readyState >= 2) {
-      this.processFrame(now);
+    // Process frame if video is ready
+    if (this.video && this.video.readyState >= 2 && this.video.videoWidth > 0) {
+      // 1. Sync canvas resolution with video dimensions
+      const vWidth = this.video.videoWidth;
+      const vHeight = this.video.videoHeight;
+      if (this.canvas.width !== vWidth || this.canvas.height !== vHeight) {
+        this.canvas.width = vWidth;
+        this.canvas.height = vHeight;
+      }
+
+      // 2. Clear canvas for fresh frame
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+      // 3. Trigger async detection cycle if not already running
+      if (!this.isDetecting && this.detectorReady) {
+        this.runFaceDetectionAsync(now);
+      }
+
+      // 4. Render bounding boxes and attached nameplates for each detected face
+      this.renderFaces();
+
+      // 5. Draw top confirmation banner if active
+      this.drawTopFeedbackBanner();
     }
 
     // Schedule next frame with requestVideoFrameCallback if available
@@ -176,238 +204,207 @@ export class DetectorLoop {
   };
 
   /**
-   * Frame processing and stability calculation
+   * Asynchronous face detection and biometric matching.
+   * Runs in background without blocking 60fps canvas rendering!
    */
-  processFrame(timestamp) {
-    const vWidth = this.video.videoWidth;
-    const vHeight = this.video.videoHeight;
-
-    if (!vWidth || !vHeight) return;
-
-    if (this.canvas.width !== vWidth || this.canvas.height !== vHeight) {
-      this.canvas.width = vWidth;
-      this.canvas.height = vHeight;
-    }
-
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-    let bbox = null;
-
-    if (this.detectorReady && this.faceDetector) {
-      try {
-        const detections = this.faceDetector.detectForVideo(this.video, timestamp);
-        if (detections && detections.detections && detections.detections.length > 0) {
-          const det = detections.detections[0];
-          const b = det.boundingBox;
-          bbox = {
-            x: Math.max(0, b.originX),
-            y: Math.max(0, b.originY),
-            width: Math.min(vWidth - b.originX, b.width),
-            height: Math.min(vHeight - b.originY, b.height),
-          };
-        }
-      } catch (err) {
-        // Fallback to center guide if error occurs
-        bbox = null;
-      }
-    } else {
-      // Guide region simulating face positioning box
-      const boxW = Math.round(vWidth * 0.45);
-      const boxH = Math.round(vHeight * 0.55);
-      bbox = {
-        x: Math.round((vWidth - boxW) / 2),
-        y: Math.round((vHeight - boxH) / 2.3),
-        width: boxW,
-        height: boxH,
-      };
-    }
-
-    if (bbox) {
-      const isStable = this.evaluateStability(bbox);
-      this.drawBoundingBox(bbox, isStable);
-
-      const canTrigger =
-        timestamp - this.lastTriggerTime > this.TRIGGER_COOLDOWN_MS && !this.isMatching;
-
-      if (isStable && canTrigger) {
-        this.triggerStableCapture(bbox, timestamp);
-      }
-    } else {
-      this.stableFrames = 0;
-      this.lastBbox = null;
-    }
-
-    this.drawOverlayFeedback();
-  }
-
-  /**
-   * Stability Evaluator: Checks if face bounding box center has been steady for >= 5 frames
-   */
-  evaluateStability(bbox) {
-    const curCx = bbox.x + bbox.width / 2;
-    const curCy = bbox.y + bbox.height / 2;
-
-    if (this.lastBbox) {
-      const prevCx = this.lastBbox.x + this.lastBbox.width / 2;
-      const prevCy = this.lastBbox.y + this.lastBbox.height / 2;
-      const distance = Math.hypot(curCx - prevCx, curCy - prevCy);
-      const sizeDelta = Math.abs(bbox.width - this.lastBbox.width);
-
-      if (distance < this.JITTER_THRESHOLD && sizeDelta < this.JITTER_THRESHOLD) {
-        this.stableFrames = Math.min(this.REQUIRED_STABLE_FRAMES, this.stableFrames + 1);
-      } else {
-        this.stableFrames = Math.max(0, this.stableFrames - 1);
-      }
-    } else {
-      this.stableFrames = 1;
-    }
-
-    this.lastBbox = bbox;
-    return this.stableFrames >= this.REQUIRED_STABLE_FRAMES;
-  }
-
-  /**
-   * Captures ImageBitmap of the stable face region and delegates to Web Worker
-   */
-  async triggerStableCapture(bbox, timestamp) {
-    this.isMatching = true;
-    this.lastTriggerTime = timestamp;
-
+  async runFaceDetectionAsync(timestamp) {
+    this.isDetecting = true;
     try {
-      // Add padding to face crop
-      const padX = bbox.width * 0.15;
-      const padY = bbox.height * 0.15;
-      const sx = Math.max(0, Math.floor(bbox.x - padX));
-      const sy = Math.max(0, Math.floor(bbox.y - padY));
-      const sw = Math.min(this.video.videoWidth - sx, Math.floor(bbox.width + 2 * padX));
-      const sh = Math.min(this.video.videoHeight - sy, Math.floor(bbox.height + 2 * padY));
+      const detections = await detectAllFacesWithDescriptors(
+        this.video,
+        this.inputSize,
+        this.scoreThreshold
+      );
 
-      const imageBitmap = await createImageBitmap(this.video, sx, sy, sw, sh);
+      const processedFaces = [];
 
-      if (this.onStableFace) {
-        this.onStableFace(imageBitmap);
+      for (const det of detections) {
+        // Match 128-D descriptor against student roster
+        const matchResult = matchDescriptorToRoster(
+          det.descriptor,
+          this.roster,
+          this.threshold
+        );
+
+        const isMatch = Boolean(matchResult.match);
+        const student = matchResult.match;
+        const confidence = matchResult.confidence;
+        const distance = matchResult.distance;
+
+        processedFaces.push({
+          box: det.box,
+          isMatch,
+          student,
+          studentName: student ? student.name : null,
+          studentCode: student ? student.studentIdCode : null,
+          confidence,
+          distance,
+        });
+
+        // If recognized student, check cooldown and trigger verified attendance
+        if (isMatch && student) {
+          const lastLogged = this.studentCooldowns.get(student.id) || 0;
+          if (timestamp - lastLogged > this.COOLDOWN_MS) {
+            this.studentCooldowns.set(student.id, timestamp);
+
+            // Trigger attendance logging callback
+            if (this.onVerifiedMatch) {
+              this.onVerifiedMatch({
+                student,
+                confidence,
+                distance,
+                box: det.box,
+              });
+            }
+
+            // Show top banner feedback
+            this.setMatchFeedback({
+              success: true,
+              name: student.name,
+              confidence,
+            });
+          }
+        }
       }
+
+      this.currentFaces = processedFaces;
+      this.lastDetectionTime = timestamp;
     } catch (err) {
-      console.error('Failed to capture ImageBitmap from video stream:', err);
-      this.isMatching = false;
+      console.warn('Face detection pass failed:', err);
+    } finally {
+      this.isDetecting = false;
     }
   }
 
   /**
-   * Renders bounding box with futuristic corners and stability status
+   * Renders bounding boxes and person nameplate directly respective to EACH face
    */
-  drawBoundingBox(bbox, isStable) {
+  renderFaces() {
     const { ctx, canvas } = this;
-    const { y, width: w, height: h } = bbox;
-    const x = this.isMirrored ? (canvas.width - bbox.x - w) : bbox.x;
-    const cornerLength = Math.min(w, h) * 0.2;
+    if (!this.currentFaces || this.currentFaces.length === 0) return;
 
-    const isMatchSuccess = this.currentMatchFeedback?.success;
-    const isUnrecognized = this.lastMatchedName === 'Unrecognized Face';
+    for (const face of this.currentFaces) {
+      const { box, isMatch, studentName, confidence } = face;
 
-    let color = isStable ? '#10b981' : '#f59e0b';
-    if (isMatchSuccess) color = '#10b981';
-    else if (isUnrecognized) color = '#ef4444';
+      // Handle mirroring transformation
+      const boxW = box.width;
+      const boxH = box.height;
+      const boxX = this.isMirrored ? (canvas.width - box.x - boxW) : box.x;
+      const boxY = box.y;
 
-    ctx.lineWidth = isMatchSuccess ? 4 : 3;
-    ctx.strokeStyle = color;
-    ctx.fillStyle = color;
+      const cornerLength = Math.min(boxW, boxH) * 0.22;
+      const themeColor = isMatch ? '#10b981' : '#ef4444'; // Emerald for verified, Crimson for unrecognized
 
-    // Corner brackets
-    ctx.beginPath();
-    // Top-left
-    ctx.moveTo(x, y + cornerLength);
-    ctx.lineTo(x, y);
-    ctx.lineTo(x + cornerLength, y);
-    // Top-right
-    ctx.moveTo(x + w - cornerLength, y);
-    ctx.lineTo(x + w, y);
-    ctx.lineTo(x + w, y + cornerLength);
-    // Bottom-right
-    ctx.moveTo(x + w, y + h - cornerLength);
-    ctx.lineTo(x + w, y + h);
-    ctx.lineTo(x + w - cornerLength, y + h);
-    // Bottom-left
-    ctx.moveTo(x + cornerLength, y + h);
-    ctx.lineTo(x, y + h);
-    ctx.lineTo(x, y + h - cornerLength);
-    ctx.stroke();
+      ctx.save();
 
-    // Person nameplate badge directly attached to this face
-    let badgeText = '';
-    if (isMatchSuccess) {
-      const confPct = Math.round((this.lastMatchedConfidence || 0.95) * 100);
-      badgeText = `👤 ${this.lastMatchedName} • ${confPct}%`;
-    } else if (isUnrecognized) {
-      badgeText = '⚠️ Unrecognized Student Face';
-    } else if (isStable) {
-      badgeText = '✓ Face Steady (Verifying...)';
-    } else {
-      badgeText = `Align Face (${this.stableFrames}/${this.REQUIRED_STABLE_FRAMES})`;
+      // 1. Semi-transparent bounding box outline
+      ctx.strokeStyle = isMatch ? 'rgba(16, 185, 129, 0.45)' : 'rgba(239, 68, 68, 0.40)';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+      // 2. High-visibility corner brackets
+      ctx.strokeStyle = themeColor;
+      ctx.lineWidth = 3.5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      ctx.beginPath();
+      // Top-Left
+      ctx.moveTo(boxX, boxY + cornerLength);
+      ctx.lineTo(boxX, boxY);
+      ctx.lineTo(boxX + cornerLength, boxY);
+      // Top-Right
+      ctx.moveTo(boxX + boxW - cornerLength, boxY);
+      ctx.lineTo(boxX + boxW, boxY);
+      ctx.lineTo(boxX + boxW, boxY + cornerLength);
+      // Bottom-Right
+      ctx.moveTo(boxX + boxW, boxY + boxH - cornerLength);
+      ctx.lineTo(boxX + boxW, boxY + boxH);
+      ctx.lineTo(boxX + boxW - cornerLength, boxY + boxH);
+      // Bottom-Left
+      ctx.moveTo(boxX + cornerLength, boxY + boxH);
+      ctx.lineTo(boxX, boxY + boxH);
+      ctx.lineTo(boxX, boxY + boxH - cornerLength);
+      ctx.stroke();
+
+      // 3. Nameplate Badge attached directly to this person's face
+      let badgeText = '';
+      if (isMatch && studentName) {
+        const confPct = Math.round((confidence || 0.95) * 100);
+        badgeText = `👤 ${studentName} • ${confPct}%`;
+      } else {
+        badgeText = '⚠️ Unrecognized Student';
+      }
+
+      ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      const textWidth = ctx.measureText(badgeText).width;
+      const badgeW = textWidth + 24;
+      const badgeH = 30;
+      const badgeX = Math.max(8, Math.min(canvas.width - badgeW - 8, boxX + (boxW - badgeW) / 2));
+      const badgeY = boxY - 38 > 8 ? boxY - 38 : boxY + boxH + 10;
+
+      // Badge pill background
+      ctx.fillStyle = isMatch ? 'rgba(6, 78, 59, 0.95)' : 'rgba(127, 29, 29, 0.95)';
+      ctx.beginPath();
+      ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 15);
+      ctx.fill();
+
+      // Badge border
+      ctx.strokeStyle = themeColor;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Glowing status dot
+      ctx.fillStyle = themeColor;
+      ctx.beginPath();
+      ctx.arc(badgeX + 13, badgeY + badgeH / 2, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Name text
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(badgeText, badgeX + 24, badgeY + 20);
+
+      ctx.restore();
     }
-
-    ctx.font = 'bold 13px sans-serif';
-    const textWidth = ctx.measureText(badgeText).width;
-    const badgeW = textWidth + 20;
-    const badgeH = 28;
-    const badgeX = x + (w - badgeW) / 2;
-    const badgeY = y - 34 > 8 ? y - 34 : y + h + 10;
-
-    // Pill background
-    ctx.fillStyle = isMatchSuccess
-      ? 'rgba(6, 78, 59, 0.95)'
-      : isUnrecognized
-      ? 'rgba(127, 29, 29, 0.95)'
-      : 'rgba(15, 23, 42, 0.90)';
-    ctx.beginPath();
-    ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 8);
-    ctx.fill();
-
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
-
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(badgeText, badgeX + 10, badgeY + 18);
   }
 
   /**
-   * Renders top or bottom notification banner for match result feedback
+   * Renders top notification banner for match feedback
    */
-  drawOverlayFeedback() {
+  drawTopFeedbackBanner() {
     if (!this.currentMatchFeedback) return;
 
     const { ctx, canvas } = this;
     const { success, name, confidence, message } = this.currentMatchFeedback;
 
-    const bannerW = Math.min(canvas.width * 0.9, 440);
-    const bannerH = 70;
+    const bannerW = Math.min(canvas.width * 0.92, 460);
+    const bannerH = 68;
     const bannerX = (canvas.width - bannerW) / 2;
-    const bannerY = 24;
+    const bannerY = 20;
 
     ctx.save();
-    ctx.fillStyle = success ? 'rgba(6, 78, 59, 0.95)' : 'rgba(127, 29, 29, 0.95)';
+    ctx.fillStyle = success ? 'rgba(6, 78, 59, 0.96)' : 'rgba(127, 29, 29, 0.96)';
     ctx.beginPath();
-    ctx.roundRect(bannerX, bannerY, bannerW, bannerH, 12);
+    ctx.roundRect(bannerX, bannerY, bannerW, bannerH, 14);
     ctx.fill();
 
     ctx.strokeStyle = success ? '#34d399' : '#f87171';
     ctx.lineWidth = 2;
     ctx.stroke();
 
-    // Title / Name
+    // Title / Verified name
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 18px sans-serif';
-    const titleText = success ? `✓ Attendance Verified: ${name}` : '✗ Verification Failed';
-    ctx.fillText(titleText, bannerX + 18, bannerY + 30);
+    ctx.font = 'bold 17px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    const titleText = success ? `✓ Attendance Logged: ${name}` : '✗ Face Unrecognized';
+    ctx.fillText(titleText, bannerX + 18, bannerY + 28);
 
     // Subtitle / confidence
     ctx.fillStyle = success ? '#a7f3d0' : '#fecaca';
     ctx.font = '13px sans-serif';
     const subText = success
-      ? `Confidence: ${(confidence * 100).toFixed(1)}% • Logged to Attendance`
+      ? `Confidence: ${(confidence * 100).toFixed(1)}% • Real Biometrics Matched`
       : message || 'Face did not match any enrolled student roster';
-    ctx.fillText(subText, bannerX + 18, bannerY + 52);
+    ctx.fillText(subText, bannerX + 18, bannerY + 50);
 
     ctx.restore();
   }
