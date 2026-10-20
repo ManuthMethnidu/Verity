@@ -16,7 +16,7 @@ async function main() {
   // Create default tenant
   const tenant = await prisma.tenant.create({
     data: {
-      name: 'Oakridge High School',
+      name: "St. Joseph's College Colombo 10",
       settings: {
         create: {
           targetFps: 30,

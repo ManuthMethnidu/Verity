@@ -56,7 +56,7 @@ export function Sidebar({ mobileOpen, onClose }) {
             Active Tenant
           </div>
           <div className="text-sm font-medium text-slate-200 truncate mt-0.5">
-            {user?.tenantName || 'Default Tenant'}
+            {user?.tenantName || "St. Joseph's College Colombo 10"}
           </div>
           <div className="text-xs text-slate-400 truncate mt-0.5">
             {user?.email || 'admin@verity.edu'}

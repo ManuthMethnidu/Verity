@@ -67,7 +67,7 @@ export function DashboardLayout() {
             </button>
             <div className="flex items-center gap-2">
               <span className="font-semibold text-white tracking-wide text-sm sm:text-base">
-                {user?.tenantName || 'Classroom Portal'}
+                {user?.tenantName || "St. Joseph's College Colombo 10"}
               </span>
               <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 Active Tenant

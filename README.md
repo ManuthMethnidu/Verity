@@ -126,7 +126,7 @@ cd ..
 > **Default Seed Credentials:**  
 > **Email:** `admin@verity.edu`  
 > **Password:** `admin123`  
-> **Tenant:** Oakridge High School (pre-populated with 4 student biometric profiles)
+> **Tenant:** St. Joseph's College Colombo 10
 
 ### 3. Run Development Servers
 Start both backend (port 8080) and frontend (port 5173) concurrently:

@@ -86,7 +86,7 @@ export function Login() {
                     required
                     value={tenantName}
                     onChange={(e) => setTenantName(e.target.value)}
-                    placeholder="e.g. Oakridge Academy"
+                    placeholder="e.g. St. Joseph's College Colombo 10"
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
                   />
                 </div>

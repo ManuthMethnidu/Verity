@@ -54,11 +54,11 @@ export function Dashboard() {
             <span>AI Face Recognition Enabled</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-            Welcome back, {user?.tenantName || 'Classroom Admin'}
+            Welcome back, {user?.tenantName || "St. Joseph's College Colombo 10"}
           </h1>
           <p className="text-sm text-slate-400 mt-2 leading-relaxed">
-            BlazeFace + MobileFaceNet ONNX pipeline is ready for high-speed edge attendance
-            verification. Stable face embeddings are evaluated offline in Web Workers and synchronized
+            TensorFlow.js deep neural vision pipeline is active for real-time edge attendance
+            verification. Real individual 128-D facial biometrics are evaluated on-device and synchronized
             reliably.
           </p>
           <div className="flex flex-wrap items-center gap-3 mt-6">
