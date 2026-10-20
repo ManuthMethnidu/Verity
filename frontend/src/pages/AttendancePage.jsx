@@ -357,9 +357,15 @@ export function AttendancePage() {
               <div>
                 <h3 className="text-base sm:text-lg font-bold text-white">Camera Standby</h3>
                 <p className="text-xs text-slate-400 max-w-sm mt-1 mx-auto">
-                  Click <strong>"Launch Camera"</strong> to begin real-time neural face recognition.
-                  Face boxes and student names will be displayed directly over each person's face.
+                  Click <strong>"Launch Camera"</strong> to begin TensorFlow.js real-time neural face recognition.
+                  Face bounding boxes and student names will be pinned directly over each person's face.
                 </p>
+                {roster.length === 0 && (
+                  <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-medium">
+                    <AlertTriangle className="w-3.5 h-3.5 flex-shrink-0" />
+                    <span>Database roster is empty. Go to the Roster tab to enroll student faces.</span>
+                  </div>
+                )}
               </div>
               <button
                 onClick={startCameraFeed}

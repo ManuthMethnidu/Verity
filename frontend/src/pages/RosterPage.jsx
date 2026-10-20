@@ -277,7 +277,7 @@ export function RosterPage() {
                 studentIdCode: parts[0],
                 name: parts[1],
                 imageUrl: parts[2] || null,
-                embedding: createMockEmbedding(parts[1]),
+                embedding: null, // No fake mock embeddings! Real faces must be enrolled.
               });
             }
           }
@@ -288,7 +288,9 @@ export function RosterPage() {
         }
 
         await api.post('/roster/batch', { students: parsed });
-        showNotice(`Batch upload completed: ${parsed.length} students processed.`);
+        showNotice(
+          `Batch upload completed: ${parsed.length} students enrolled. Please snap or upload photos to record real facial biometrics.`
+        );
         setShowBatchModal(false);
         fetchRoster();
       } catch (err) {
@@ -296,6 +298,24 @@ export function RosterPage() {
       }
     };
     reader.readAsText(file);
+  };
+
+  const handlePurgeAll = async () => {
+    if (
+      !confirm(
+        'Warning: This will delete ALL students and attendance records from your database and wipe the local cache clean. Proceed?'
+      )
+    )
+      return;
+    try {
+      await api.delete('/roster/purge/all');
+      await cacheRoster([]);
+      setStudents([]);
+      setCachedCount(0);
+      showNotice('All student data purged. Database and local cache are completely clean.');
+    } catch (err) {
+      showNotice('Failed to purge roster: ' + err.message, 'error');
+    }
   };
 
   const filtered = students.filter(
@@ -343,6 +363,14 @@ export function RosterPage() {
           >
             <HardDriveDownload className="w-3.5 h-3.5 text-emerald-400" />
             <span>Cache Offline ({cachedCount})</span>
+          </button>
+          <button
+            onClick={handlePurgeAll}
+            className="flex items-center gap-1.5 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-semibold transition"
+            title="Purge all student records from database and cache"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Reset Roster</span>
           </button>
           <button
             onClick={() => setShowBatchModal(true)}

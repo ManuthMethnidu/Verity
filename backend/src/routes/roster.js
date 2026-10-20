@@ -157,6 +157,22 @@ router.put('/:id', authenticateToken, async (req, res) => {
   }
 });
 
+// DELETE /api/roster/purge/all - delete all students and attendance for tenant (wipe clean)
+router.delete('/purge/all', authenticateToken, async (req, res) => {
+  try {
+    await prisma.attendance.deleteMany({
+      where: { tenantId: req.user.tenantId },
+    });
+    const deleted = await prisma.student.deleteMany({
+      where: { tenantId: req.user.tenantId },
+    });
+    return res.json({ message: `Purged ${deleted.count} students and all attendance logs.` });
+  } catch (err) {
+    console.error('Purge roster error:', err);
+    return res.status(500).json({ error: 'Failed to purge roster.' });
+  }
+});
+
 // DELETE /api/roster/:id - delete student
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {

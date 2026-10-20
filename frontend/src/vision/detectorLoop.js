@@ -293,12 +293,17 @@ export class DetectorLoop {
       const boxY = box.y;
 
       const cornerLength = Math.min(boxW, boxH) * 0.22;
-      const themeColor = isMatch ? '#10b981' : '#ef4444'; // Emerald for verified, Crimson for unrecognized
+      const isRosterEmpty = !this.roster || this.roster.length === 0;
+      const themeColor = isMatch ? '#10b981' : isRosterEmpty ? '#f59e0b' : '#ef4444';
 
       ctx.save();
 
       // 1. Semi-transparent bounding box outline
-      ctx.strokeStyle = isMatch ? 'rgba(16, 185, 129, 0.45)' : 'rgba(239, 68, 68, 0.40)';
+      ctx.strokeStyle = isMatch
+        ? 'rgba(16, 185, 129, 0.45)'
+        : isRosterEmpty
+        ? 'rgba(245, 158, 11, 0.45)'
+        : 'rgba(239, 68, 68, 0.40)';
       ctx.lineWidth = 1.5;
       ctx.strokeRect(boxX, boxY, boxW, boxH);
 
@@ -332,8 +337,10 @@ export class DetectorLoop {
       if (isMatch && studentName) {
         const confPct = Math.round((confidence || 0.95) * 100);
         badgeText = `👤 ${studentName} • ${confPct}%`;
+      } else if (isRosterEmpty) {
+        badgeText = '⚠️ Roster Empty • Enroll in Roster';
       } else {
-        badgeText = '⚠️ Unrecognized Student';
+        badgeText = '⚠️ Unrecognized Face';
       }
 
       ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -344,7 +351,11 @@ export class DetectorLoop {
       const badgeY = boxY - 38 > 8 ? boxY - 38 : boxY + boxH + 10;
 
       // Badge pill background
-      ctx.fillStyle = isMatch ? 'rgba(6, 78, 59, 0.95)' : 'rgba(127, 29, 29, 0.95)';
+      ctx.fillStyle = isMatch
+        ? 'rgba(6, 78, 59, 0.95)'
+        : isRosterEmpty
+        ? 'rgba(120, 53, 15, 0.95)'
+        : 'rgba(127, 29, 29, 0.95)';
       ctx.beginPath();
       ctx.roundRect(badgeX, badgeY, badgeW, badgeH, 15);
       ctx.fill();

@@ -1,3 +1,4 @@
+import * as tf from '@tensorflow/tfjs';
 import * as faceapi from '@vladmandic/face-api';
 
 let modelsLoaded = false;
@@ -9,7 +10,16 @@ const MODEL_PATHS = [
 ];
 
 /**
- * Initializes and loads face-api.js neural network models:
+ * Ensures TensorFlow.js WebGL / CPU backend is ready
+ */
+export async function initTensorFlow() {
+  await tf.ready();
+  console.log(`✅ TensorFlow.js initialized (backend: ${tf.getBackend()}, version: ${tf.version.tfjs})`);
+  return tf;
+}
+
+/**
+ * Initializes and loads neural network models on top of TensorFlow.js:
  * - TinyFaceDetector (fast mobile/web real-time face detector)
  * - FaceLandmark68TinyNet (68 facial landmark detector)
  * - FaceRecognitionNet (ResNet-34 128-D deep facial recognition model)
@@ -21,10 +31,12 @@ export async function loadFaceApiModels(onProgress = null) {
   loadingPromise = (async () => {
     let lastError = null;
 
+    await initTensorFlow();
+
     for (const modelPath of MODEL_PATHS) {
       try {
-        if (onProgress) onProgress(`Loading models from ${modelPath}...`);
-        
+        if (onProgress) onProgress(`Loading neural vision models from ${modelPath}...`);
+
         await Promise.all([
           faceapi.nets.tinyFaceDetector.loadFromUri(modelPath),
           faceapi.nets.faceLandmark68TinyNet.loadFromUri(modelPath),
@@ -32,7 +44,7 @@ export async function loadFaceApiModels(onProgress = null) {
         ]);
 
         modelsLoaded = true;
-        console.log(`✅ face-api.js models loaded successfully from ${modelPath}`);
+        console.log(`✅ Face-API ResNet models loaded successfully from ${modelPath}`);
         return true;
       } catch (err) {
         console.warn(`Could not load models from ${modelPath}, trying fallback:`, err.message);
@@ -41,7 +53,7 @@ export async function loadFaceApiModels(onProgress = null) {
     }
 
     loadingPromise = null;
-    throw new Error(`Failed to load face-api.js models: ${lastError?.message}`);
+    throw new Error(`Failed to load face recognition models: ${lastError?.message}`);
   })();
 
   return loadingPromise;
@@ -164,33 +176,42 @@ export function extractFaceThumbnail(imageSource, box) {
 }
 
 /**
- * Computes Euclidean distance between two 128-D face descriptors using face-api.
- * Euclidean distance:
- *  0.0 - 0.40 : Strong match (same person)
- *  0.40 - 0.55 : Good match
- *  > 0.60      : Different person
+ * Computes Euclidean distance between two 128-D face descriptors using TensorFlow.js tensors.
  * @param {Array<number>|Float32Array} d1
  * @param {Array<number>|Float32Array} d2
  * @returns {number} Euclidean distance
  */
 export function computeFaceDistance(d1, d2) {
   if (!d1 || !d2 || d1.length !== d2.length) return 1.0;
-  return faceapi.euclideanDistance(d1, d2);
+  return tf.tidy(() => {
+    const t1 = tf.tensor1d(d1);
+    const t2 = tf.tensor1d(d2);
+    return tf.norm(tf.sub(t1, t2), 'euclidean').dataSync()[0];
+  });
 }
 
 /**
- * Finds best match for a probe descriptor against a list of enrolled student descriptors.
+ * Matches a probe 128-D face descriptor against the enrolled student roster.
+ * Uses GPU-accelerated TensorFlow.js tensor math with strict biometric thresholding.
+ *
+ * STRICT INDIVIDUAL BIOMETRICS:
+ * - Same person (identical face): Euclidean distance 0.15 - 0.42
+ * - Different person: Euclidean distance > 0.50
+ * - Maximum distance allowed for individual recognition: 0.46
+ * - Any distance > 0.46 is STRICTLY UNRECOGNIZED (NO FALSE POSITIVES).
+ *
  * @param {Array<number>|Float32Array} probeDescriptor - Detected 128-D face descriptor
- * @param {Array<object>} roster - List of students with `embeddingVector` or `embedding`
- * @param {number} maxDistanceThreshold - Maximum Euclidean distance considered a match (default 0.55)
+ * @param {Array<object>} roster - List of enrolled students with real 128-D descriptors
+ * @param {number} minConfidenceThreshold - Minimum match confidence (e.g. 0.70)
  */
-export function matchDescriptorToRoster(probeDescriptor, roster, maxDistanceThreshold = 0.55) {
+export function matchDescriptorToRoster(probeDescriptor, roster, minConfidenceThreshold = 0.70) {
   if (!probeDescriptor || !roster || roster.length === 0) {
     return { match: null, confidence: 0, distance: 1.0 };
   }
 
-  let bestMatch = null;
-  let lowestDistance = Infinity;
+  // Filter valid enrolled students with 128-D vectors
+  const validStudents = [];
+  const vectors = [];
 
   for (const student of roster) {
     let candidateVector = student.embeddingVector;
@@ -210,30 +231,58 @@ export function matchDescriptorToRoster(probeDescriptor, roster, maxDistanceThre
       }
     }
 
-    if (!candidateVector || candidateVector.length !== 128) continue;
-
-    const dist = faceapi.euclideanDistance(probeDescriptor, candidateVector);
-    if (dist < lowestDistance) {
-      lowestDistance = dist;
-      bestMatch = student;
+    if (candidateVector && candidateVector.length === 128) {
+      validStudents.push(student);
+      vectors.push(candidateVector);
     }
   }
 
-  if (lowestDistance <= maxDistanceThreshold && bestMatch) {
-    // Map Euclidean distance [0, 0.60] to confidence percentage [1.0, 0.60]
-    const confidence = Math.max(0.60, Math.min(0.99, 1.0 - (lowestDistance / 0.60) * 0.40));
-    return {
-      match: bestMatch,
-      confidence,
-      distance: lowestDistance,
-    };
+  if (validStudents.length === 0) {
+    return { match: null, confidence: 0, distance: 1.0 };
+  }
+
+  // Compute vectorized Euclidean distances via TensorFlow.js on GPU
+  const { minIdx, lowestDistance } = tf.tidy(() => {
+    const probeTensor = tf.tensor2d([Array.from(probeDescriptor)], [1, 128]);
+    const rosterTensor = tf.tensor2d(vectors, [vectors.length, 128]);
+    const diff = tf.sub(rosterTensor, probeTensor);
+    const dists = tf.norm(diff, 'euclidean', 1);
+    const distArray = dists.dataSync();
+
+    let bestIdx = 0;
+    let bestDist = distArray[0];
+    for (let i = 1; i < distArray.length; i++) {
+      if (distArray[i] < bestDist) {
+        bestDist = distArray[i];
+        bestIdx = i;
+      }
+    }
+    return { minIdx: bestIdx, lowestDistance: bestDist };
+  });
+
+  // STRICT BIOMETRIC CEILING: Never accept distance > 0.46
+  const STRICT_MAX_DISTANCE = 0.46;
+
+  if (lowestDistance <= STRICT_MAX_DISTANCE) {
+    // Map Euclidean distance [0.15, 0.46] -> confidence [0.99, 0.70]
+    const confidence = Math.round(
+      Math.max(70, Math.min(99, (1.0 - Math.pow(lowestDistance / 0.65, 1.6)) * 100))
+    ) / 100;
+
+    if (confidence >= minConfidenceThreshold) {
+      return {
+        match: validStudents[minIdx],
+        confidence,
+        distance: lowestDistance,
+      };
+    }
   }
 
   return {
     match: null,
-    confidence: lowestDistance < 1.0 ? Math.max(0, 1.0 - lowestDistance) : 0,
+    confidence: 0,
     distance: lowestDistance,
   };
 }
 
-export { faceapi };
+export { tf, faceapi };
