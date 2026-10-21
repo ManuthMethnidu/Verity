@@ -66,8 +66,13 @@ export function Dashboard() {
               <h1 className="text-3xl sm:text-5xl font-normal text-white tracking-wider font-title">
                 VERITY
               </h1>
-              <h2 className="text-base sm:text-lg font-medium text-emerald-400 mt-0.5 font-sans">
-                {user?.tenantName || "St. Joseph's College Colombo 10"}
+              <h2 className="text-base sm:text-lg font-medium text-emerald-400 mt-0.5 font-sans flex items-center gap-2">
+                <span>{user?.tenantName || "St. Joseph's College Colombo 10"}</span>
+                {user?.tenantId && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 font-mono">
+                    Tenant Active
+                  </span>
+                )}
               </h2>
               <p className="text-xs text-slate-400 mt-1 max-w-xl leading-relaxed font-sans">
                 Autonomous real-time facial recognition and individual identity verification for classrooms.

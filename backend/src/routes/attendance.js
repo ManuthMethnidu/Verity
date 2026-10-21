@@ -119,26 +119,30 @@ router.get('/report', authenticateToken, async (req, res) => {
 });
 
 /**
- * GET /api/attendance/feed
+ * GET /api/attendance/feed and /api/attendance/feed/:tenantId
  * Dedicated endpoint for external websites, dashboards, and integrations.
  * Supports:
+ * - Direct path: /api/attendance/feed/:tenantId
+ * - Query param: ?tenantId=<id>
  * - ?apiKey=<key> or Bearer <token>
- * - ?tenantId=<id> (optional if authenticated or matching token)
  * - ?startDate=YYYY-MM-DD
  * - ?endDate=YYYY-MM-DD
  * - ?studentId=<id>
  * - ?limit=50
  *
  * Returns:
- * 1. uniqueAttendance: List of unique students with total attendance count, first seen, and latest seen timestamp.
+ * 1. uniqueAttendance: List of unique students with name, id, total attendance count, first seen, and latest seen timestamp.
  * 2. timeline: Time-series log grouped by date / timestamp for trend tracking.
- * 3. rawLogs: Paginated chronological attendance events.
+ * 3. rawLogs: Chronological attendance events.
  */
-router.get('/feed', async (req, res) => {
+async function handleAttendanceFeed(req, res) {
   try {
     let tenantId = null;
 
-    // Check Bearer Token first
+    // Check direct route parameter /feed/:tenantId first
+    const paramTenantId = req.params?.tenantId;
+
+    // Check Bearer Token
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
 
@@ -156,7 +160,7 @@ router.get('/feed', async (req, res) => {
 
     // Check API Key or direct tenantId query if not authenticated via Bearer
     const apiKey = req.query.apiKey || req.headers['x-api-key'];
-    const requestedTenantId = req.query.tenantId;
+    const requestedTenantId = paramTenantId || req.query.tenantId;
 
     if (!tenantId) {
       if (apiKey) {
@@ -188,10 +192,15 @@ router.get('/feed', async (req, res) => {
         tenantId = firstTenant.id;
       } else {
         return res.status(401).json({
-          error: 'Unauthorized. Please supply a Bearer token or ?tenantId=<tenant_id>.',
+          error: 'Unauthorized. Please supply a valid tenant ID or Bearer token.',
         });
       }
     }
+
+    const tenant = await prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { id: true, name: true, createdAt: true },
+    });
 
     const { startDate, endDate, studentId, limit } = req.query;
 
@@ -285,6 +294,7 @@ router.get('/feed', async (req, res) => {
     return res.json({
       success: true,
       tenantId,
+      tenantName: tenant ? tenant.name : 'Unknown Tenant',
       totalEvents: logs.length,
       uniqueStudentsCount: uniqueStudents.length,
       timeline,
@@ -304,6 +314,9 @@ router.get('/feed', async (req, res) => {
     console.error('Attendance feed error:', err);
     return res.status(500).json({ error: 'Failed to retrieve attendance feed.' });
   }
-});
+}
+
+router.get('/feed', handleAttendanceFeed);
+router.get('/feed/:tenantId', handleAttendanceFeed);
 
 export default router;

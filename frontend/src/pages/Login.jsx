@@ -65,10 +65,10 @@ export function Login() {
             VERITY
           </h1>
           <p className="text-sm font-semibold text-emerald-400 mt-1">
-            St. Joseph's College Colombo 10
+            Multi-Tenant Biometric Platform
           </p>
           <p className="text-xs text-slate-400 mt-1">
-            Classroom Biometric Face-Recognition Attendance System
+            Autonomous Classroom Face-Recognition Attendance System
           </p>
         </div>
 
@@ -93,7 +93,7 @@ export function Login() {
                     required
                     value={tenantName}
                     onChange={(e) => setTenantName(e.target.value)}
-                    placeholder="e.g. St. Joseph's College Colombo 10"
+                    placeholder="e.g. Springfield Academy, Oxford Campus..."
                     className="w-full pl-10 pr-4 py-2.5 bg-slate-800/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
                   />
                 </div>
@@ -152,7 +152,7 @@ export function Login() {
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 transition"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Use Seeded Demo Admin (admin@verity.edu)</span>
+              <span>Use Demo Admin (St. Joseph's College Tenant)</span>
             </button>
           </div>
 

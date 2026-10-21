@@ -21,7 +21,7 @@ export function Footer({ footerRef }) {
                 <div>
                   <span className="font-bold text-lg text-white tracking-wider">VERITY</span>
                   <span className="block text-xs text-emerald-400 font-medium">
-                    St. Joseph's College Colombo 10
+                    Multi-Tenant Biometric Platform
                   </span>
                 </div>
               </div>
@@ -119,7 +119,7 @@ export function Footer({ footerRef }) {
           {/* Bottom Copyright */}
           <div className="pt-6 border-t border-[#1f192b] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
             <div>
-              © 2026 Verity Biometrics. St. Joseph's College Colombo 10. All rights reserved.
+              © 2026 Verity Biometrics. Multi-Tenant Architecture. All rights reserved.
             </div>
             <div className="flex items-center gap-4">
               <button
@@ -174,7 +174,7 @@ export function Footer({ footerRef }) {
               {modalType === 'privacy' ? (
                 <>
                   <p className="font-semibold text-emerald-400">
-                    Last updated: October 20, 2026 | St. Joseph's College Colombo 10
+                    Last updated: October 20, 2026 | Verity Platform Governance
                   </p>
                   <h5 className="font-bold text-white text-sm">1. Biometric Data Collection & Processing</h5>
                   <p>
@@ -182,7 +182,7 @@ export function Footer({ footerRef }) {
                   </p>
                   <h5 className="font-bold text-white text-sm">2. Purpose of Processing</h5>
                   <p>
-                    Facial descriptors are generated solely for verifying student identity and logging educational attendance for St. Joseph's College Colombo 10. Data is never sold, shared with advertising networks, or used for commercial surveillance.
+                    Facial descriptors are generated solely for verifying student identity and logging educational attendance for subscribed institution tenants. Data is never sold, shared with advertising networks, or used for commercial surveillance.
                   </p>
                   <h5 className="font-bold text-white text-sm">3. Local Storage & Cryptographic Security</h5>
                   <p>
@@ -190,13 +190,13 @@ export function Footer({ footerRef }) {
                   </p>
                   <h5 className="font-bold text-white text-sm">4. Data Subject Rights & Revocation</h5>
                   <p>
-                    Parents, guardians, and enrolled students may request inspection, modification, or complete deletion of their facial biometrics and attendance records at any time by contacting the school administration.
+                    Parents, guardians, and enrolled students may request inspection, modification, or complete deletion of their facial biometrics and attendance records at any time by contacting their school or tenant administration.
                   </p>
                 </>
               ) : (
                 <>
                   <p className="font-semibold text-emerald-400">
-                    Last updated: October 20, 2026 | St. Joseph's College Colombo 10
+                    Last updated: October 20, 2026 | Verity Platform Governance
                   </p>
                   <h5 className="font-bold text-white text-sm">1. Acceptance of Terms</h5>
                   <p>
@@ -204,7 +204,7 @@ export function Footer({ footerRef }) {
                   </p>
                   <h5 className="font-bold text-white text-sm">2. Permitted Use</h5>
                   <p>
-                    This platform is licensed exclusively for legitimate educational attendance management, student safety verification, and administrative reporting at St. Joseph's College Colombo 10. Unauthorized attempts to bypass cosine similarity filters, spoof biometric sensors, or tamper with IndexedDB audit logs are strictly prohibited.
+                    This platform is licensed exclusively for legitimate educational attendance management, student safety verification, and administrative reporting across registered institutional tenants. Unauthorized attempts to bypass cosine similarity filters, spoof biometric sensors, or tamper with IndexedDB audit logs are strictly prohibited.
                   </p>
                   <h5 className="font-bold text-white text-sm">3. Device & Camera Responsibility</h5>
                   <p>

@@ -13,15 +13,21 @@ import {
   UserCheck,
   FlipHorizontal,
   SwitchCamera,
+  Copy,
+  Check,
+  ExternalLink,
+  Globe,
+  Code2,
 } from 'lucide-react';
 import { CameraManager } from '../vision/cameraManager.js';
 import { DetectorLoop } from '../vision/detectorLoop.js';
 import { loadFaceApiModels } from '../vision/faceApiService.js';
 import { getLocalSettings } from '../storage/settingsStore.js';
 import { getCachedRoster, recordAttendance } from '../storage/attendanceStore.js';
-import { api } from '../auth/auth.js';
+import { api, getCurrentUser } from '../auth/auth.js';
 
 export function AttendancePage() {
+  const user = getCurrentUser();
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const cameraManagerRef = useRef(null);
@@ -41,6 +47,20 @@ export function AttendancePage() {
     return localStorage.getItem('verity_device_id') || `DEVICE-CAM-${Math.floor(Math.random() * 900 + 100)}`;
   });
   const [settings, setSettings] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const [activeCodeTab, setActiveCodeTab] = useState('js');
+
+  const tenantId = user?.tenantId || '';
+  const tenantName = user?.tenantName || 'Active Institution';
+  const feedApiUrl = `${window.location.origin}/api/attendance/feed/${tenantId}`;
+
+  const copyToClipboard = () => {
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(feedApiUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   // Initialize models and load cached roster on mount
   useEffect(() => {
@@ -439,6 +459,197 @@ export function AttendancePage() {
               <span>Offline Ready</span>
             </span>
             <span className="text-emerald-400 font-semibold">{roster.length} Profiles</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Unique Tenant API Integration Card */}
+      <div className="mt-8 bg-[#181322]/90 border border-[#2e263d] rounded-2xl p-6 sm:p-7 shadow-xl backdrop-blur-md">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#2e263d] pb-5 mb-5">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0">
+              <Globe className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-base sm:text-lg font-bold text-white tracking-wide">
+                  Tenant Attendance Feed API
+                </h3>
+                <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-semibold">
+                  {tenantName}
+                </span>
+                {tenantId && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-[#251f33] text-slate-400 font-mono border border-[#362b4c]">
+                    Tenant ID: {tenantId}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-slate-400 mt-1 max-w-2xl leading-relaxed">
+                Connect external websites, school management portals, or analytics dashboards to query real-time unique attendance, student names, IDs, and attendance over time.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2.5 flex-shrink-0">
+            <button
+              onClick={copyToClipboard}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs transition shadow-md shadow-emerald-500/20 active:scale-[0.98]"
+            >
+              {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copied ? 'API URL Copied!' : 'Copy API URL'}</span>
+            </button>
+            <a
+              href={feedApiUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#221b30] hover:bg-[#2c233e] border border-[#362b4c] text-slate-200 text-xs font-semibold transition"
+            >
+              <span>Test API (JSON)</span>
+              <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
+            </a>
+          </div>
+        </div>
+
+        {/* Endpoint Display Box */}
+        <div className="mb-5">
+          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            REST Endpoint URL
+          </div>
+          <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[#110e17] border border-[#2e263d] font-mono text-xs text-slate-200 overflow-x-auto">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px] tracking-wider">
+                GET
+              </span>
+              <span className="truncate select-all text-slate-300">
+                {feedApiUrl}
+              </span>
+            </div>
+            <button
+              onClick={copyToClipboard}
+              className="p-1.5 hover:bg-[#251f33] rounded-lg text-slate-400 hover:text-white transition flex-shrink-0"
+              title="Copy URL"
+            >
+              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+
+        {/* Feature Pills */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5 text-[11px]">
+          <div className="p-2.5 rounded-xl bg-[#201a2d]/60 border border-[#2e263d] text-slate-300">
+            <strong className="text-emerald-400 block font-semibold mb-0.5">Unique Attendance</strong>
+            Deduplicated students with total counts
+          </div>
+          <div className="p-2.5 rounded-xl bg-[#201a2d]/60 border border-[#2e263d] text-slate-300">
+            <strong className="text-emerald-400 block font-semibold mb-0.5">Name & Student Code</strong>
+            Full student identities & image URLs
+          </div>
+          <div className="p-2.5 rounded-xl bg-[#201a2d]/60 border border-[#2e263d] text-slate-300">
+            <strong className="text-emerald-400 block font-semibold mb-0.5">Timeline Over Time</strong>
+            Daily trend aggregation array
+          </div>
+          <div className="p-2.5 rounded-xl bg-[#201a2d]/60 border border-[#2e263d] text-slate-300">
+            <strong className="text-emerald-400 block font-semibold mb-0.5">Query Filters</strong>
+            ?startDate, ?endDate, ?studentId
+          </div>
+        </div>
+
+        {/* Code Integration Snippet Tabs */}
+        <div className="border border-[#2e263d] rounded-xl overflow-hidden bg-[#100d16]">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-[#2e263d] bg-[#161220] text-xs">
+            <div className="flex items-center gap-2">
+              <Code2 className="w-4 h-4 text-emerald-400" />
+              <span className="font-semibold text-white">Integration Snippet</span>
+            </div>
+            <div className="flex items-center gap-1">
+              {[
+                { id: 'js', label: 'JavaScript' },
+                { id: 'curl', label: 'cURL' },
+                { id: 'response', label: 'Sample Response' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveCodeTab(tab.id)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition ${
+                    activeCodeTab === tab.id
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                      : 'text-slate-400 hover:text-slate-200'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="p-4 font-mono text-xs leading-relaxed overflow-x-auto text-slate-300">
+            {activeCodeTab === 'js' && (
+              <pre className="text-emerald-300">
+{`// 1. Fetch unique attendance and timeline for ${tenantName}
+const response = await fetch("${feedApiUrl}");
+const data = await response.json();
+
+// 2. Access unique students with names, student codes, and attendance totals
+console.log(data.uniqueAttendance);
+/*
+[
+  {
+    "studentId": "...",
+    "name": "Alex Perera",
+    "studentIdCode": "STU-2026-001",
+    "totalAttendanceCount": 14,
+    "latestAttendance": "2026-10-21T08:32:00.000Z",
+    "firstAttendance": "2026-10-01T08:00:00.000Z"
+  }
+]
+*/
+
+// 3. Access timeline for charts or graphs over time
+console.log(data.timeline);
+/*
+[
+  { "date": "2026-10-19", "count": 28 },
+  { "date": "2026-10-20", "count": 31 },
+  { "date": "2026-10-21", "count": 35 }
+]
+*/`}
+              </pre>
+            )}
+
+            {activeCodeTab === 'curl' && (
+              <pre className="text-slate-200">
+{`# Query unique attendance feed for ${tenantName}
+curl -X GET "${feedApiUrl}" \\
+  -H "Accept: application/json"`}
+              </pre>
+            )}
+
+            {activeCodeTab === 'response' && (
+              <pre className="text-slate-300">
+{`{
+  "success": true,
+  "tenantId": "${tenantId || 'tenant_xyz'}",
+  "tenantName": "${tenantName}",
+  "totalEvents": 42,
+  "uniqueStudentsCount": 15,
+  "timeline": [
+    { "date": "2026-10-20", "count": 20 },
+    { "date": "2026-10-21", "count": 22 }
+  ],
+  "uniqueAttendance": [
+    {
+      "studentId": "cm1stu001",
+      "name": "Jane Silva",
+      "studentCode": "STU-104",
+      "totalAttendanceCount": 8,
+      "latestAttendance": "2026-10-21T08:30:12.000Z",
+      "firstAttendance": "2026-10-14T08:15:00.000Z",
+      "history": [...]
+    }
+  ]
+}`}
+              </pre>
+            )}
           </div>
         </div>
       </div>

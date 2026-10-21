@@ -315,7 +315,7 @@ export function SettingsPage() {
                 Logged in as <span className="text-slate-200 font-semibold">{user?.email || 'admin@verity.edu'}</span>
               </div>
               <div className="text-xs text-emerald-400 mt-0.5">
-                Tenant: {user?.tenantName || "St. Joseph's College Colombo 10"}
+                Tenant: {user?.tenantName || "Institution Tenant"}
               </div>
             </div>
           </div>
