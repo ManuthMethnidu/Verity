@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import GooeyNav from './GooeyNav.jsx';
-import GlassSurface from './GlassSurface.jsx';
+import { FloatingDock } from './ui/floating-dock.jsx';
 import PillNav from './PillNav.jsx';
 import { Footer } from './Footer.jsx';
 import {
@@ -26,22 +25,12 @@ export function DashboardLayout() {
   });
 
   const navItems = [
-    { label: 'Dashboard', path: '/dashboard', href: '/dashboard', icon: <PixelHome className="w-4 h-4" /> },
-    { label: 'Attendance', path: '/attendance', href: '/attendance', icon: <PixelCamera className="w-4 h-4" /> },
-    { label: 'Roster', path: '/roster', href: '/roster', icon: <PixelUsers className="w-4 h-4" /> },
-    { label: 'Reports', path: '/reports', href: '/reports', icon: <PixelReports className="w-4 h-4" /> },
-    { label: 'Settings', path: '/settings', href: '/settings', icon: <PixelSettings className="w-4 h-4" /> },
+    { label: 'Dashboard', title: 'Dashboard', path: '/dashboard', href: '/dashboard', icon: <PixelHome className="w-4 h-4 text-emerald-400" /> },
+    { label: 'Attendance', title: 'Attendance', path: '/attendance', href: '/attendance', icon: <PixelCamera className="w-4 h-4 text-emerald-400" /> },
+    { label: 'Roster', title: 'Roster', path: '/roster', href: '/roster', icon: <PixelUsers className="w-4 h-4 text-emerald-400" /> },
+    { label: 'Reports', title: 'Reports', path: '/reports', href: '/reports', icon: <PixelReports className="w-4 h-4 text-emerald-400" /> },
+    { label: 'Settings', title: 'Settings', path: '/settings', href: '/settings', icon: <PixelSettings className="w-4 h-4 text-emerald-400" /> },
   ];
-
-  const getActiveIndex = (items) => {
-    const currentPath = location.pathname;
-    const index = items.findIndex((item) =>
-      item.path === '/dashboard'
-        ? currentPath === '/' || currentPath === '/dashboard'
-        : currentPath.startsWith(item.path)
-    );
-    return index >= 0 ? index : 0;
-  };
 
   const getActiveHref = () => {
     const currentPath = location.pathname;
@@ -51,12 +40,6 @@ export function DashboardLayout() {
         : currentPath.startsWith(item.path)
     );
     return match ? match.href : '/dashboard';
-  };
-
-  const handleNavChange = (index, item) => {
-    if (item?.path && item.path !== location.pathname) {
-      navigate(item.path);
-    }
   };
 
   const handleMobileNavClick = (item, index, event) => {
@@ -170,42 +153,16 @@ export function DashboardLayout() {
             />
           </div>
         ) : (
-          /* Desktop View (>= 768px): GlassSurface + GooeyNav with WebGL / SVG Refraction */
+          /* Desktop View (>= 768px): Aceternity UI FloatingDock with macOS Magnification */
           <div
-            className={`rounded-full shadow-[0_16px_45px_rgba(0,0,0,0.85)] transition-all duration-300 ${
+            className={`transition-all duration-300 ${
               hideDock ? 'pointer-events-none' : 'pointer-events-auto'
             }`}
           >
-            <GlassSurface
-              width="auto"
-              height="auto"
-              borderRadius={999}
-              distortionScale={-180}
-              displace={0.5}
-              backgroundOpacity={0.12}
-              blur={10}
-              refraction={true}
-              className="rounded-full !p-1.5 border border-white/10"
-            >
-              <GooeyNav
-                items={navItems}
-                activeIndex={getActiveIndex(navItems)}
-                onChange={handleNavChange}
-                theme="dark"
-                size="sm"
-                frame={false}
-                color="#10b981"
-                activeTextColor="#ffffff"
-                colors={['#10b981', '#34d399', '#059669', '#6ee7b7']}
-                particleCount={15}
-                spread={48}
-                animationTime={500}
-                timeVariance={250}
-                gooeyness={0.5}
-                wobble={0.4}
-                hoverEffect={true}
-              />
-            </GlassSurface>
+            <FloatingDock
+              items={navItems}
+              desktopClassName="bg-[#181322]/90 border border-[#2e263d] backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.85)]"
+            />
           </div>
         )}
       </div>
