@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Users,
-  Camera,
-  CheckCircle2,
-  TrendingUp,
-  ArrowRight,
-  ShieldAlert,
-  Clock,
-  Sparkles,
-} from 'lucide-react';
+  PixelCamera,
+  PixelUsers,
+  PixelClock,
+  PixelReports,
+} from '../components/PixelIcon.jsx';
+import { ArrowRight, Sparkles, CheckCircle2, TrendingUp } from 'lucide-react';
 import { api, getCurrentUser } from '../auth/auth.js';
 import { getLocalSettings } from '../storage/settingsStore.js';
 
@@ -46,36 +43,54 @@ export function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Welcome Hero */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-900/40 via-slate-900 to-slate-900 border border-slate-800 p-6 sm:p-8">
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-3">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>AI Face Recognition Enabled</span>
+      {/* Brand Header Banner with Logo & School Name */}
+      <div className="relative overflow-hidden rounded-2xl bg-[#181322]/90 border border-[#2e263d] p-6 sm:p-8 shadow-xl">
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-start sm:items-center gap-5">
+            {/* Logo (Transparent) */}
+            <div className="relative flex-shrink-0">
+              <img
+                src="/logo.png"
+                alt="Verity Shield"
+                className="w-16 h-16 sm:w-20 sm:h-20 object-contain filter drop-shadow-[0_0_12px_rgba(255,255,255,0.18)] transition-transform duration-300 hover:scale-105"
+              />
+            </div>
+
+            {/* School & System Name */}
+            <div>
+              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 mb-1.5 font-sans">
+                <Sparkles className="w-3 h-3" />
+                <span>TensorFlow.js Edge Vision Active</span>
+              </div>
+              {/* Title strictly using Viaoda Libre */}
+              <h1 className="text-3xl sm:text-5xl font-normal text-white tracking-wider font-title">
+                VERITY
+              </h1>
+              <h2 className="text-base sm:text-lg font-medium text-emerald-400 mt-0.5 font-sans">
+                {user?.tenantName || "St. Joseph's College Colombo 10"}
+              </h2>
+              <p className="text-xs text-slate-400 mt-1 max-w-xl leading-relaxed font-sans">
+                Autonomous real-time facial recognition and individual identity verification for classrooms.
+              </p>
+            </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-            Welcome back, {user?.tenantName || "St. Joseph's College Colombo 10"}
-          </h1>
-          <p className="text-sm text-slate-400 mt-2 leading-relaxed">
-            TensorFlow.js deep neural vision pipeline is active for real-time edge attendance
-            verification. Real individual 128-D facial biometrics are evaluated on-device and synchronized
-            reliably.
-          </p>
-          <div className="flex flex-wrap items-center gap-3 mt-6">
+
+          {/* Quick Launch Buttons */}
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
             <Link
               to="/attendance"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-slate-950 transition shadow-lg shadow-emerald-500/20"
+              className="inline-flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold bg-emerald-500 hover:bg-emerald-600 text-slate-950 transition shadow-lg shadow-emerald-500/25 active:scale-[0.98]"
             >
-              <Camera className="w-4 h-4" />
+              <PixelCamera className="w-4 h-4" />
               <span>Launch Live Attendance</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link
               to="/roster"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+              className="inline-flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold bg-[#221b30] hover:bg-[#2c233e] text-slate-200 border border-[#362b4c] transition"
             >
-              <Users className="w-4 h-4" />
-              <span>Manage Student Roster</span>
+              <PixelUsers className="w-4 h-4 text-emerald-400" />
+              <span>Student Roster</span>
             </Link>
           </div>
         </div>
@@ -84,7 +99,7 @@ export function Dashboard() {
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Enrolled Students */}
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-[#181322]/80 border border-[#2e263d] flex items-center justify-between shadow-sm">
           <div>
             <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Enrolled Students
@@ -92,15 +107,15 @@ export function Dashboard() {
             <div className="text-2xl font-bold text-white mt-1">
               {stats.totalEnrolled}
             </div>
-            <div className="text-xs text-slate-500 mt-1">Roster database</div>
+            <div className="text-xs text-slate-500 mt-1">Active Roster Database</div>
           </div>
           <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
-            <Users className="w-6 h-6" />
+            <PixelUsers className="w-6 h-6" />
           </div>
         </div>
 
         {/* Present Today */}
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-[#181322]/80 border border-[#2e263d] flex items-center justify-between shadow-sm">
           <div>
             <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Verified Today
@@ -108,7 +123,7 @@ export function Dashboard() {
             <div className="text-2xl font-bold text-emerald-400 mt-1">
               {stats.uniquePresent}
             </div>
-            <div className="text-xs text-slate-500 mt-1">Unique attendees</div>
+            <div className="text-xs text-slate-500 mt-1">Unique Attendees</div>
           </div>
           <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
             <CheckCircle2 className="w-6 h-6" />
@@ -116,7 +131,7 @@ export function Dashboard() {
         </div>
 
         {/* Attendance Rate */}
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-[#181322]/80 border border-[#2e263d] flex items-center justify-between shadow-sm">
           <div>
             <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Attendance Rate
@@ -124,7 +139,7 @@ export function Dashboard() {
             <div className="text-2xl font-bold text-white mt-1">
               {stats.attendanceRate.toFixed(1)}%
             </div>
-            <div className="text-xs text-slate-500 mt-1">Classroom turnout</div>
+            <div className="text-xs text-slate-500 mt-1">Classroom Turnout</div>
           </div>
           <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
             <TrendingUp className="w-6 h-6" />
@@ -132,12 +147,12 @@ export function Dashboard() {
         </div>
 
         {/* Performance Mode */}
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-[#181322]/80 border border-[#2e263d] flex items-center justify-between shadow-sm">
           <div>
             <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Model & Target FPS
             </div>
-            <div className="text-xl font-bold text-white mt-1 capitalize">
+            <div className="text-lg font-bold text-white mt-1 capitalize truncate max-w-[150px]">
               {settings?.targetFps || 30} FPS • {settings?.modelQuality || 'Medium'}
             </div>
             <div className="text-xs text-emerald-400 mt-1">
@@ -145,20 +160,23 @@ export function Dashboard() {
             </div>
           </div>
           <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
-            <Clock className="w-6 h-6" />
+            <PixelClock className="w-6 h-6" />
           </div>
         </div>
       </div>
 
       {/* Recent Verifications Feed */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl p-6">
+      <div className="bg-[#181322]/80 border border-[#2e263d] rounded-2xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-white tracking-wide">
-            Today's Verification Activity
-          </h2>
+          <div className="flex items-center gap-2">
+            <PixelReports className="w-5 h-5 text-emerald-400" />
+            <h2 className="text-lg font-bold text-white tracking-wide">
+              Today's Verification Activity
+            </h2>
+          </div>
           <Link
             to="/reports"
-            className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1"
+            className="text-xs font-semibold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 transition"
           >
             <span>View All Logs</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -166,11 +184,11 @@ export function Dashboard() {
         </div>
 
         {report?.records?.length > 0 ? (
-          <div className="divide-y divide-slate-800">
+          <div className="divide-y divide-[#262033]">
             {report.records.slice(0, 5).map((rec) => (
               <div key={rec.id} className="py-3.5 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-[#221b30] border border-[#362b4c] overflow-hidden flex items-center justify-center">
                     {rec.imageUrl ? (
                       <img
                         src={rec.imageUrl}
@@ -178,7 +196,7 @@ export function Dashboard() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <Users className="w-5 h-5 text-slate-400" />
+                      <PixelUsers className="w-5 h-5 text-slate-400" />
                     )}
                   </div>
                   <div>

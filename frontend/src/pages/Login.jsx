@@ -46,27 +46,34 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden">
+    <div className="min-h-screen bg-[#120f17] flex flex-col justify-center items-center px-4 py-12 relative overflow-hidden font-sans">
       {/* Background Glow Accents */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10">
         {/* Brand Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mb-4 shadow-lg shadow-emerald-500/5">
-            <ShieldCheck className="w-8 h-8" />
+          <div className="inline-flex items-center justify-center mb-4">
+            <img
+              src="/logo.png"
+              alt="Verity Logo"
+              className="w-16 h-16 object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]"
+            />
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Verity Classroom
+            VERITY
           </h1>
-          <p className="text-sm text-slate-400 mt-2">
-            Mobile-Web Face-Recognition Attendance System
+          <p className="text-sm font-semibold text-emerald-400 mt-1">
+            St. Joseph's College Colombo 10
+          </p>
+          <p className="text-xs text-slate-400 mt-1">
+            Classroom Biometric Face-Recognition Attendance System
           </p>
         </div>
 
         {/* Card */}
-        <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-xl backdrop-blur-xl">
+        <div className="bg-[#181322]/95 border border-[#2e263d] rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl">
           {error && (
             <div className="mb-5 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
               {error}
