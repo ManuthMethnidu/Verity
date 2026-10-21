@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PixelHome, PixelCamera, PixelUsers, PixelReports, PixelSettings } from './PixelIcon.jsx';
 
-export function Footer() {
+export function Footer({ footerRef }) {
   const [modalType, setModalType] = useState(null); // 'terms' | 'privacy' | null
 
   return (
     <>
-      <footer className="mt-20 border-t border-[#262033] bg-[#0e0c12]/80 backdrop-blur-md text-slate-400 text-sm">
+      <footer ref={footerRef} className="mt-20 border-t border-[#262033] bg-[#0e0c12]/80 backdrop-blur-md text-slate-400 text-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
             {/* Col 1: Brand & Logo */}
