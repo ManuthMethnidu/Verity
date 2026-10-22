@@ -114,61 +114,6 @@ export function RosterPage() {
     showNotice('Exported student roster as CSV.');
   };
 
-  const rosterDropdownActions = [
-    {
-      id: 'enroll-student',
-      label: 'Enroll Face with Camera',
-      icon: <Camera size={18} strokeWidth={1.75} />,
-      detail: 'Enroll student face profile',
-      onSelect: () => {
-        setFormName('');
-        setFormCode('');
-        setFormImage('');
-        setCapturedFace(null);
-        setEnrollTab('camera');
-        setShowAddModal(true);
-        setTimeout(() => startEnrollCamera(), 100);
-      },
-    },
-    {
-      id: 'batch-upload',
-      label: 'Upload CSV / JSON',
-      icon: <Upload size={18} strokeWidth={1.75} />,
-      detail: 'Bulk roster import',
-      onSelect: () => setShowBatchModal(true),
-    },
-    {
-      id: 'export-roster',
-      label: 'Export Student Roster',
-      icon: <FileSpreadsheet size={18} strokeWidth={1.75} />,
-      detail: 'Download .csv spreadsheet',
-      onSelect: exportRosterCSV,
-    },
-    {
-      id: 'cache-offline',
-      label: `Sync Offline Cache (${cachedCount})`,
-      icon: <HardDriveDownload size={18} strokeWidth={1.75} />,
-      detail: 'Update browser IndexedDB',
-      onSelect: handleManualCache,
-    },
-    {
-      id: 'reload',
-      label: 'Reload from Cloud',
-      icon: <RefreshCw size={18} strokeWidth={1.75} />,
-      detail: 'Re-fetch latest student roster',
-      onSelect: fetchRoster,
-    },
-    {
-      id: 'purge-all',
-      label: 'Purge Entire Roster',
-      icon: <Trash2 size={18} strokeWidth={1.75} />,
-      detail: 'Wipes all enrolled faces',
-      divider: true,
-      destructive: true,
-      onSelect: handlePurgeAll,
-    },
-  ];
-
   // Start enrollment webcam
   const startEnrollCamera = async () => {
     try {
@@ -403,6 +348,61 @@ export function RosterPage() {
       s.name.toLowerCase().includes(search.toLowerCase()) ||
       (s.studentIdCode && s.studentIdCode.toLowerCase().includes(search.toLowerCase()))
   );
+
+  const rosterDropdownActions = [
+    {
+      id: 'enroll-student',
+      label: 'Enroll Face with Camera',
+      icon: <Camera size={18} strokeWidth={1.75} />,
+      detail: 'Enroll student face profile',
+      onSelect: () => {
+        setFormName('');
+        setFormCode('');
+        setFormImage('');
+        setCapturedFace(null);
+        setEnrollTab('camera');
+        setShowAddModal(true);
+        setTimeout(() => startEnrollCamera(), 100);
+      },
+    },
+    {
+      id: 'batch-upload',
+      label: 'Upload CSV / JSON',
+      icon: <Upload size={18} strokeWidth={1.75} />,
+      detail: 'Bulk roster import',
+      onSelect: () => setShowBatchModal(true),
+    },
+    {
+      id: 'export-roster',
+      label: 'Export Student Roster',
+      icon: <FileSpreadsheet size={18} strokeWidth={1.75} />,
+      detail: 'Download .csv spreadsheet',
+      onSelect: () => exportRosterCSV(),
+    },
+    {
+      id: 'cache-offline',
+      label: `Sync Offline Cache (${cachedCount})`,
+      icon: <HardDriveDownload size={18} strokeWidth={1.75} />,
+      detail: 'Update browser IndexedDB',
+      onSelect: () => handleManualCache(),
+    },
+    {
+      id: 'reload',
+      label: 'Reload from Cloud',
+      icon: <RefreshCw size={18} strokeWidth={1.75} />,
+      detail: 'Re-fetch latest student roster',
+      onSelect: () => fetchRoster(),
+    },
+    {
+      id: 'purge-all',
+      label: 'Purge Entire Roster',
+      icon: <Trash2 size={18} strokeWidth={1.75} />,
+      detail: 'Wipes all enrolled faces',
+      divider: true,
+      destructive: true,
+      onSelect: () => handlePurgeAll(),
+    },
+  ];
 
   return (
     <div className="space-y-6 font-sans">
