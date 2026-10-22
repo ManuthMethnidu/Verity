@@ -119,8 +119,7 @@ export function RosterPage() {
       id: 'enroll-student',
       label: 'Enroll Face with Camera',
       icon: <Camera size={18} strokeWidth={1.75} />,
-      shortcut: 'E',
-      detail: 'Capture 128-D embedding',
+      detail: 'Enroll student face profile',
       onSelect: () => {
         setFormName('');
         setFormCode('');
@@ -135,7 +134,6 @@ export function RosterPage() {
       id: 'batch-upload',
       label: 'Upload CSV / JSON',
       icon: <Upload size={18} strokeWidth={1.75} />,
-      shortcut: 'U',
       detail: 'Bulk roster import',
       onSelect: () => setShowBatchModal(true),
     },
@@ -143,7 +141,6 @@ export function RosterPage() {
       id: 'export-roster',
       label: 'Export Student Roster',
       icon: <FileSpreadsheet size={18} strokeWidth={1.75} />,
-      shortcut: 'X',
       detail: 'Download .csv spreadsheet',
       onSelect: exportRosterCSV,
     },
@@ -151,7 +148,6 @@ export function RosterPage() {
       id: 'cache-offline',
       label: `Sync Offline Cache (${cachedCount})`,
       icon: <HardDriveDownload size={18} strokeWidth={1.75} />,
-      shortcut: 'C',
       detail: 'Update browser IndexedDB',
       onSelect: handleManualCache,
     },
@@ -159,7 +155,6 @@ export function RosterPage() {
       id: 'reload',
       label: 'Reload from Cloud',
       icon: <RefreshCw size={18} strokeWidth={1.75} />,
-      shortcut: 'R',
       detail: 'Re-fetch latest student roster',
       onSelect: fetchRoster,
     },
@@ -167,7 +162,6 @@ export function RosterPage() {
       id: 'purge-all',
       label: 'Purge Entire Roster',
       icon: <Trash2 size={18} strokeWidth={1.75} />,
-      shortcut: 'P',
       detail: 'Wipes all enrolled faces',
       divider: true,
       destructive: true,
@@ -220,10 +214,10 @@ export function RosterPage() {
 
       setCapturedFace(result);
       setFormImage(thumbUrl);
-      showNotice('Face verified! 128-D neural face descriptor extracted (ResNet-34).');
+      showNotice('Face verified! Face recognition profile successfully created.');
     } catch (err) {
       console.error('Snap face failed:', err);
-      showNotice('Failed to extract face biometrics: ' + err.message, 'error');
+      showNotice('Failed to capture face profile: ' + err.message, 'error');
     } finally {
       setIsExtractingFace(false);
     }
@@ -258,10 +252,10 @@ export function RosterPage() {
 
           setCapturedFace(result);
           setFormImage(thumbUrl);
-          showNotice('Photo processed! 128-D neural biometrics extracted from portrait.');
+          showNotice('Photo processed! Face recognition profile created.');
         } catch (err) {
           console.error('Photo face detection failed:', err);
-          showNotice('Could not extract biometrics from image: ' + err.message, 'error');
+          showNotice('Could not extract face profile from image: ' + err.message, 'error');
         } finally {
           setIsExtractingFace(false);
         }
@@ -296,7 +290,7 @@ export function RosterPage() {
         ],
       });
 
-      showNotice(`Student ${formName} enrolled with real 128-D neural face descriptor.`);
+      showNotice(`Student ${formName} enrolled with active face recognition profile.`);
       closeAddModal();
       fetchRoster();
     } catch (err) {
@@ -440,7 +434,7 @@ export function RosterPage() {
             <span>Student Roster</span>
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Manage student enrollment and 128-D facial feature embeddings for offline matching.
+            Manage student enrollment and face recognition profiles for classroom check-in.
           </p>
         </div>
 
@@ -493,7 +487,7 @@ export function RosterPage() {
               <tr>
                 <th className="px-6 py-3.5">Student</th>
                 <th className="px-6 py-3.5">Student ID Code</th>
-                <th className="px-6 py-3.5">Embedding Status</th>
+                <th className="px-6 py-3.5">Face Scan Status</th>
                 <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
@@ -536,7 +530,7 @@ export function RosterPage() {
                       {s.embedding || s.embeddingVector ? (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                           <CheckCircle className="w-3 h-3" />
-                          <span>128-D Biometric Saved</span>
+                          <span>Face Scan Enrolled</span>
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
@@ -686,7 +680,7 @@ export function RosterPage() {
                     <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2">
                       <CheckCircle className="w-4 h-4 flex-shrink-0" />
                       <span>
-                        Real 128-D Neural Biometrics Locked ({capturedFace.embeddingVector.length} features)
+                        Face Profile Confirmed ({capturedFace.embeddingVector.length} biometric points)
                       </span>
                     </div>
                   )}
@@ -700,7 +694,7 @@ export function RosterPage() {
                       <Upload className="w-8 h-8 text-emerald-400" />
                     </div>
                     <p className="text-xs text-slate-300 font-medium">
-                      Upload a student portrait photo to extract neural biometrics
+                      Upload a student portrait photo to generate a face profile
                     </p>
                     <label className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-semibold cursor-pointer transition">
                       <span>Choose Portrait Photo</span>
@@ -726,7 +720,7 @@ export function RosterPage() {
                           <span>Face Extracted Successfully</span>
                         </div>
                         <div className="text-slate-400 mt-0.5">
-                          128-D ResNet-34 descriptor ready for enrollment
+                          Face recognition profile ready for enrollment
                         </div>
                       </div>
                     </div>
@@ -862,7 +856,7 @@ export function RosterPage() {
             <h2 className="text-lg font-bold text-white mb-2">Upload Student Roster Batch</h2>
             <p className="text-xs text-slate-400 mb-4">
               Select a CSV file formatted as <code className="text-emerald-400 font-mono">student_id,name,image_url</code>{' '}
-              or JSON array of students with embeddings.
+              or JSON array of students with face profiles.
             </p>
 
             <div className="border-2 border-dashed border-slate-700 hover:border-emerald-500/50 rounded-2xl p-8 text-center cursor-pointer transition bg-slate-950/50">

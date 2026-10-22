@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ShieldCheck,
@@ -16,14 +16,22 @@ import { getCurrentUser, signOut } from '../auth/auth.js';
 import { GooeyDropdown } from './ui/GooeyDropdown.tsx';
 
 export function Header() {
-  const user = getCurrentUser();
+  const [user, setUser] = useState(() => getCurrentUser());
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleProfileUpdate = (e) => {
+      setUser(e.detail || getCurrentUser());
+    };
+    window.addEventListener('verity:profileUpdated', handleProfileUpdate);
+    return () => window.removeEventListener('verity:profileUpdated', handleProfileUpdate);
+  }, []);
 
   const handleSignOut = () => {
     signOut();
   };
 
-  const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : 'A';
+  const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : 'A');
   const tenantDisplayName = user?.tenantName || "St. Joseph's College Colombo 10";
 
   const userDropdownActions = [
@@ -31,7 +39,6 @@ export function Header() {
       id: 'dashboard',
       label: 'Dashboard',
       icon: <LayoutDashboard size={18} strokeWidth={1.75} />,
-      shortcut: 'D',
       detail: 'Metrics & attendance feed',
       onSelect: () => navigate('/dashboard'),
     },
@@ -39,7 +46,6 @@ export function Header() {
       id: 'scanner',
       label: 'Live Scanner',
       icon: <Camera size={18} strokeWidth={1.75} />,
-      shortcut: 'S',
       detail: 'Edge face-recognition camera',
       onSelect: () => navigate('/attendance'),
     },
@@ -47,15 +53,13 @@ export function Header() {
       id: 'roster',
       label: 'Student Roster',
       icon: <Users size={18} strokeWidth={1.75} />,
-      shortcut: 'R',
-      detail: 'Manage 128-D face embeddings',
+      detail: 'Manage student face profiles',
       onSelect: () => navigate('/roster'),
     },
     {
       id: 'reports',
       label: 'Attendance Logs',
       icon: <ClipboardList size={18} strokeWidth={1.75} />,
-      shortcut: 'L',
       detail: 'Audit trail and export',
       onSelect: () => navigate('/reports'),
     },
@@ -63,7 +67,6 @@ export function Header() {
       id: 'settings',
       label: 'System Settings',
       icon: <Settings size={18} strokeWidth={1.75} />,
-      shortcut: 'G',
       detail: 'Threshold & camera FPS',
       onSelect: () => navigate('/settings'),
     },
@@ -71,7 +74,6 @@ export function Header() {
       id: 'signout',
       label: 'Sign Out',
       icon: <LogOut size={18} strokeWidth={1.75} />,
-      shortcut: 'Q',
       divider: true,
       destructive: true,
       onSelect: handleSignOut,
@@ -134,11 +136,19 @@ export function Header() {
           {/* User Profile Pill & Gooey Dropdown */}
           <div className="flex items-center pl-2 border-l border-slate-800/80">
             <GooeyDropdown
-              label={user?.email ? user.email.split('@')[0] : 'Account'}
+              label={user?.name || (user?.email ? user.email.split('@')[0] : 'Account')}
               icon={
-                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[11px] font-bold">
-                  {userInitial}
-                </span>
+                user?.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user?.name || "Profile"}
+                    className="w-5 h-5 rounded-full object-cover border border-emerald-500/40"
+                  />
+                ) : (
+                  <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[11px] font-bold">
+                    {userInitial}
+                  </span>
+                )
               }
               actions={userDropdownActions}
               anchor="end"

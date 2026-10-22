@@ -32,7 +32,6 @@ export interface GooeyDropdownAction {
   id: string;
   label: string;
   icon?: ReactNode;
-  shortcut?: string;
   detail?: string;
   divider?: boolean;
   destructive?: boolean;
@@ -60,6 +59,8 @@ export interface GooeyDropdownProps {
   ink?: string;
   /** Custom color override for destructive actions (default: #ff453a) */
   danger?: string;
+  /** Force open direction: 'down', 'up', or 'auto' (default: 'auto') */
+  direction?: "down" | "up" | "auto";
   /** Whether the dropdown starts open */
   defaultOpen?: boolean;
   /** Additional container classes */
@@ -68,8 +69,8 @@ export interface GooeyDropdownProps {
   triggerClassName?: string;
 }
 
-const SPRING_OPEN = { type: "spring", visualDuration: 0.4, bounce: 0 } as const;
-const SPRING_CLOSE = { type: "spring", visualDuration: 0.28, bounce: 0 } as const;
+const SPRING_OPEN = { type: "spring", visualDuration: 0.38, bounce: 0 } as const;
+const SPRING_CLOSE = { type: "spring", visualDuration: 0.25, bounce: 0 } as const;
 const ICON_PROPS = { size: 18, strokeWidth: 1.75 };
 
 const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
@@ -80,31 +81,26 @@ export const DEFAULT_ACTIONS: GooeyDropdownAction[] = [
     id: "rename",
     label: "Rename",
     icon: <Pencil {...ICON_PROPS} />,
-    shortcut: "R",
   },
   {
     id: "duplicate",
     label: "Duplicate",
     icon: <Copy {...ICON_PROPS} />,
-    shortcut: "D",
   },
   {
     id: "move",
     label: "Move to folder",
     icon: <FolderSymlink {...ICON_PROPS} />,
-    shortcut: "M",
   },
   {
     id: "archive",
     label: "Archive",
     icon: <Archive {...ICON_PROPS} />,
-    shortcut: "A",
   },
   {
     id: "delete",
     label: "Delete",
     icon: <Trash2 {...ICON_PROPS} />,
-    shortcut: "⌫",
     divider: true,
     destructive: true,
   },
@@ -116,11 +112,12 @@ export function GooeyDropdown({
   actions = DEFAULT_ACTIONS,
   menuWidth = 240,
   anchor = "start",
-  gap = 14,
-  viscosity = 7,
+  gap = 12,
+  viscosity = 6,
   fill,
   ink,
   danger,
+  direction = "auto",
   defaultOpen = false,
   className,
   triggerClassName,
@@ -134,6 +131,8 @@ export function GooeyDropdown({
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const [triggerWidth, setTriggerWidth] = useState(0);
   const [menuHeight, setMenuHeight] = useState(0);
+  const [isUp, setIsUp] = useState(direction === "up");
+  const [clampedMenuLeft, setClampedMenuLeft] = useState(0);
 
   const triggerRef = useRef<HTMLButtonElement>(null);
   const blobRef = useRef<HTMLDivElement>(null);
@@ -145,27 +144,75 @@ export function GooeyDropdown({
 
   const progress = useMotionValue(defaultOpen ? 1 : 0);
 
-  // Position calculations based on anchor
-  const menuLeft =
-    anchor === "end"
-      ? triggerWidth - menuWidth
-      : anchor === "center"
-        ? (triggerWidth - menuWidth) / 2
-        : 0;
+  // Measure dimensions and dynamically detect collision/overflow
+  useLayoutEffect(() => {
+    const triggerEl = triggerRef.current;
+    const contentEl = menuContentRef.current;
+    if (!triggerEl) return;
+
+    const measure = () => {
+      const tWidth = triggerEl.offsetWidth;
+      setTriggerWidth(tWidth);
+
+      const mHeight = contentEl ? contentEl.offsetHeight : 220;
+      setMenuHeight(mHeight);
+
+      const rect = triggerEl.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      const neededHeight = mHeight + gap + 16;
+
+      const shouldOpenUp =
+        direction === "up" ||
+        (direction === "auto" && spaceBelow < neededHeight && spaceAbove > spaceBelow);
+      setIsUp(shouldOpenUp);
+
+      // Compute base horizontal position from anchor
+      let baseLeft =
+        anchor === "end"
+          ? tWidth - menuWidth
+          : anchor === "center"
+            ? (tWidth - menuWidth) / 2
+            : 0;
+
+      // Viewport safety clamp: ensure menu does not spill past screen edges
+      const absoluteLeft = rect.left + baseLeft;
+      if (absoluteLeft < 10) {
+        baseLeft += 10 - absoluteLeft;
+      } else if (absoluteLeft + menuWidth > window.innerWidth - 10) {
+        baseLeft -= absoluteLeft + menuWidth - (window.innerWidth - 10);
+      }
+      setClampedMenuLeft(baseLeft);
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(triggerEl);
+    if (contentEl) observer.observe(contentEl);
+    window.addEventListener("resize", measure);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [anchor, direction, gap, menuWidth]);
+
+  const menuLeft = clampedMenuLeft;
+  const menuTop = isUp ? -(menuHeight + gap) : 44 + gap;
   const triggerRelativeLeft = -menuLeft;
-  const menuTop = 44 + gap;
 
   const renderLiquidRef = useRef<() => void>(() => {});
 
   const renderLiquid = () => {
     const e = clamp01(progress.get());
-    const blobWidth = lerp(Math.min(0.6 * triggerWidth, 56), menuWidth, e);
-    const blobHeight = lerp(20, menuHeight, e);
-    const blobTop = lerp(24, menuTop, e);
+    const blobWidth = lerp(Math.min(0.6 * (triggerWidth || 140), 56), menuWidth, e);
+    const blobHeight = lerp(20, Math.max(menuHeight, 40), e);
+    const blobTop = isUp
+      ? lerp(20, menuTop, e)
+      : lerp(24, menuTop, e);
     const blobLeft =
-      lerp(triggerRelativeLeft + triggerWidth / 2, menuWidth / 2, e) -
+      lerp(triggerRelativeLeft + (triggerWidth || 140) / 2, menuWidth / 2, e) -
       blobWidth / 2;
-    const blobRadius = Math.min(24, blobWidth / 2, blobHeight / 2);
+    const blobRadius = Math.min(20, blobWidth / 2, blobHeight / 2);
 
     if (blobRef.current) {
       blobRef.current.style.width = `${blobWidth}px`;
@@ -176,13 +223,19 @@ export function GooeyDropdown({
     }
 
     if (menuContainerRef.current) {
-      const topInset = Math.max(0, blobTop - menuTop);
-      const bottomInset = Math.max(0, menuTop + menuHeight - (blobTop + blobHeight));
-      const rightInset = Math.max(0, menuWidth - (blobLeft + blobWidth));
-      const leftInset = Math.max(0, blobLeft);
+      if (e >= 0.94) {
+        // Once opened, remove all clip-path insets so nothing is cut off
+        menuContainerRef.current.style.clipPath = "none";
+        menuContainerRef.current.style.opacity = "1";
+      } else {
+        const topInset = Math.max(0, isUp ? menuTop + menuHeight - (blobTop + blobHeight) : blobTop - menuTop);
+        const bottomInset = Math.max(0, isUp ? blobTop - menuTop : menuTop + menuHeight - (blobTop + blobHeight));
+        const rightInset = Math.max(0, menuWidth - (blobLeft + blobWidth));
+        const leftInset = Math.max(0, blobLeft);
 
-      menuContainerRef.current.style.clipPath = `inset(${topInset}px ${rightInset}px ${bottomInset}px ${leftInset}px round ${blobRadius}px)`;
-      menuContainerRef.current.style.opacity = String(clamp01((e - 0.7) / 0.3));
+        menuContainerRef.current.style.clipPath = `inset(${topInset}px ${rightInset}px ${bottomInset}px ${leftInset}px round ${blobRadius}px)`;
+        menuContainerRef.current.style.opacity = String(clamp01((e - 0.4) / 0.5));
+      }
     }
   };
 
@@ -199,23 +252,6 @@ export function GooeyDropdown({
       cancelFrame(onFrame);
     };
   }, [progress]);
-
-  // Dynamically measure trigger width and menu content height
-  useLayoutEffect(() => {
-    const triggerEl = triggerRef.current;
-    const contentEl = menuContentRef.current;
-    if (!triggerEl || !contentEl) return;
-
-    const measure = () => {
-      setTriggerWidth(triggerEl.offsetWidth);
-      setMenuHeight(contentEl.offsetHeight);
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(triggerEl);
-    observer.observe(contentEl);
-    return () => observer.disconnect();
-  }, []);
 
   // Spring animation transition
   useEffect(() => {
@@ -279,13 +315,22 @@ export function GooeyDropdown({
     closeMenu(true);
   };
 
-  const filterPadding = Math.ceil(Math.max(3 * viscosity, 36));
-  const totalHeight = menuTop + Math.max(menuHeight, 20);
+  const filterPadding = Math.ceil(Math.max(3 * viscosity, 32));
+  const effectiveTriggerWidth = triggerWidth || 140;
+
+  // Union bounding box to ensure liquid surface div and filter cover trigger & menu completely
+  const minX = Math.min(0, menuLeft) - filterPadding;
+  const maxX = Math.max(effectiveTriggerWidth, menuLeft + menuWidth) + filterPadding;
+  const containerWidth = Math.max(maxX - minX, menuWidth + 2 * filterPadding);
+
+  const minY = Math.min(0, menuTop) - filterPadding;
+  const maxY = Math.max(44, menuTop + Math.max(menuHeight, 40)) + filterPadding;
+  const containerHeight = Math.max(maxY - minY, 100);
 
   return (
     <div
       ref={rootRef}
-      className={cn("relative z-30 inline-block", className)}
+      className={cn("relative inline-block", isOpen ? "z-50" : "z-30", className)}
       style={
         {
           "--gooey-dropdown-fill": fill ?? "var(--foreground, #1e293b)",
@@ -300,10 +345,10 @@ export function GooeyDropdown({
           <filter
             id={gooFilterId}
             filterUnits="userSpaceOnUse"
-            x={-filterPadding}
-            y={-filterPadding}
-            width={menuWidth + 2 * filterPadding}
-            height={totalHeight + 2 * filterPadding + 10}
+            x={minX}
+            y={minY}
+            width={containerWidth}
+            height={containerHeight}
             colorInterpolationFilters="sRGB"
           >
             {viscosity > 0 && (
@@ -330,10 +375,10 @@ export function GooeyDropdown({
             <feDropShadow
               in={viscosity > 0 ? "body" : "SourceGraphic"}
               dx={0}
-              dy={10}
-              stdDeviation={12}
+              dy={8}
+              stdDeviation={10}
               floodColor="#000"
-              floodOpacity={0.25}
+              floodOpacity={0.3}
             />
           </filter>
         </defs>
@@ -346,10 +391,10 @@ export function GooeyDropdown({
         style={{
           left: menuLeft,
           width: menuWidth,
-          height: totalHeight,
+          height: isUp ? menuHeight + gap + 44 : menuTop + Math.max(menuHeight, 40),
           filter: `url(#${gooFilterId})`,
           willChange: "transform",
-          opacity: triggerWidth > 0 ? 1 : 0,
+          opacity: effectiveTriggerWidth > 0 ? 1 : 0,
         }}
       >
         {/* Trigger Capsule Liquid Core */}
@@ -358,7 +403,7 @@ export function GooeyDropdown({
           style={{
             background: "var(--gooey-dropdown-fill)",
             left: triggerRelativeLeft,
-            width: triggerWidth,
+            width: effectiveTriggerWidth,
             height: 44,
           }}
         />
@@ -406,7 +451,7 @@ export function GooeyDropdown({
           }
         }}
         className={cn(
-          "relative z-20 flex items-center gap-2 whitespace-nowrap rounded-full pl-5 pr-4 text-[14px] sm:text-[15px] font-medium outline-none shadow-sm cursor-pointer",
+          "relative z-20 flex items-center gap-2 whitespace-nowrap rounded-full pl-5 pr-4 text-[14px] sm:text-[15px] font-medium outline-none shadow-sm cursor-pointer select-none",
           "transition-colors duration-150 ease-out hover:bg-[color-mix(in_oklab,var(--gooey-dropdown-ink)_10%,transparent)]",
           "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[var(--gooey-dropdown-ink)]",
           triggerClassName
@@ -429,7 +474,7 @@ export function GooeyDropdown({
         />
       </button>
 
-      {/* Crisp Menu Overlay (Z-Index 20: No SVG blur, clipped dynamically) */}
+      {/* Crisp Menu Overlay (Z-Index 50: No SVG blur, clipped dynamically) */}
       <div
         ref={menuContainerRef}
         id={menuId}
@@ -457,23 +502,6 @@ export function GooeyDropdown({
           } else if (e.key === "Tab") {
             closeMenu(false);
             return;
-          } else if (!e.metaKey && !e.ctrlKey && !e.altKey) {
-            // Shortcut execution: single-character or Backspace/Delete
-            const matchedAction = actions.find((item) => {
-              if (!item.shortcut) return false;
-              if (item.shortcut === "⌫") {
-                return e.key === "Backspace" || e.key === "Delete";
-              }
-              return (
-                item.shortcut.length === 1 &&
-                item.shortcut.toLowerCase() === e.key.toLowerCase()
-              );
-            });
-            if (matchedAction) {
-              e.preventDefault();
-              handleActionSelect(matchedAction);
-              return;
-            }
           }
 
           if (nextIndex >= 0 && validItems[nextIndex]) {
@@ -481,7 +509,10 @@ export function GooeyDropdown({
             validItems[nextIndex]?.focus();
           }
         }}
-        className={cn("absolute z-30", !isOpen && "pointer-events-none")}
+        className={cn(
+          "absolute z-50",
+          !isOpen && "pointer-events-none"
+        )}
         style={{
           left: menuLeft,
           top: menuTop,
@@ -520,7 +551,7 @@ export function GooeyDropdown({
                     : "focus:bg-[color-mix(in_oklab,var(--gooey-dropdown-ink)_12%,transparent)]"
                 )}
                 style={{
-                  borderRadius: 16,
+                  borderRadius: 14,
                   color: action.destructive ? (danger ?? "#ff453a") : undefined,
                 }}
               >
@@ -545,18 +576,6 @@ export function GooeyDropdown({
                     </span>
                   )}
                 </span>
-                {action.shortcut && (
-                  <kbd
-                    className={cn(
-                      "flex h-5 min-w-5 shrink-0 items-center justify-center rounded-md px-1.5 font-sans text-[11px] font-medium",
-                      action.destructive
-                        ? "bg-[color-mix(in_oklab,currentColor_15%,transparent)]"
-                        : "bg-[color-mix(in_oklab,var(--gooey-dropdown-ink)_12%,transparent)] text-current/70"
-                    )}
-                  >
-                    {action.shortcut}
-                  </kbd>
-                )}
               </button>
             </div>
           ))}

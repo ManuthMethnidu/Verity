@@ -105,13 +105,13 @@ export function LegalPage({ initialTab = 'terms' }) {
                   <span>SECTION 1</span>
                 </div>
                 <h2 className="text-xl font-bold text-white tracking-tight">
-                  On-Device Biometric Extraction & Ephemeral Processing
+                  On-Device Face Matching & Ephemeral Processing
                 </h2>
                 <p>
-                  Verity is architected with a strict <strong>privacy-first, edge-computing</strong> philosophy. Biometric facial recognition computations—including facial detection, landmark alignment, and 128-dimensional mathematical vector embedding extraction—are executed exclusively on the client machine’s local WebGL2 graphics pipeline using TensorFlow.js.
+                  Verity is built with a strict <strong>privacy-first, on-device processing</strong> architecture. Facial recognition computations—including face detection and secure facial feature mapping—are executed entirely on the local device browser without transmitting raw facial imagery to external cloud services.
                 </p>
                 <p className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-xs text-slate-400 font-mono">
-                  KEY GUARANTEE: Raw camera video frames analyzed during live attendance monitoring are held solely in volatile device memory (RAM) and are permanently discarded after feature matching. Raw video feeds are never streamed or persisted to remote servers.
+                  KEY GUARANTEE: Raw camera video frames analyzed during live attendance monitoring are held solely in temporary device memory (RAM) and are permanently discarded after verification. Live video feeds are never streamed or persisted to remote servers.
                 </p>
               </section>
 
@@ -121,14 +121,14 @@ export function LegalPage({ initialTab = 'terms' }) {
                   <span>SECTION 2</span>
                 </div>
                 <h2 className="text-xl font-bold text-white tracking-tight">
-                  Purpose of Biometric Verification & Educational Governance
+                  Purpose of Verification & Educational Governance
                 </h2>
                 <p>
-                  Facial descriptors and biometric match vectors are collected and processed solely for educational identity verification, classroom attendance management, and authorized institutional logging.
+                  Student face profiles and match data are processed solely for educational identity verification, classroom attendance management, and authorized school reporting.
                 </p>
                 <ul className="list-disc list-inside space-y-1.5 text-slate-400 text-xs pl-2">
                   <li>Data is strictly partitioned by institutional tenant ID (multi-tenant isolation).</li>
-                  <li>Biometric embeddings are never sold, rented, or distributed to advertising networks or external data brokers.</li>
+                  <li>Student face data is never sold, rented, or distributed to advertising networks or external data brokers.</li>
                   <li>No cross-institutional profiling or surveillance tracking is performed.</li>
                 </ul>
               </section>
@@ -139,10 +139,10 @@ export function LegalPage({ initialTab = 'terms' }) {
                   <span>SECTION 3</span>
                 </div>
                 <h2 className="text-xl font-bold text-white tracking-tight">
-                  Cryptographic Storage, Offline IndexedDB & API Security
+                  Secure Storage, Offline Operation & Cloud Protection
                 </h2>
                 <p>
-                  Offline attendance queues and reference feature vectors are persisted locally within client IndexedDB databases sandbox-restricted to the institution’s verified origin. Online sync payloads transmitted to the Verity institutional API utilize TLS 1.3 protocol encryption, JSON Web Token (JWT) verification, and database-level tenant isolation.
+                  Offline attendance records and student face profiles are stored securely in local browser storage protected by strict sandboxing. Cloud sync transmissions utilize modern encrypted protocols (TLS 1.3) and secure school-level database isolation.
                 </p>
               </section>
 
@@ -184,7 +184,7 @@ export function LegalPage({ initialTab = 'terms' }) {
                   Permitted & Authorized Educational Use
                 </h2>
                 <p>
-                  This software is licensed solely for legitimate educational attendance verification, classroom security, and administrative academic reporting. Any unauthorized tampering, injection of synthetic deepfakes, bypassing cosine threshold filters, or reverse-engineering offline IndexedDB audit records is strictly prohibited and constitutes an immediate violation of institutional agreement.
+                  This software is licensed solely for legitimate educational attendance verification, classroom security, and administrative academic reporting. Any unauthorized tampering, bypassing match accuracy thresholds, or altering offline attendance records is strictly prohibited and constitutes an immediate violation of institutional agreement.
                 </p>
               </section>
 
@@ -210,7 +210,7 @@ export function LegalPage({ initialTab = 'terms' }) {
                   Supervisory Authority & Attendance Corrections
                 </h2>
                 <p>
-                  Verity biometric cosine matching provides automated administrative assistance. Final attendance determination and manual corrections remain under the supervision and discretion of certified academic faculty and tenant administrators.
+                  Verity automated face matching provides administrative assistance. Final attendance determination and manual corrections remain under the supervision and discretion of certified academic faculty and school administrators.
                 </p>
               </section>
             </>

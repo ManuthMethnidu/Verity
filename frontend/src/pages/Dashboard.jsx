@@ -196,7 +196,7 @@ export function Dashboard() {
               <h2 className="text-base font-bold text-white tracking-tight">
                 Today's Verification Activity
               </h2>
-              <p className="text-xs text-slate-400">Live biometric recognition log stream</p>
+              <p className="text-xs text-slate-400">Live student check-in activity</p>
             </div>
           </div>
           <Link
@@ -227,7 +227,7 @@ export function Dashboard() {
                   <div>
                     <div className="text-sm font-semibold text-white">{rec.studentName}</div>
                     <div className="text-xs text-slate-400 font-mono">
-                      ID: {rec.studentCode || 'N/A'} • Device: {rec.deviceId}
+                      ID: {rec.studentCode || 'N/A'} • Scanner: {rec.deviceId?.replace('DEVICE-CAM-', 'Station ') || rec.deviceId}
                     </div>
                   </div>
                 </div>

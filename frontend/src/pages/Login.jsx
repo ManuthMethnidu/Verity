@@ -369,25 +369,25 @@ export function Login() {
               </div>
 
               <h2 className="text-base sm:text-lg font-bold text-white tracking-tight leading-snug">
-                Autonomous classroom face-recognition attendance with on-device edge verification.
+                Instant classroom face recognition attendance with private on-device verification.
               </h2>
               <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">
-                Zero-knowledge biometric pipeline designed for universities, schools, and institutional multi-tenancy.
+                Private, privacy-first attendance platform built for modern schools and colleges.
               </p>
 
               {/* Key Highlights */}
               <div className="mt-4 space-y-2">
                 <div className="flex items-center gap-2 text-xs text-slate-300">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>Sub-500ms real-time multi-face edge detection</span>
+                  <span>Instant face detection for multiple students simultaneously</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-300">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>Encrypted client-side biometrics & isolation</span>
+                  <span>Private on-device face scan matching & school data isolation</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-slate-300">
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>Automated attendance syncing with audit ledger</span>
+                  <span>Automated attendance syncing with comprehensive logs</span>
                 </div>
               </div>
             </div>
@@ -404,7 +404,7 @@ export function Login() {
         {/* Global Security Sub-badge */}
         <div className="mt-2.5 text-center flex items-center justify-center gap-1.5 text-[11px] text-slate-500">
           <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
-          <span>Encrypted client-side biometrics & institutional tenant isolation</span>
+          <span>Private on-device face matching & institutional tenant isolation</span>
         </div>
       </div>
 

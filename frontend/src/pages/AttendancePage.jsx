@@ -21,6 +21,7 @@ import {
   Terminal,
   Download,
   Trash2,
+  X,
 } from 'lucide-react';
 import { GooeyDropdown } from '../components/ui/GooeyDropdown.tsx';
 import { CameraManager } from '../vision/cameraManager.js';
@@ -49,10 +50,11 @@ export function AttendancePage() {
     return localStorage.getItem('verity_camera_mirrored') !== 'false';
   });
   const [deviceId] = useState(() => {
-    return localStorage.getItem('verity_device_id') || `DEVICE-CAM-${Math.floor(Math.random() * 900 + 100)}`;
+    return localStorage.getItem('verity_device_id') || `Station-${Math.floor(Math.random() * 90 + 10)}`;
   });
   const [settings, setSettings] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [showApiSetup, setShowApiSetup] = useState(false);
   const [activeCodeTab, setActiveCodeTab] = useState('js');
 
   const tenantId = user?.tenantId || '';
@@ -86,62 +88,37 @@ export function AttendancePage() {
 
   const apiDropdownActions = [
     {
+      id: 'api-setup',
+      label: 'API Setup & Guide',
+      icon: <Code2 size={18} strokeWidth={1.75} />,
+      detail: 'Endpoints, cURL & integration code',
+      onSelect: () => setShowApiSetup(true),
+    },
+    {
       id: 'copy-url',
       label: copied ? 'URL Copied!' : 'Copy API URL',
       icon: <Copy size={18} strokeWidth={1.75} />,
-      shortcut: 'C',
-      detail: 'REST GET feed endpoint',
+      detail: 'Direct REST feed GET endpoint',
       onSelect: copyToClipboard,
     },
     {
       id: 'test-endpoint',
       label: 'Test API (JSON)',
       icon: <ExternalLink size={18} strokeWidth={1.75} />,
-      shortcut: 'T',
-      detail: 'Open live JSON feed',
+      detail: 'Open live JSON feed in new tab',
       onSelect: () => window.open(feedApiUrl, '_blank'),
-    },
-    {
-      id: 'copy-curl',
-      label: 'Copy cURL Snippet',
-      icon: <Terminal size={18} strokeWidth={1.75} />,
-      shortcut: 'U',
-      detail: 'CLI curl request snippet',
-      onSelect: () => {
-        if (navigator?.clipboard) {
-          navigator.clipboard.writeText(`curl -X GET "${feedApiUrl}" -H "Accept: application/json"`);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        }
-      },
-    },
-    {
-      id: 'copy-fetch',
-      label: 'Copy JS Fetch Snippet',
-      icon: <Code2 size={18} strokeWidth={1.75} />,
-      shortcut: 'J',
-      detail: 'JavaScript fetch integration',
-      onSelect: () => {
-        if (navigator?.clipboard) {
-          navigator.clipboard.writeText(`const response = await fetch("${feedApiUrl}");\nconst data = await response.json();`);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 2000);
-        }
-      },
     },
     {
       id: 'download-json',
       label: 'Export JSON Feed',
       icon: <Download size={18} strokeWidth={1.75} />,
-      shortcut: 'D',
-      detail: 'Save offline snapshot',
+      detail: 'Save offline JSON snapshot',
       onSelect: downloadApiPayload,
     },
     {
       id: 'revalidate',
       label: 'Revalidate Edge Buffer',
       icon: <RefreshCw size={18} strokeWidth={1.75} />,
-      shortcut: 'R',
       detail: 'Flush cache and sync',
       divider: true,
       destructive: true,
@@ -219,8 +196,9 @@ export function AttendancePage() {
         onVerifiedMatch: async ({ student, confidence, distance }) => {
           // Play pleasant confirmation audio ping
           try {
+            const chimeEnabled = localStorage.getItem('verity_sound_chime') !== 'false';
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            if (AudioCtx) {
+            if (chimeEnabled && AudioCtx) {
               const ctx = new AudioCtx();
               const osc = ctx.createOscillator();
               const gain = ctx.createGain();
@@ -351,7 +329,7 @@ export function AttendancePage() {
   };
 
   return (
-    <div className="space-y-6 max-w-full overflow-hidden font-sans">
+    <div className="space-y-6 max-w-full pb-36 font-sans">
       {/* Top Banner & Control Strip */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -365,17 +343,28 @@ export function AttendancePage() {
                   : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
               }`}
             >
-              {modelsReady ? 'ResNet-34 AI Ready' : 'Loading Models...'}
+              {modelsReady ? 'AI Scanner Ready' : 'Starting Camera Engine...'}
             </span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Real-time neural face detection & 128-D descriptor matching. Names and confidence are pinned directly to each respective face.
+            Live smart face verification. Identified students and match confidence are highlighted directly on screen.
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <GooeyDropdown
+            label="API Setup & Feed"
+            icon={<Globe className="w-4 h-4 text-emerald-400" />}
+            actions={apiDropdownActions}
+            anchor="end"
+            menuWidth={260}
+            fill="#0f172a"
+            ink="#f8fafc"
+            danger="#ef4444"
+          />
+
           <div className="px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-mono text-slate-300">
-            Device: <span className="text-emerald-400">{deviceId}</span>
+            Station: <span className="text-emerald-400">{deviceId?.replace('DEVICE-CAM-', 'Scanner ') || deviceId}</span>
           </div>
 
           {/* Mirror Camera Toggle */}
@@ -467,8 +456,7 @@ export function AttendancePage() {
               <div>
                 <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Camera Standby</h3>
                 <p className="text-xs text-slate-400 max-w-sm mt-1 mx-auto leading-relaxed">
-                  Click <strong>"Start Camera"</strong> to activate real-time neural face recognition.
-                  Face bounding boxes and student names will be dynamically pinned over each verified person.
+                  Click <strong>"Start Camera"</strong> to begin attendance scanning. Verified students will be highlighted on screen automatically.
                 </p>
                 {roster.length === 0 && (
                   <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-medium">
@@ -501,7 +489,7 @@ export function AttendancePage() {
               </div>
 
               <div className="bg-slate-950/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-800 text-slate-300 font-mono">
-                Roster: <strong className="text-emerald-400">{roster.length}</strong> cached
+                Roster: <strong className="text-emerald-400">{roster.length}</strong> active profiles
               </div>
             </div>
           )}
@@ -537,7 +525,7 @@ export function AttendancePage() {
               </div>
             ) : (
               <div className="text-center py-8 text-slate-500 text-xs leading-relaxed">
-                No verifications in current camera session. Present face in frame for 5 stable frames.
+                No verifications in current camera session. Keep face clearly visible in front of camera to verify.
               </div>
             )}
           </div>
@@ -562,169 +550,176 @@ export function AttendancePage() {
         />
       </div>
 
-      {/* Unique Tenant API Integration Card */}
-      <div className="mt-8 bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 sm:p-7 shadow-xl backdrop-blur-md ring-1 ring-white/[0.05]">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-800/80 pb-5 mb-5">
-          <div className="flex items-start sm:items-center gap-3.5">
-            <div className="w-11 h-11 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
-              <Globe className="w-5 h-5" />
+      {/* Sleek, Uncluttered API Integration Capsule */}
+      <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:px-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md shadow-md">
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
+            <Globe className="w-5 h-5" />
+          </div>
+          <div>
+            <div className="text-sm font-bold text-white flex items-center gap-2">
+              <span>Tenant Attendance API</span>
+              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono font-medium">
+                {tenantName}
+              </span>
             </div>
-            <div>
-              <div className="flex items-center gap-2 flex-wrap">
-                <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">
-                  Tenant Attendance Feed API
-                </h3>
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold">
-                  {tenantName}
-                </span>
-                {tenantId && (
-                  <span className="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 font-mono border border-slate-700/80">
-                    ID: {tenantId}
-                  </span>
-                )}
+            <p className="text-xs text-slate-400 mt-0.5">
+              Secure REST feed for external portals, LMS, and institutional dashboards.
+            </p>
+          </div>
+        </div>
+
+        <GooeyDropdown
+          label="API Setup & Actions"
+          icon={<Globe className="w-4 h-4 text-emerald-400" />}
+          actions={apiDropdownActions}
+          anchor="end"
+          menuWidth={260}
+          fill="#0f172a"
+          ink="#f8fafc"
+          danger="#ef4444"
+        />
+      </div>
+
+      {/* API Setup & Integration Modal */}
+      {showApiSetup && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+          <div className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl my-6">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  <Globe className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                    <span>Tenant API Setup & Integration</span>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
+                      {tenantName}
+                    </span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Query real-time attendance, student codes, and timeline trends from external systems.
+                  </p>
+                </div>
               </div>
-              <p className="text-xs text-slate-400 mt-1 max-w-2xl leading-relaxed">
-                Connect external websites, school management portals, or analytics dashboards to query real-time attendance, student names, IDs, and trends.
-              </p>
+              <button
+                onClick={() => setShowApiSetup(false)}
+                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition cursor-pointer"
+                title="Close Setup"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-          </div>
 
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <button
-              onClick={copyToClipboard}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs transition-all duration-200 active:scale-[0.98] shadow-sm cursor-pointer"
-            >
-              {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copied ? 'API URL Copied!' : 'Copy API URL'}</span>
-            </button>
-            <GooeyDropdown
-              label="API Actions"
-              actions={apiDropdownActions}
-              anchor="end"
-              menuWidth={260}
-              fill="#0f172a"
-              ink="#f8fafc"
-              danger="#ef4444"
-            />
-          </div>
-        </div>
-
-        {/* Endpoint Display Box */}
-        <div className="mb-5">
-          <div className="text-xs font-medium text-slate-400 mb-2">
-            REST Endpoint URL
-          </div>
-          <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-950/80 border border-slate-800 font-mono text-xs text-slate-200 overflow-x-auto">
-            <div className="flex items-center gap-2.5 min-w-0">
-              <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-xs tracking-wider">
-                GET
-              </span>
-              <span className="truncate select-all text-slate-300">
-                {feedApiUrl}
-              </span>
+            {/* REST Endpoint URL Box */}
+            <div className="mb-4">
+              <div className="text-xs font-medium text-slate-400 mb-1.5 flex items-center justify-between">
+                <span>REST Endpoint URL</span>
+                {tenantId && <span className="font-mono text-[11px] text-slate-500">Tenant ID: {tenantId}</span>}
+              </div>
+              <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-slate-200">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-xs tracking-wider">
+                    GET
+                  </span>
+                  <span className="truncate select-all text-slate-300">
+                    {feedApiUrl}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={copyToClipboard}
+                    className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition cursor-pointer"
+                    title="Copy URL"
+                  >
+                    {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                  </button>
+                  <a
+                    href={feedApiUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-emerald-400 transition cursor-pointer"
+                    title="Open JSON Feed"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </div>
+              </div>
             </div>
-            <button
-              onClick={copyToClipboard}
-              className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition flex-shrink-0"
-              title="Copy URL"
-            >
-              {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
-            </button>
-          </div>
-        </div>
 
-        {/* Feature Pills */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5 text-xs">
-          <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800/80 text-slate-300">
-            <strong className="text-emerald-400 block font-semibold mb-0.5">Unique Attendance</strong>
-            Deduplicated students with total counts
-          </div>
-          <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800/80 text-slate-300">
-            <strong className="text-emerald-400 block font-semibold mb-0.5">Name & Student Code</strong>
-            Full student identities & image URLs
-          </div>
-          <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800/80 text-slate-300">
-            <strong className="text-emerald-400 block font-semibold mb-0.5">Timeline Over Time</strong>
-            Daily trend aggregation array
-          </div>
-          <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800/80 text-slate-300">
-            <strong className="text-emerald-400 block font-semibold mb-0.5">Query Filters</strong>
-            ?startDate, ?endDate, ?studentId
-          </div>
-        </div>
-
-        {/* Code Integration Snippet Tabs */}
-        <div className="border border-slate-800/80 rounded-xl overflow-hidden bg-slate-950/80">
-          <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800/80 bg-slate-900/90 text-xs">
-            <div className="flex items-center gap-2">
-              <Code2 className="w-4 h-4 text-emerald-400" />
-              <span className="font-semibold text-white">Integration Snippet</span>
+            {/* Feature Pills */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 text-xs">
+              <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 text-slate-300">
+                <strong className="text-emerald-400 block font-semibold mb-0.5">Unique Attendance</strong>
+                Deduplicated counts
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 text-slate-300">
+                <strong className="text-emerald-400 block font-semibold mb-0.5">Identities & Codes</strong>
+                Student IDs & photos
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 text-slate-300">
+                <strong className="text-emerald-400 block font-semibold mb-0.5">Timeline Series</strong>
+                Daily trend arrays
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 text-slate-300">
+                <strong className="text-emerald-400 block font-semibold mb-0.5">Query Filters</strong>
+                ?startDate, ?endDate
+              </div>
             </div>
-            <div className="flex items-center gap-1">
-              {[
-                { id: 'js', label: 'JavaScript' },
-                { id: 'curl', label: 'cURL' },
-                { id: 'response', label: 'Sample Response' },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveCodeTab(tab.id)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition ${
-                    activeCodeTab === tab.id
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                      : 'text-slate-400 hover:text-slate-200'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
 
-          <div className="p-4 font-mono text-xs leading-relaxed overflow-x-auto text-slate-300">
-            {activeCodeTab === 'js' && (
-              <pre className="text-emerald-300">
+            {/* Code Integration Snippet Tabs */}
+            <div className="border border-slate-800 rounded-xl overflow-hidden bg-slate-950">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 bg-slate-900/90 text-xs">
+                <div className="flex items-center gap-2">
+                  <Code2 className="w-4 h-4 text-emerald-400" />
+                  <span className="font-semibold text-white">Integration Snippet</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  {[
+                    { id: 'js', label: 'JavaScript' },
+                    { id: 'curl', label: 'cURL' },
+                    { id: 'response', label: 'Sample Response' },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setActiveCodeTab(tab.id)}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition cursor-pointer ${
+                        activeCodeTab === tab.id
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                          : 'text-slate-400 hover:text-slate-200'
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4 font-mono text-xs leading-relaxed overflow-x-auto text-slate-300 max-h-64 overflow-y-auto">
+                {activeCodeTab === 'js' && (
+                  <pre className="text-emerald-300">
 {`// 1. Fetch unique attendance and timeline for ${tenantName}
 const response = await fetch("${feedApiUrl}");
 const data = await response.json();
 
 // 2. Access unique students with names, student codes, and attendance totals
 console.log(data.uniqueAttendance);
-/*
-[
-  {
-    "studentId": "...",
-    "name": "Alex Perera",
-    "studentIdCode": "STU-2026-001",
-    "totalAttendanceCount": 14,
-    "latestAttendance": "2026-10-21T08:32:00.000Z",
-    "firstAttendance": "2026-10-01T08:00:00.000Z"
-  }
-]
-*/
 
 // 3. Access timeline for charts or graphs over time
-console.log(data.timeline);
-/*
-[
-  { "date": "2026-10-19", "count": 28 },
-  { "date": "2026-10-20", "count": 31 },
-  { "date": "2026-10-21", "count": 35 }
-]
-*/`}
-              </pre>
-            )}
+console.log(data.timeline);`}
+                  </pre>
+                )}
 
-            {activeCodeTab === 'curl' && (
-              <pre className="text-slate-200">
+                {activeCodeTab === 'curl' && (
+                  <pre className="text-slate-200">
 {`# Query unique attendance feed for ${tenantName}
 curl -X GET "${feedApiUrl}" \\
   -H "Accept: application/json"`}
-              </pre>
-            )}
+                  </pre>
+                )}
 
-            {activeCodeTab === 'response' && (
-              <pre className="text-slate-300">
+                {activeCodeTab === 'response' && (
+                  <pre className="text-slate-300">
 {`{
   "success": true,
   "tenantId": "${tenantId || 'tenant_xyz'}",
@@ -741,17 +736,33 @@ curl -X GET "${feedApiUrl}" \\
       "name": "Jane Silva",
       "studentCode": "STU-104",
       "totalAttendanceCount": 8,
-      "latestAttendance": "2026-10-21T08:30:12.000Z",
-      "firstAttendance": "2026-10-14T08:15:00.000Z",
-      "history": [...]
+      "latestAttendance": "2026-10-21T08:30:12.000Z"
     }
   ]
 }`}
-              </pre>
-            )}
+                  </pre>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-5 flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+              <button
+                onClick={() => setShowApiSetup(false)}
+                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition cursor-pointer"
+              >
+                Close
+              </button>
+              <button
+                onClick={copyToClipboard}
+                className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 text-xs font-bold rounded-xl transition cursor-pointer"
+              >
+                {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                <span>{copied ? 'Copied!' : 'Copy API URL'}</span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

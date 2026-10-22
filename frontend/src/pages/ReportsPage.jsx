@@ -42,13 +42,13 @@ export function ReportsPage() {
       return;
     }
 
-    const headers = ['Record ID', 'Student ID Code', 'Student Name', 'Timestamp', 'Device ID', 'Confidence Score'];
+    const headers = ['Record ID', 'Student ID Code', 'Student Name', 'Timestamp', 'Scanner Station', 'Match Accuracy'];
     const rows = report.records.map((r) => [
       r.id,
       r.studentCode || '',
       `"${r.studentName}"`,
       new Date(r.timestamp).toISOString(),
-      r.deviceId,
+      r.deviceId?.replace('DEVICE-CAM-', 'Station ') || r.deviceId,
       r.confidence ? (r.confidence * 100).toFixed(1) + '%' : 'N/A',
     ]);
 
@@ -81,7 +81,6 @@ export function ReportsPage() {
       id: 'export-csv',
       label: 'Export CSV Spreadsheet',
       icon: <FileSpreadsheet size={18} strokeWidth={1.75} />,
-      shortcut: 'C',
       detail: 'Standard audit CSV format',
       onSelect: exportCSV,
     },
@@ -89,7 +88,6 @@ export function ReportsPage() {
       id: 'export-json',
       label: 'Export JSON Payload',
       icon: <Archive size={18} strokeWidth={1.75} />,
-      shortcut: 'J',
       detail: 'Full structured JSON record array',
       onSelect: exportJSON,
     },
@@ -97,7 +95,6 @@ export function ReportsPage() {
       id: 'refresh',
       label: 'Refresh Report Feed',
       icon: <RefreshCw size={18} strokeWidth={1.75} />,
-      shortcut: 'R',
       detail: 'Re-fetch latest verified attendance',
       onSelect: () => fetchReport(date),
     },
@@ -105,7 +102,6 @@ export function ReportsPage() {
       id: 'print',
       label: 'Print / Save PDF',
       icon: <Printer size={18} strokeWidth={1.75} />,
-      shortcut: 'P',
       detail: 'Opens browser print dialog',
       onSelect: () => window.print(),
     },
@@ -113,7 +109,6 @@ export function ReportsPage() {
       id: 'today',
       label: "Jump to Today's Date",
       icon: <Calendar size={18} strokeWidth={1.75} />,
-      shortcut: 'T',
       detail: 'Reset date filter to current day',
       divider: true,
       destructive: true,
@@ -138,7 +133,7 @@ export function ReportsPage() {
             <span>Attendance Logs & Reports</span>
           </h1>
           <p className="text-sm text-slate-400 mt-1">
-            Real-time biometric attendance records, device origins, and confidence validation scores.
+            Verified attendance records, check-in stations, and match accuracy scores.
           </p>
         </div>
 
@@ -234,8 +229,8 @@ export function ReportsPage() {
                 <th className="px-6 py-3.5">Student</th>
                 <th className="px-6 py-3.5">Student ID Code</th>
                 <th className="px-6 py-3.5">Timestamp</th>
-                <th className="px-6 py-3.5">Device Identifier</th>
-                <th className="px-6 py-3.5 text-right">Confidence Score</th>
+                <th className="px-6 py-3.5">Scanner Station</th>
+                <th className="px-6 py-3.5 text-right">Match Accuracy</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
@@ -268,7 +263,7 @@ export function ReportsPage() {
                       })}
                     </td>
                     <td className="px-6 py-4 text-slate-400 font-mono text-xs">
-                      {r.deviceId}
+                      {r.deviceId?.replace('DEVICE-CAM-', 'Station ') || r.deviceId}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">

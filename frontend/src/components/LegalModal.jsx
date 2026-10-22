@@ -72,20 +72,20 @@ export function LegalModal({ isOpen, type, onClose }) {
               <div>
                 <h5 className="font-bold text-white text-sm mb-1.5 flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  <span>1. On-Device Biometric Processing</span>
+                  <span>1. On-Device Face Recognition & Privacy</span>
                 </h5>
                 <p>
-                  Verity operates on an offline-first, client-side neural architecture. Facial feature embeddings (128-dimensional mathematical descriptors) are extracted in-memory on the client device using TensorFlow.js and WebGL2 shaders. Raw camera frames captured during attendance scanning are processed locally in volatile runtime memory and are <strong>never uploaded, archived, or transmitted</strong> to remote cloud vision endpoints without explicit institutional mandate.
+                  Verity operates on an offline-first, on-device architecture. Facial features are mapped securely in-memory on the client device. Raw camera frames captured during attendance scanning are processed locally in temporary runtime memory and are <strong>never uploaded, archived, or transmitted</strong> to remote cloud vision endpoints.
                 </p>
               </div>
 
               <div>
                 <h5 className="font-bold text-white text-sm mb-1.5 flex items-center gap-2">
                   <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  <span>2. Purpose of Biometric Verification</span>
+                  <span>2. Purpose of Attendance Verification</span>
                 </h5>
                 <p>
-                  Facial descriptors and biometric match vectors are utilized exclusively for verifying student presence and generating automated classroom attendance records for registered institutional tenants. Biometric data is strictly prohibited from being commercialized, monetized, sold to advertising networks, or repurposed for unapproved surveillance.
+                  Student face profiles and match data are utilized exclusively for verifying student presence and generating automated classroom attendance records for registered schools and institutions. Biometric data is strictly prohibited from being commercialized, monetized, sold to advertising networks, or repurposed for unapproved surveillance.
                 </p>
               </div>
 
@@ -95,7 +95,7 @@ export function LegalModal({ isOpen, type, onClose }) {
                   <span>3. Local Encrypted Storage & Cloud Sync</span>
                 </h5>
                 <p>
-                  Offline attendance queues and reference feature vectors reside in client-side IndexedDB storage protected by browser sandbox boundaries. Synchronized data packets transmitted to the Verity institutional API utilize TLS 1.3 encryption with strict tenant isolation, preventing cross-tenant data leakage.
+                  Offline attendance queues and student face profiles reside in local browser storage protected by strict sandboxing. Synchronized data transmitted to the Verity institutional API utilizes TLS 1.3 encryption with strict school-level isolation.
                 </p>
               </div>
 
@@ -105,7 +105,7 @@ export function LegalModal({ isOpen, type, onClose }) {
                   <span>4. Student Rights, Revocation & Deletion</span>
                 </h5>
                 <p>
-                  Enrolled students, parents, and authorized guardians retain the fundamental right to inspect, modify, or permanently purge their facial reference embeddings and attendance history at any time through their institutional school administrator or by submitting a tenant audit request.
+                  Enrolled students, parents, and authorized guardians retain the fundamental right to inspect, modify, or permanently purge their facial reference data and attendance history at any time through their school administrator.
                 </p>
               </div>
             </>
@@ -127,7 +127,7 @@ export function LegalModal({ isOpen, type, onClose }) {
                   <span>2. Authorized Classroom Use</span>
                 </h5>
                 <p>
-                  This software is licensed solely for lawful educational attendance verification, classroom safety, and institutional administrative record-keeping. Any malicious attempts to circumvent cosine similarity thresholds, inject synthetic deepfake video feeds, tamper with IndexedDB audit trails, or disrupt biometric verification pipelines are strictly forbidden and constitute a breach of service.
+                  This software is licensed solely for lawful educational attendance verification, classroom safety, and institutional administrative record-keeping. Any malicious attempts to circumvent match accuracy thresholds, inject synthetic video feeds, tamper with local audit trails, or disrupt verification pipelines are strictly forbidden and constitute a breach of service.
                 </p>
               </div>
 
@@ -147,7 +147,7 @@ export function LegalModal({ isOpen, type, onClose }) {
                   <span>4. Algorithmic Guidance & Verification Discretion</span>
                 </h5>
                 <p>
-                  Verity biometric cosine matching functions as an automated administrative tool. Final verification authority and attendance corrections remain under the supervision and discretion of certified academic faculty and tenant administrators.
+                  Verity automated face matching functions as an administrative tool. Final verification authority and attendance corrections remain under the supervision and discretion of certified academic faculty and school administrators.
                 </p>
               </div>
             </>

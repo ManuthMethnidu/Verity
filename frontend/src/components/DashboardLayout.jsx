@@ -15,9 +15,9 @@ import { cn } from '@/lib/utils';
 
 export function DashboardLayout() {
   const [open, setOpen] = useState(false);
+  const [user, setUser] = useState(getCurrentUser());
   const navigate = useNavigate();
   const location = useLocation();
-  const user = getCurrentUser();
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -25,7 +25,15 @@ export function DashboardLayout() {
     }
   }, [navigate]);
 
-  const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : 'A';
+  useEffect(() => {
+    const handleProfileUpdate = (e) => {
+      setUser(e.detail || getCurrentUser());
+    };
+    window.addEventListener('verity:profileUpdated', handleProfileUpdate);
+    return () => window.removeEventListener('verity:profileUpdated', handleProfileUpdate);
+  }, []);
+
+  const userInitial = user?.name ? user.name.charAt(0).toUpperCase() : (user?.email ? user.email.charAt(0).toUpperCase() : 'A');
   const tenantName = user?.tenantName || "St. Joseph's College";
 
   const links = [
@@ -176,9 +184,15 @@ export function DashboardLayout() {
           <div className="pt-2.5 border-t border-[#222222]">
             <SidebarLink
               link={{
-                label: user?.email || 'Institution Admin',
+                label: user?.name || user?.email || 'Institution Admin',
                 href: '/settings',
-                icon: (
+                icon: user?.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user?.name || "Admin"}
+                    className="w-6 h-6 rounded-full object-cover border border-emerald-500/40 shrink-0"
+                  />
+                ) : (
                   <div className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-300 font-bold text-[10px] uppercase shadow-sm shrink-0">
                     {userInitial}
                   </div>
