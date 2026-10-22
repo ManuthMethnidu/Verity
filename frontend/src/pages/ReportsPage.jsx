@@ -7,9 +7,13 @@ import {
   Users,
   CheckCircle2,
   TrendingUp,
+  Archive,
+  Printer,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { api } from '../auth/auth.js';
 import { AttendanceChart } from '../components/AttendanceChart.jsx';
+import { GooeyDropdown } from '../components/ui/GooeyDropdown.tsx';
 
 export function ReportsPage() {
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -58,6 +62,65 @@ export function ReportsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const exportJSON = () => {
+    if (!report || !report.records || report.records.length === 0) {
+      alert('No records available to export.');
+      return;
+    }
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `attendance-report-${date}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const reportDropdownActions = [
+    {
+      id: 'export-csv',
+      label: 'Export CSV Spreadsheet',
+      icon: <FileSpreadsheet size={18} strokeWidth={1.75} />,
+      shortcut: 'C',
+      detail: 'Standard audit CSV format',
+      onSelect: exportCSV,
+    },
+    {
+      id: 'export-json',
+      label: 'Export JSON Payload',
+      icon: <Archive size={18} strokeWidth={1.75} />,
+      shortcut: 'J',
+      detail: 'Full structured JSON record array',
+      onSelect: exportJSON,
+    },
+    {
+      id: 'refresh',
+      label: 'Refresh Report Feed',
+      icon: <RefreshCw size={18} strokeWidth={1.75} />,
+      shortcut: 'R',
+      detail: 'Re-fetch latest verified attendance',
+      onSelect: () => fetchReport(date),
+    },
+    {
+      id: 'print',
+      label: 'Print / Save PDF',
+      icon: <Printer size={18} strokeWidth={1.75} />,
+      shortcut: 'P',
+      detail: 'Opens browser print dialog',
+      onSelect: () => window.print(),
+    },
+    {
+      id: 'today',
+      label: "Jump to Today's Date",
+      icon: <Calendar size={18} strokeWidth={1.75} />,
+      shortcut: 'T',
+      detail: 'Reset date filter to current day',
+      divider: true,
+      destructive: true,
+      onSelect: () => setDate(new Date().toISOString().split('T')[0]),
+    },
+  ];
+
   const stats = report?.stats || {
     totalAttendanceEvents: 0,
     uniquePresent: 0,
@@ -91,20 +154,22 @@ export function ReportsPage() {
           </div>
 
           <button
-            onClick={() => fetchReport(date)}
-            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 rounded-xl transition"
-            title="Refresh Report"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-
-          <button
             onClick={exportCSV}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-xl text-xs transition-all duration-200 active:scale-[0.98] shadow-sm"
+            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-full text-xs transition-all duration-200 active:scale-[0.98] shadow-sm cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Export CSV</span>
           </button>
+
+          <GooeyDropdown
+            label="Report Actions"
+            actions={reportDropdownActions}
+            anchor="end"
+            menuWidth={260}
+            fill="#0f172a"
+            ink="#f8fafc"
+            danger="#ef4444"
+          />
         </div>
       </div>
 

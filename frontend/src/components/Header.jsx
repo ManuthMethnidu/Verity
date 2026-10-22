@@ -7,8 +7,13 @@ import {
   Camera,
   Activity,
   User,
+  LayoutDashboard,
+  Users,
+  ClipboardList,
+  Settings,
 } from 'lucide-react';
 import { getCurrentUser, signOut } from '../auth/auth.js';
+import { GooeyDropdown } from './ui/GooeyDropdown.tsx';
 
 export function Header() {
   const user = getCurrentUser();
@@ -20,6 +25,58 @@ export function Header() {
 
   const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : 'A';
   const tenantDisplayName = user?.tenantName || "St. Joseph's College Colombo 10";
+
+  const userDropdownActions = [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: <LayoutDashboard size={18} strokeWidth={1.75} />,
+      shortcut: 'D',
+      detail: 'Metrics & attendance feed',
+      onSelect: () => navigate('/dashboard'),
+    },
+    {
+      id: 'scanner',
+      label: 'Live Scanner',
+      icon: <Camera size={18} strokeWidth={1.75} />,
+      shortcut: 'S',
+      detail: 'Edge face-recognition camera',
+      onSelect: () => navigate('/attendance'),
+    },
+    {
+      id: 'roster',
+      label: 'Student Roster',
+      icon: <Users size={18} strokeWidth={1.75} />,
+      shortcut: 'R',
+      detail: 'Manage 128-D face embeddings',
+      onSelect: () => navigate('/roster'),
+    },
+    {
+      id: 'reports',
+      label: 'Attendance Logs',
+      icon: <ClipboardList size={18} strokeWidth={1.75} />,
+      shortcut: 'L',
+      detail: 'Audit trail and export',
+      onSelect: () => navigate('/reports'),
+    },
+    {
+      id: 'settings',
+      label: 'System Settings',
+      icon: <Settings size={18} strokeWidth={1.75} />,
+      shortcut: 'G',
+      detail: 'Threshold & camera FPS',
+      onSelect: () => navigate('/settings'),
+    },
+    {
+      id: 'signout',
+      label: 'Sign Out',
+      icon: <LogOut size={18} strokeWidth={1.75} />,
+      shortcut: 'Q',
+      divider: true,
+      destructive: true,
+      onSelect: handleSignOut,
+    },
+  ];
 
   return (
     <header className="sticky top-0 z-40 w-full bg-[#111111]/90 backdrop-blur-md border-b border-[#222222] transition-colors">
@@ -74,32 +131,22 @@ export function Header() {
             <span>Live Scanner</span>
           </Link>
 
-          {/* User Profile Pill & Sign Out */}
-          <div className="flex items-center gap-2 pl-2 border-l border-slate-800/80">
-            <div className="hidden lg:flex flex-col text-right">
-              <span className="text-xs font-semibold text-slate-200 leading-none">
-                {user?.email || 'Administrator'}
-              </span>
-              <span className="text-xs text-slate-400 font-mono mt-0.5">
-                {user?.role || 'Institution Admin'}
-              </span>
-            </div>
-
-            <div
-              className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700/80 flex items-center justify-center text-xs font-bold text-emerald-400"
-              title={user?.email || 'Administrator'}
-            >
-              {userInitial}
-            </div>
-
-            <button
-              onClick={handleSignOut}
-              className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-slate-800/60 rounded-lg transition"
-              title="Sign Out"
-              aria-label="Sign Out"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
+          {/* User Profile Pill & Gooey Dropdown */}
+          <div className="flex items-center pl-2 border-l border-slate-800/80">
+            <GooeyDropdown
+              label={user?.email ? user.email.split('@')[0] : 'Account'}
+              icon={
+                <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-[11px] font-bold">
+                  {userInitial}
+                </span>
+              }
+              actions={userDropdownActions}
+              anchor="end"
+              menuWidth={250}
+              fill="#18181b"
+              ink="#f8fafc"
+              danger="#ef4444"
+            />
           </div>
         </div>
       </div>

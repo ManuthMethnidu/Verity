@@ -24,6 +24,10 @@ export default {
   				'Monaco',
   				'Consolas',
   				'monospace'
+  			],
+  			viaoda: [
+  				'"Viaoda Libre"',
+  				'serif'
   			]
   		},
   		colors: {

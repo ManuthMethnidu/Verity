@@ -149,6 +149,8 @@ const DropdownMenuShortcut = ({
 }
 DropdownMenuShortcut.displayName = "DropdownMenuShortcut"
 
+export { GooeyDropdown } from "./GooeyDropdown"
+
 export {
   DropdownMenu,
   DropdownMenuTrigger,

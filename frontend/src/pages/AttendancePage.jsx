@@ -18,7 +18,11 @@ import {
   ExternalLink,
   Globe,
   Code2,
+  Terminal,
+  Download,
+  Trash2,
 } from 'lucide-react';
+import { GooeyDropdown } from '../components/ui/GooeyDropdown.tsx';
 import { CameraManager } from '../vision/cameraManager.js';
 import { DetectorLoop } from '../vision/detectorLoop.js';
 import { loadFaceApiModels } from '../vision/faceApiService.js';
@@ -62,6 +66,91 @@ export function AttendancePage() {
       setTimeout(() => setCopied(false), 2000);
     }
   };
+
+  const downloadApiPayload = async () => {
+    try {
+      const res = await fetch(feedApiUrl);
+      const data = await res.json();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `attendance-feed-${tenantId || 'tenant'}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error('Failed to export API JSON:', e);
+      alert('Could not download API payload: ' + e.message);
+    }
+  };
+
+  const apiDropdownActions = [
+    {
+      id: 'copy-url',
+      label: copied ? 'URL Copied!' : 'Copy API URL',
+      icon: <Copy size={18} strokeWidth={1.75} />,
+      shortcut: 'C',
+      detail: 'REST GET feed endpoint',
+      onSelect: copyToClipboard,
+    },
+    {
+      id: 'test-endpoint',
+      label: 'Test API (JSON)',
+      icon: <ExternalLink size={18} strokeWidth={1.75} />,
+      shortcut: 'T',
+      detail: 'Open live JSON feed',
+      onSelect: () => window.open(feedApiUrl, '_blank'),
+    },
+    {
+      id: 'copy-curl',
+      label: 'Copy cURL Snippet',
+      icon: <Terminal size={18} strokeWidth={1.75} />,
+      shortcut: 'U',
+      detail: 'CLI curl request snippet',
+      onSelect: () => {
+        if (navigator?.clipboard) {
+          navigator.clipboard.writeText(`curl -X GET "${feedApiUrl}" -H "Accept: application/json"`);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        }
+      },
+    },
+    {
+      id: 'copy-fetch',
+      label: 'Copy JS Fetch Snippet',
+      icon: <Code2 size={18} strokeWidth={1.75} />,
+      shortcut: 'J',
+      detail: 'JavaScript fetch integration',
+      onSelect: () => {
+        if (navigator?.clipboard) {
+          navigator.clipboard.writeText(`const response = await fetch("${feedApiUrl}");\nconst data = await response.json();`);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        }
+      },
+    },
+    {
+      id: 'download-json',
+      label: 'Export JSON Feed',
+      icon: <Download size={18} strokeWidth={1.75} />,
+      shortcut: 'D',
+      detail: 'Save offline snapshot',
+      onSelect: downloadApiPayload,
+    },
+    {
+      id: 'revalidate',
+      label: 'Revalidate Edge Buffer',
+      icon: <RefreshCw size={18} strokeWidth={1.75} />,
+      shortcut: 'R',
+      detail: 'Flush cache and sync',
+      divider: true,
+      destructive: true,
+      onSelect: () => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      },
+    },
+  ];
 
   // Initialize models and load cached roster on mount
   useEffect(() => {
@@ -500,23 +589,23 @@ export function AttendancePage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 flex-shrink-0">
+          <div className="flex items-center gap-3 flex-shrink-0">
             <button
               onClick={copyToClipboard}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs transition-all duration-200 active:scale-[0.98] shadow-sm"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs transition-all duration-200 active:scale-[0.98] shadow-sm cursor-pointer"
             >
               {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copied ? 'API URL Copied!' : 'Copy API URL'}</span>
             </button>
-            <a
-              href={feedApiUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700/80 text-slate-200 text-xs font-semibold transition"
-            >
-              <span>Test API (JSON)</span>
-              <ExternalLink className="w-3.5 h-3.5 text-emerald-400" />
-            </a>
+            <GooeyDropdown
+              label="API Actions"
+              actions={apiDropdownActions}
+              anchor="end"
+              menuWidth={260}
+              fill="#0f172a"
+              ink="#f8fafc"
+              danger="#ef4444"
+            />
           </div>
         </div>
 

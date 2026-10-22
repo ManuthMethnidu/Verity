@@ -23,6 +23,7 @@ import {
   extractFaceThumbnail,
   loadFaceApiModels,
 } from '../vision/faceApiService.js';
+import { GooeyDropdown } from '../components/ui/GooeyDropdown.tsx';
 
 export function RosterPage() {
   const [students, setStudents] = useState([]);
@@ -88,6 +89,91 @@ export function RosterPage() {
     setCachedCount(cached.length);
     showNotice(`Cached ${cached.length} student profiles into local IndexedDB for offline matching.`);
   };
+
+  const exportRosterCSV = () => {
+    if (!students || students.length === 0) {
+      showNotice('No student records to export.', 'warning');
+      return;
+    }
+    const headers = ['ID', 'Student Code', 'Name', 'Image URL', 'Enrolled Date'];
+    const rows = students.map((s) => [
+      s.id,
+      s.studentIdCode || '',
+      `"${s.name}"`,
+      s.imageUrl || '',
+      s.createdAt || '',
+    ]);
+    const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `roster-${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
+    showNotice('Exported student roster as CSV.');
+  };
+
+  const rosterDropdownActions = [
+    {
+      id: 'enroll-student',
+      label: 'Enroll Face with Camera',
+      icon: <Camera size={18} strokeWidth={1.75} />,
+      shortcut: 'E',
+      detail: 'Capture 128-D embedding',
+      onSelect: () => {
+        setFormName('');
+        setFormCode('');
+        setFormImage('');
+        setCapturedFace(null);
+        setEnrollTab('camera');
+        setShowAddModal(true);
+        setTimeout(() => startEnrollCamera(), 100);
+      },
+    },
+    {
+      id: 'batch-upload',
+      label: 'Upload CSV / JSON',
+      icon: <Upload size={18} strokeWidth={1.75} />,
+      shortcut: 'U',
+      detail: 'Bulk roster import',
+      onSelect: () => setShowBatchModal(true),
+    },
+    {
+      id: 'export-roster',
+      label: 'Export Student Roster',
+      icon: <FileSpreadsheet size={18} strokeWidth={1.75} />,
+      shortcut: 'X',
+      detail: 'Download .csv spreadsheet',
+      onSelect: exportRosterCSV,
+    },
+    {
+      id: 'cache-offline',
+      label: `Sync Offline Cache (${cachedCount})`,
+      icon: <HardDriveDownload size={18} strokeWidth={1.75} />,
+      shortcut: 'C',
+      detail: 'Update browser IndexedDB',
+      onSelect: handleManualCache,
+    },
+    {
+      id: 'reload',
+      label: 'Reload from Cloud',
+      icon: <RefreshCw size={18} strokeWidth={1.75} />,
+      shortcut: 'R',
+      detail: 'Re-fetch latest student roster',
+      onSelect: fetchRoster,
+    },
+    {
+      id: 'purge-all',
+      label: 'Purge Entire Roster',
+      icon: <Trash2 size={18} strokeWidth={1.75} />,
+      shortcut: 'P',
+      detail: 'Wipes all enrolled faces',
+      divider: true,
+      destructive: true,
+      onSelect: handlePurgeAll,
+    },
+  ];
 
   // Start enrollment webcam
   const startEnrollCamera = async () => {
@@ -358,30 +444,7 @@ export function RosterPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button
-            onClick={handleManualCache}
-            className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 rounded-xl text-xs font-semibold transition"
-            title="Ensure roster is cached in browser IndexedDB"
-          >
-            <HardDriveDownload className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Cache Offline ({cachedCount})</span>
-          </button>
-          <button
-            onClick={handlePurgeAll}
-            className="flex items-center gap-1.5 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 rounded-xl text-xs font-semibold transition"
-            title="Purge all student records from database and cache"
-          >
-            <Trash2 className="w-3.5 h-3.5" />
-            <span>Reset Roster</span>
-          </button>
-          <button
-            onClick={() => setShowBatchModal(true)}
-            className="flex items-center gap-2 px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 rounded-xl text-xs font-semibold transition"
-          >
-            <Upload className="w-3.5 h-3.5" />
-            <span>Upload CSV/JSON</span>
-          </button>
+        <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={() => {
               setFormName('');
@@ -392,11 +455,21 @@ export function RosterPage() {
               setShowAddModal(true);
               setTimeout(() => startEnrollCamera(), 100);
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold rounded-xl text-xs transition-all duration-200 active:scale-[0.98] shadow-sm"
+            className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-full text-xs transition-all duration-200 active:scale-[0.98] shadow-sm cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Enroll Student</span>
           </button>
+
+          <GooeyDropdown
+            label="Roster Actions"
+            actions={rosterDropdownActions}
+            anchor="end"
+            menuWidth={260}
+            fill="#0f172a"
+            ink="#f8fafc"
+            danger="#ef4444"
+          />
         </div>
       </div>
 

@@ -28,3 +28,14 @@ export async function getDb() {
     },
   });
 }
+
+/**
+ * Completely clears all local IndexedDB stores (roster, settings, attendanceQueue)
+ */
+export async function clearLocalDatabase() {
+  const db = await getDb();
+  await db.clear('roster');
+  await db.clear('settings');
+  await db.clear('attendanceQueue');
+  return true;
+}

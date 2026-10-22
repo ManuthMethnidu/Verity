@@ -139,4 +139,42 @@ router.get('/me', authenticateToken, async (req, res) => {
   }
 });
 
+// Update admin profile & institution tenant name
+router.put('/profile', authenticateToken, async (req, res) => {
+  try {
+    const { name, tenantName, avatarUrl } = req.body;
+
+    if (tenantName && tenantName.trim()) {
+      await prisma.tenant.update({
+        where: { id: req.user.tenantId },
+        data: { name: tenantName.trim() },
+      });
+    }
+
+    const admin = await prisma.admin.findUnique({
+      where: { id: req.user.adminId },
+      include: { tenant: true },
+    });
+
+    if (!admin) {
+      return res.status(404).json({ error: 'Admin not found.' });
+    }
+
+    return res.json({
+      message: 'Profile updated successfully.',
+      admin: {
+        id: admin.id,
+        email: admin.email,
+        name: name || undefined,
+        avatarUrl: avatarUrl || undefined,
+        tenantId: admin.tenantId,
+        tenantName: admin.tenant.name,
+      },
+    });
+  } catch (err) {
+    console.error('Update profile error:', err);
+    return res.status(500).json({ error: 'Failed to update profile.' });
+  }
+});
+
 export default router;

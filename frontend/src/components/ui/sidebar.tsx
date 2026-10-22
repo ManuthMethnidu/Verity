@@ -117,17 +117,17 @@ export const DesktopSidebar = ({
 
   return (
     <div
-      className="hidden md:block relative shrink-0 h-full w-[72px] z-30"
+      className="hidden md:block relative shrink-0 h-full w-[60px] z-30"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {/* Absolute drawer expands smoothly without triggering layout reflow on main page content */}
       <div
         className={cn(
-          "h-full flex flex-col justify-between py-4 px-3 bg-slate-900/95 border-r border-slate-800/80 backdrop-blur-md transition-[width,box-shadow] duration-300 ease-in-out absolute top-0 left-0 z-30 select-none overflow-hidden will-change-[width]",
+          "h-full flex flex-col justify-between py-3.5 px-3 bg-[#141414]/95 border-r border-[#222222] backdrop-blur-md transition-[width,box-shadow] duration-300 ease-in-out absolute top-0 left-0 z-30 select-none overflow-hidden will-change-[width]",
           open
-            ? "w-[260px] shadow-[12px_0_36px_rgba(0,0,0,0.55)]"
-            : "w-[72px]",
+            ? "w-[230px] shadow-[12px_0_36px_rgba(0,0,0,0.55)]"
+            : "w-[60px]",
           className
         )}
         {...props}
@@ -148,13 +148,13 @@ export const MobileSidebar = ({
   return (
     <div
       className={cn(
-        "h-14 px-4 flex flex-row md:hidden items-center justify-between bg-slate-900 border-b border-slate-800 w-full z-40 shrink-0",
+        "h-14 px-4 flex flex-row md:hidden items-center justify-between bg-[#141414] border-b border-[#222222] w-full z-40 shrink-0",
         className
       )}
       {...props}
     >
       <div className="flex items-center gap-2.5">
-        <img src="/logo.png" alt="Verity" className="w-7 h-7 object-contain" />
+        <img src="/logo.png" alt="Verity" className="w-6 h-6 object-contain" />
         <span className="font-extrabold text-sm tracking-wider text-white">VERITY</span>
       </div>
 
@@ -186,13 +186,13 @@ export const MobileSidebar = ({
               exit={{ x: "-100%" }}
               transition={{ duration: 0.25, ease: "easeInOut" }}
               className={cn(
-                "fixed top-0 bottom-0 left-0 w-[280px] bg-slate-900 border-r border-slate-800 p-6 z-50 flex flex-col justify-between shadow-2xl md:hidden",
+                "fixed top-0 bottom-0 left-0 w-[240px] bg-[#141414] border-r border-[#222222] p-4 z-50 flex flex-col justify-between shadow-2xl md:hidden",
                 className
               )}
             >
-              <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center justify-between pb-3.5 border-b border-[#222222]">
                 <div className="flex items-center gap-2.5">
-                  <img src="/logo.png" alt="Verity" className="w-7 h-7 object-contain" />
+                  <img src="/logo.png" alt="Verity" className="w-6 h-6 object-contain" />
                   <span className="font-black text-sm tracking-wider text-white">VERITY</span>
                 </div>
                 <button
@@ -204,7 +204,7 @@ export const MobileSidebar = ({
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto py-4">
+              <div className="flex-1 overflow-y-auto py-3.5">
                 {children}
               </div>
             </motion.div>
@@ -229,24 +229,25 @@ export const SidebarLink = ({
   return (
     <a
       href={link.href}
+      title={link.label}
       className={cn(
-        "flex items-center h-10 px-2 rounded-xl transition-colors duration-150 group/sidebar relative select-none",
+        "flex items-center h-9 w-full rounded-xl transition-colors duration-150 group/sidebar relative select-none overflow-hidden",
         className
       )}
       {...props}
     >
-      {/* Icon: Exactly 28px width centered in the 72px rail */}
-      <div className="w-7 h-7 flex items-center justify-center shrink-0">
+      {/* Icon: Exactly 36px box mathematically centered in the 60px rail with px-3 drawer padding (12px + 18px = 30px center) */}
+      <div className="w-9 h-9 flex items-center justify-center shrink-0">
         {link.icon}
       </div>
 
       {/* Label: Smooth text expansion without word wrapping or display jumps */}
       <span
         className={cn(
-          "text-sm font-medium whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out pl-3",
+          "text-xs font-semibold whitespace-nowrap overflow-hidden transition-all duration-300 ease-in-out",
           open
-            ? "opacity-100 max-w-[180px] translate-x-0"
-            : "opacity-0 max-w-0 -translate-x-1 pointer-events-none"
+            ? "opacity-100 max-w-[160px] translate-x-0 ml-2.5 text-slate-200"
+            : "opacity-0 max-w-0 -translate-x-1 pointer-events-none ml-0"
         )}
       >
         {link.label}

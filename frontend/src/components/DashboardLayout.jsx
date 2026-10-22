@@ -9,7 +9,6 @@ import {
   IconSettings,
   IconArrowLeft,
 } from '@tabler/icons-react';
-import { Header } from './Header.jsx';
 import { Footer } from './Footer.jsx';
 import { isAuthenticated, getCurrentUser, signOut } from '../auth/auth.js';
 import { cn } from '@/lib/utils';
@@ -109,27 +108,29 @@ export function DashboardLayout() {
   ];
 
   return (
-    <div className="flex flex-col md:flex-row h-screen w-screen overflow-hidden bg-[#090d16] text-slate-100 font-sans">
+    <div className="flex flex-col md:flex-row h-screen w-screen overflow-hidden bg-[#111111] text-slate-100 font-sans">
       {/* Collapsible Animated Sidebar (Aceternity UI) */}
       <Sidebar open={open} setOpen={setOpen}>
-        <SidebarBody className="justify-between gap-6">
+        <SidebarBody className="justify-between gap-4">
           <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
-            {/* Unified Logo: Constant 28px icon box for rock-solid vertical alignment */}
-            <div className="flex items-center h-10 px-2 group/sidebar">
-              <div className="w-7 h-7 flex items-center justify-center shrink-0">
+            {/* Unified Logo: Constant 36px icon box for rock-solid horizontal centering and alignment */}
+            <div className="flex items-center h-9 group/sidebar overflow-hidden w-full">
+              <div className="w-9 h-9 flex items-center justify-center shrink-0">
                 <img
                   src="/logo.png"
                   alt="Verity"
-                  className="w-6 h-6 object-contain filter drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]"
+                  className="w-5 h-5 object-contain filter drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]"
                 />
               </div>
               <div
                 className={cn(
-                  "flex flex-col min-w-0 overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out pl-3",
-                  open ? "opacity-100 max-w-[180px]" : "opacity-0 max-w-0 pointer-events-none"
+                  "flex flex-col min-w-0 overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out",
+                  open
+                    ? "opacity-100 max-w-[160px] translate-x-0 ml-2.5"
+                    : "opacity-0 max-w-0 pointer-events-none ml-0"
                 )}
               >
-                <span className="font-black text-sm tracking-wider text-white leading-tight">
+                <span className="font-black text-xs tracking-wider text-white leading-tight">
                   VERITY
                 </span>
                 <span className="text-[10px] text-emerald-400 font-semibold truncate leading-tight">
@@ -139,7 +140,7 @@ export function DashboardLayout() {
             </div>
 
             {/* Navigation links */}
-            <div className="mt-6 flex flex-col gap-1.5">
+            <div className="mt-5 flex flex-col gap-1.5">
               {links.map((link, idx) => {
                 const isActive =
                   link.href === '/dashboard'
@@ -171,14 +172,14 @@ export function DashboardLayout() {
             </div>
           </div>
 
-          {/* User Profile / Tenant Identity: Constant 28px avatar box for vertical alignment */}
-          <div className="pt-3 border-t border-slate-800/80">
+          {/* User Profile / Tenant Identity: Constant 36px avatar box for vertical alignment */}
+          <div className="pt-2.5 border-t border-[#222222]">
             <SidebarLink
               link={{
                 label: user?.email || 'Institution Admin',
                 href: '/settings',
                 icon: (
-                  <div className="w-7 h-7 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-300 font-bold text-xs uppercase shadow-sm shrink-0">
+                  <div className="w-6 h-6 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-300 font-bold text-[10px] uppercase shadow-sm shrink-0">
                     {userInitial}
                   </div>
                 ),
@@ -195,10 +196,7 @@ export function DashboardLayout() {
       </Sidebar>
 
       {/* Main Dashboard Panel */}
-      <div className="flex flex-1 flex-col overflow-hidden min-w-0 bg-[#090d16]">
-        {/* Top Header */}
-        <Header />
-
+      <div className="flex flex-1 flex-col overflow-hidden min-w-0 bg-[#111111]">
         {/* Scrollable Content View */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto w-full">

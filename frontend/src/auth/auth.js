@@ -87,6 +87,14 @@ export function getCurrentUser() {
   }
 }
 
+export function updateCurrentUser(data) {
+  const current = getCurrentUser() || {};
+  const updated = { ...current, ...data };
+  localStorage.setItem(USER_KEY, JSON.stringify(updated));
+  window.dispatchEvent(new CustomEvent('verity:profileUpdated', { detail: updated }));
+  return updated;
+}
+
 export function isAuthenticated() {
   return Boolean(getToken());
 }

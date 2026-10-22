@@ -133,7 +133,7 @@ export function Login() {
               <div className="mb-3.5">
                 <div className="flex items-center gap-2 mb-1.5 md:hidden">
                   <img src="/logo.png" alt="Verity Logo" className="w-6 h-6 object-contain" />
-                  <span className="font-black text-base text-white tracking-tight">VERITY</span>
+                  <span className="font-normal text-lg text-white tracking-wider font-viaoda">VERITY</span>
                 </div>
                 <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight leading-tight">
                   {isRegister ? 'Create an account' : 'Welcome back'}
@@ -352,27 +352,20 @@ export function Login() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            {/* Top Branding */}
-            <div className="relative z-10 flex items-center gap-2.5">
-              <img
-                src="/logo.png"
-                alt="Verity Logo"
-                className="w-8 h-8 object-contain filter drop-shadow-[0_0_10px_rgba(16,185,129,0.3)]"
-              />
-              <span className="h-8 flex items-center text-2xl font-black tracking-wider text-white leading-none">
-                VERITY
-              </span>
-            </div>
-
             {/* Center Visual Feature Spotlight */}
             <div className="relative z-10 my-auto py-4">
-              <div className="relative inline-flex items-center justify-center mb-3.5">
-                <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl" />
-                <img
-                  src="/logo.png"
-                  alt="Verity"
-                  className="w-16 h-16 sm:w-20 sm:h-20 object-contain filter drop-shadow-[0_0_20px_rgba(16,185,129,0.35)] relative z-10"
-                />
+              <div className="flex items-center gap-3.5 sm:gap-4 mb-3.5 sm:mb-4">
+                <div className="relative inline-flex items-center justify-center shrink-0">
+                  <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl" />
+                  <img
+                    src="/logo.png"
+                    alt="Verity"
+                    className="w-16 h-16 sm:w-20 sm:h-20 object-contain filter drop-shadow-[0_0_20px_rgba(16,185,129,0.35)] relative z-10"
+                  />
+                </div>
+                <span className="text-3xl sm:text-4xl lg:text-5xl tracking-wider text-white leading-none font-viaoda">
+                  VERITY
+                </span>
               </div>
 
               <h2 className="text-base sm:text-lg font-bold text-white tracking-tight leading-snug">

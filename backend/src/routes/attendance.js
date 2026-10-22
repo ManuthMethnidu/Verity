@@ -49,6 +49,19 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
+// DELETE /api/attendance/purge - purge all attendance logs for tenant
+router.delete('/purge', authenticateToken, async (req, res) => {
+  try {
+    const deleted = await prisma.attendance.deleteMany({
+      where: { tenantId: req.user.tenantId },
+    });
+    return res.json({ message: `Purged ${deleted.count} attendance event logs.` });
+  } catch (err) {
+    console.error('Purge attendance error:', err);
+    return res.status(500).json({ error: 'Failed to purge attendance records.' });
+  }
+});
+
 // GET /api/attendance/report - admin view of logs for today (or given date)
 router.get('/report', authenticateToken, async (req, res) => {
   try {
