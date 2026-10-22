@@ -42,7 +42,6 @@ export async function recordAttendance(record) {
     timestamp: record.timestamp || new Date().toISOString(),
     deviceId: record.deviceId || 'WEB_CLIENT_01',
     confidence: record.confidence || null,
-    livenessScore: typeof record.livenessScore === 'number' ? record.livenessScore : null,
     synced: false,
     createdAt: Date.now(),
   };
@@ -82,7 +81,6 @@ export async function syncAttendanceQueue() {
           timestamp: record.timestamp,
           deviceId: record.deviceId,
           confidence: record.confidence,
-          livenessScore: record.livenessScore,
         });
 
         // Mark as synced locally or delete to save space

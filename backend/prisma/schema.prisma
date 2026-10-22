@@ -10,14 +10,13 @@ datasource db {
 }
 
 model Tenant {
-  id            String          @id @default(uuid())
-  name          String
-  createdAt     DateTime        @default(now()) @map("created_at")
-  admins        Admin[]
-  students      Student[]
-  attendance    Attendance[]
-  settings      TenantSettings?
-  spoofAttempts SpoofAttempt[]
+  id         String          @id @default(uuid())
+  name       String
+  createdAt  DateTime        @default(now()) @map("created_at")
+  admins     Admin[]
+  students   Student[]
+  attendance Attendance[]
+  settings   TenantSettings?
 
   @@map("tenants")
 }
@@ -49,15 +48,14 @@ model Student {
 }
 
 model Attendance {
-  id            String   @id @default(uuid())
-  tenantId      String   @map("tenant_id")
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  studentId     String   @map("student_id")
-  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  timestamp     DateTime @default(now())
-  deviceId      String   @map("device_id")
-  confidence    Float?
-  livenessScore Float?   @map("liveness_score")
+  id         String   @id @default(uuid())
+  tenantId   String   @map("tenant_id")
+  tenant     Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  studentId  String   @map("student_id")
+  student    Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  timestamp  DateTime @default(now())
+  deviceId   String   @map("device_id")
+  confidence Float?
 
   @@index([tenantId, timestamp], name: "idx_attendance_tenant_timestamp")
   @@index([studentId], name: "idx_attendance_student")
@@ -72,23 +70,7 @@ model TenantSettings {
   modelQuality        String   @default("medium") @map("model_quality")
   batterySaver        Boolean  @default(false) @map("battery_saver")
   confidenceThreshold Float    @default(0.70) @map("confidence_threshold")
-  livenessEnabled     Boolean  @default(true) @map("liveness_enabled")
-  livenessStrictness  String   @default("standard") @map("liveness_strictness")
   updatedAt           DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("tenant_settings")
-}
-
-model SpoofAttempt {
-  id            String   @id @default(uuid())
-  tenantId      String   @map("tenant_id")
-  tenant        Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  timestamp     DateTime @default(now())
-  deviceId      String   @map("device_id")
-  livenessScore Float    @map("liveness_score")
-  reason        String?
-  candidateName String?  @map("candidate_name")
-
-  @@index([tenantId, timestamp], name: "idx_spoof_attempts_tenant_timestamp")
-  @@map("spoof_attempts")
 }

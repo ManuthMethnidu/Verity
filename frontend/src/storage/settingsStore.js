@@ -8,8 +8,6 @@ export const DEFAULT_SETTINGS = {
   modelQuality: 'medium', // 'low' | 'medium' | 'high'
   batterySaver: false,
   confidenceThreshold: 0.70,
-  livenessEnabled: true,
-  livenessStrictness: 'standard', // 'standard' | 'high'
 };
 
 /**

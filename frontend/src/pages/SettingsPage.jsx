@@ -19,8 +19,6 @@ export function SettingsPage() {
   const [modelQuality, setModelQuality] = useState('medium');
   const [batterySaver, setBatterySaver] = useState(false);
   const [confidenceThreshold, setConfidenceThreshold] = useState(0.70);
-  const [livenessEnabled, setLivenessEnabled] = useState(true);
-  const [livenessStrictness, setLivenessStrictness] = useState('standard');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [notification, setNotification] = useState(null);
@@ -32,8 +30,6 @@ export function SettingsPage() {
       setModelQuality(prefs.modelQuality || 'medium');
       setBatterySaver(Boolean(prefs.batterySaver));
       setConfidenceThreshold(prefs.confidenceThreshold || 0.70);
-      setLivenessEnabled(prefs.livenessEnabled !== undefined ? Boolean(prefs.livenessEnabled) : true);
-      setLivenessStrictness(prefs.livenessStrictness || 'standard');
       setLoading(false);
     }
     load();
@@ -57,8 +53,6 @@ export function SettingsPage() {
         modelQuality,
         batterySaver,
         confidenceThreshold,
-        livenessEnabled,
-        livenessStrictness,
       });
 
       setNotification({
@@ -153,75 +147,6 @@ export function SettingsPage() {
             <span className="text-emerald-400 font-semibold">70% (Recommended Spec)</span>
             <span>95% (Strict Biometric)</span>
           </div>
-        </div>
-
-        {/* Anti-Spoofing & Passive Liveness Detection */}
-        <div className="p-6 rounded-2xl bg-[#181322]/90 border border-[#2e263d] shadow-sm">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 flex-shrink-0 mt-0.5">
-                <ShieldCheck className="w-5 h-5" />
-              </div>
-              <div>
-                <label
-                  htmlFor="liveness-enabled"
-                  className="font-bold text-base text-white cursor-pointer select-none"
-                >
-                  Passive Liveness & Anti-Spoofing
-                </label>
-                <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-                  Evaluates Eye Aspect Ratio (EAR) blink dynamics and 3D head pose micro-variance in real time to reject printed photos and digital screen presentation attacks.
-                </p>
-              </div>
-            </div>
-
-            <label className="relative inline-flex items-center cursor-pointer ml-4">
-              <input
-                id="liveness-enabled"
-                type="checkbox"
-                checked={livenessEnabled}
-                onChange={(e) => setLivenessEnabled(e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-[#262033] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
-            </label>
-          </div>
-
-          {livenessEnabled && (
-            <div className="pt-3 border-t border-[#2e263d]/60 mt-3">
-              <div className="text-xs font-semibold text-slate-300 mb-2.5">
-                Liveness Strictness Mode
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  {
-                    id: 'standard',
-                    label: 'Standard (Recommended)',
-                    desc: 'Fast 600ms validation window, balanced sensitivity for classroom queues.',
-                  },
-                  {
-                    id: 'high',
-                    label: 'High Security',
-                    desc: 'Extended 800ms window, requires pronounced blink and 3D angle variance.',
-                  },
-                ].map((mode) => (
-                  <button
-                    type="button"
-                    key={mode.id}
-                    onClick={() => setLivenessStrictness(mode.id)}
-                    className={`p-3.5 rounded-xl border text-left transition flex flex-col justify-between ${
-                      livenessStrictness === mode.id
-                        ? 'bg-cyan-500/15 border-cyan-500 text-cyan-300 font-bold shadow-md shadow-cyan-500/10'
-                        : 'bg-[#221b30]/60 border-[#362b4c]/60 hover:bg-[#2c233e] text-slate-400'
-                    }`}
-                  >
-                    <span className="text-sm font-bold text-white mb-1">{mode.label}</span>
-                    <span className="text-[11px] font-normal text-slate-400">{mode.desc}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Battery Saver Mode */}

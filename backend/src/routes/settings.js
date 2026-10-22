@@ -19,8 +19,6 @@ router.get('/', authenticateToken, async (req, res) => {
           modelQuality: 'medium',
           batterySaver: false,
           confidenceThreshold: 0.70,
-          livenessEnabled: true,
-          livenessStrictness: 'standard',
         },
       });
     }
@@ -30,8 +28,6 @@ router.get('/', authenticateToken, async (req, res) => {
       modelQuality: settings.modelQuality,
       batterySaver: settings.batterySaver,
       confidenceThreshold: settings.confidenceThreshold,
-      livenessEnabled: settings.livenessEnabled,
-      livenessStrictness: settings.livenessStrictness,
       updatedAt: settings.updatedAt,
     });
   } catch (err) {
@@ -43,22 +39,11 @@ router.get('/', authenticateToken, async (req, res) => {
 // PUT /api/settings - update tenant settings
 router.put('/', authenticateToken, async (req, res) => {
   try {
-    const {
-      targetFps,
-      modelQuality,
-      batterySaver,
-      confidenceThreshold,
-      livenessEnabled,
-      livenessStrictness,
-    } = req.body;
+    const { targetFps, modelQuality, batterySaver, confidenceThreshold } = req.body;
 
     const fps = Number(targetFps) || 30;
     const isBatterySaver = Boolean(batterySaver);
     const validFps = isBatterySaver ? Math.min(fps, 30) : fps;
-    const isLivenessEnabled = livenessEnabled !== undefined ? Boolean(livenessEnabled) : true;
-    const validStrictness = ['standard', 'high'].includes(livenessStrictness)
-      ? livenessStrictness
-      : 'standard';
 
     const settings = await prisma.tenantSettings.upsert({
       where: { tenantId: req.user.tenantId },
@@ -68,8 +53,6 @@ router.put('/', authenticateToken, async (req, res) => {
         batterySaver: isBatterySaver,
         confidenceThreshold:
           typeof confidenceThreshold === 'number' ? confidenceThreshold : 0.70,
-        livenessEnabled: isLivenessEnabled,
-        livenessStrictness: validStrictness,
       },
       create: {
         tenantId: req.user.tenantId,
@@ -78,8 +61,6 @@ router.put('/', authenticateToken, async (req, res) => {
         batterySaver: isBatterySaver,
         confidenceThreshold:
           typeof confidenceThreshold === 'number' ? confidenceThreshold : 0.70,
-        livenessEnabled: isLivenessEnabled,
-        livenessStrictness: validStrictness,
       },
     });
 
@@ -90,8 +71,6 @@ router.put('/', authenticateToken, async (req, res) => {
         modelQuality: settings.modelQuality,
         batterySaver: settings.batterySaver,
         confidenceThreshold: settings.confidenceThreshold,
-        livenessEnabled: settings.livenessEnabled,
-        livenessStrictness: settings.livenessStrictness,
         updatedAt: settings.updatedAt,
       },
     });

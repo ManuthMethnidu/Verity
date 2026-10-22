@@ -126,38 +126,7 @@ export function AttendancePage() {
         roster,
         isMirrored,
         threshold: prefs.confidenceThreshold || 0.55,
-        livenessEnabled: prefs.livenessEnabled !== undefined ? prefs.livenessEnabled : true,
-        livenessStrictness: prefs.livenessStrictness || 'standard',
-        onSpoofAttempt: async ({ candidateName, livenessScore, reason }) => {
-          // Play warning audio cue
-          try {
-            const AudioCtx = window.AudioContext || window.webkitAudioContext;
-            if (AudioCtx) {
-              const ctx = new AudioCtx();
-              const osc = ctx.createOscillator();
-              const gain = ctx.createGain();
-              osc.connect(gain);
-              gain.connect(ctx.destination);
-              osc.type = 'sawtooth';
-              osc.frequency.setValueAtTime(220, ctx.currentTime);
-              osc.frequency.setValueAtTime(160, ctx.currentTime + 0.12);
-              gain.gain.setValueAtTime(0.15, ctx.currentTime);
-              gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
-              osc.start();
-              osc.stop(ctx.currentTime + 0.35);
-            }
-          } catch {}
-
-          // Report spoof attempt to backend security telemetry
-          api.post('/attendance/spoof-alert', {
-            deviceId,
-            candidateName,
-            livenessScore,
-            reason,
-            timestamp: new Date().toISOString(),
-          }).catch((err) => console.warn('Could not report spoof attempt to backend:', err.message));
-        },
-        onVerifiedMatch: async ({ student, confidence, distance, livenessScore }) => {
+        onVerifiedMatch: async ({ student, confidence, distance }) => {
           // Play pleasant confirmation audio ping
           try {
             const AudioCtx = window.AudioContext || window.webkitAudioContext;
@@ -184,7 +153,6 @@ export function AttendancePage() {
             studentCode: student.studentIdCode,
             deviceId,
             confidence,
-            livenessScore,
             timestamp: new Date().toISOString(),
           });
 
@@ -195,7 +163,6 @@ export function AttendancePage() {
               name: student.name,
               time: new Date().toLocaleTimeString(),
               confidence,
-              livenessScore,
             },
             ...prev.slice(0, 4),
           ]);
