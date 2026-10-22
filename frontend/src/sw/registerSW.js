@@ -6,7 +6,7 @@ export async function registerSW() {
       const registration = await navigator.serviceWorker.register('/service-worker.js', {
         scope: '/',
       });
-      console.log('✅ ServiceWorker registered with scope:', registration.scope);
+      console.log('[ServiceWorker] Registered with scope:', registration.scope);
 
       // Listen for message from service worker
       navigator.serviceWorker.addEventListener('message', (event) => {

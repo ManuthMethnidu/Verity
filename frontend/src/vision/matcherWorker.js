@@ -20,7 +20,7 @@ async function initSession(modelUrl = '/models/mobilefacenet.onnx') {
       executionProviders: ['wasm'],
       graphOptimizationLevel: 'all',
     });
-    console.log('✅ MobileFaceNet ONNX InferenceSession initialized in Web Worker');
+    console.log('[MatcherWorker] MobileFaceNet ONNX InferenceSession initialized in Web Worker');
   } catch (err) {
     console.warn(
       'Notice: MobileFaceNet ONNX model not loaded or unavailable, using high-speed perceptual feature extractor fallback:',

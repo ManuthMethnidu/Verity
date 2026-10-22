@@ -119,7 +119,7 @@ export async function getPendingCount() {
 // Auto-sync whenever internet connectivity returns
 if (typeof window !== 'undefined') {
   window.addEventListener('online', () => {
-    console.log('🌐 Network reconnected: Syncing offline attendance queue...');
+    console.log('[AttendanceStore] Network reconnected: Syncing offline attendance queue...');
     syncAttendanceQueue();
   });
 }

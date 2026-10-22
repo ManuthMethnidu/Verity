@@ -116,7 +116,7 @@ export function Dashboard() {
         {/* Enrolled Students */}
         <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm hover:border-slate-700/80 transition-all duration-200">
           <div>
-            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <div className="text-xs font-medium text-slate-400">
               Enrolled Students
             </div>
             <div className="text-3xl font-extrabold text-white mt-1 font-mono tracking-tight">
@@ -132,7 +132,7 @@ export function Dashboard() {
         {/* Present Today */}
         <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm hover:border-slate-700/80 transition-all duration-200">
           <div>
-            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <div className="text-xs font-medium text-slate-400">
               Verified Today
             </div>
             <div className="text-3xl font-extrabold text-emerald-400 mt-1 font-mono tracking-tight">
@@ -148,7 +148,7 @@ export function Dashboard() {
         {/* Attendance Rate */}
         <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm hover:border-slate-700/80 transition-all duration-200">
           <div>
-            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <div className="text-xs font-medium text-slate-400">
               Attendance Rate
             </div>
             <div className="text-3xl font-extrabold text-white mt-1 font-mono tracking-tight">
@@ -156,7 +156,7 @@ export function Dashboard() {
             </div>
             <div className="text-xs text-slate-500 mt-1">Classroom Turnout</div>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 flex-shrink-0">
+          <div className="w-12 h-12 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 flex-shrink-0">
             <TrendingUp className="w-6 h-6" />
           </div>
         </div>
@@ -164,7 +164,7 @@ export function Dashboard() {
         {/* Performance Mode */}
         <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm hover:border-slate-700/80 transition-all duration-200">
           <div>
-            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <div className="text-xs font-medium text-slate-400">
               Target FPS & Quality
             </div>
             <div className="text-lg font-bold text-white mt-1 capitalize truncate max-w-[150px] font-mono">

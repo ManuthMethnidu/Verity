@@ -38,7 +38,7 @@ export function Header() {
               <span className="text-base font-extrabold text-white tracking-wider leading-none">
                 VERITY
               </span>
-              <span className="text-xs font-semibold text-emerald-400 tracking-wide mt-0.5 uppercase">
+              <span className="text-xs font-medium text-emerald-400 mt-0.5">
                 Biometric Platform
               </span>
             </div>

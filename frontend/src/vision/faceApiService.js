@@ -14,7 +14,7 @@ const MODEL_PATHS = [
  */
 export async function initTensorFlow() {
   await tf.ready();
-  console.log(`✅ TensorFlow.js initialized (backend: ${tf.getBackend()}, version: ${tf.version.tfjs})`);
+  console.log(`[FaceAPI] TensorFlow.js initialized (backend: ${tf.getBackend()}, version: ${tf.version.tfjs})`);
   return tf;
 }
 
@@ -44,7 +44,7 @@ export async function loadFaceApiModels(onProgress = null) {
         ]);
 
         modelsLoaded = true;
-        console.log(`✅ Face-API ResNet models loaded successfully from ${modelPath}`);
+        console.log(`[FaceAPI] Face-API ResNet models loaded successfully from ${modelPath}`);
         return true;
       } catch (err) {
         console.warn(`Could not load models from ${modelPath}, trying fallback:`, err.message);

@@ -93,7 +93,7 @@ export class DetectorLoop {
     try {
       await loadFaceApiModels();
       this.detectorReady = true;
-      console.log('✅ Neural Face-API detector & 128-D recognizer initialized successfully');
+      console.log('[DetectorLoop] Neural Face-API detector & 128-D recognizer initialized successfully');
     } catch (err) {
       console.error('Failed to load Face-API models:', err);
       this.detectorReady = false;
@@ -336,11 +336,11 @@ export class DetectorLoop {
       let badgeText = '';
       if (isMatch && studentName) {
         const confPct = Math.round((confidence || 0.95) * 100);
-        badgeText = `👤 ${studentName} • ${confPct}%`;
+        badgeText = `${studentName} • ${confPct}%`;
       } else if (isRosterEmpty) {
-        badgeText = '⚠️ Roster Empty • Enroll in Roster';
+        badgeText = 'Roster Empty • Enroll in Roster';
       } else {
-        badgeText = '⚠️ Unrecognized Face';
+        badgeText = 'Unrecognized Face';
       }
 
       ctx.font = 'bold 14px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -406,7 +406,7 @@ export class DetectorLoop {
     // Title / Verified name
     ctx.fillStyle = '#ffffff';
     ctx.font = 'bold 17px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    const titleText = success ? `✓ Attendance Logged: ${name}` : '✗ Face Unrecognized';
+    const titleText = success ? `Attendance Logged: ${name}` : 'Face Unrecognized';
     ctx.fillText(titleText, bannerX + 18, bannerY + 28);
 
     // Subtitle / confidence

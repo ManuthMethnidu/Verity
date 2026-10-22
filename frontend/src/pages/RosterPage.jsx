@@ -416,7 +416,7 @@ export function RosterPage() {
       <div className="bg-slate-900/60 border border-slate-800/80 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/[0.05]">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-950/60 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/80">
+            <thead className="bg-slate-950/60 text-xs font-medium text-slate-400 border-b border-slate-800/80">
               <tr>
                 <th className="px-6 py-3.5">Student</th>
                 <th className="px-6 py-3.5">Student ID Code</th>
@@ -698,7 +698,7 @@ export function RosterPage() {
                       type="url"
                       value={formImage}
                       onChange={(e) => setFormImage(e.target.value)}
-                      placeholder="https://example.com/photo.jpg"
+                      placeholder="https://cdn.verity.internal/photos/student.jpg"
                       className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
                     />
                   </div>

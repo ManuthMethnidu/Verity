@@ -111,7 +111,7 @@ export function ReportsPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm">
           <div>
-            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <div className="text-xs font-medium text-slate-400">
               Total Logged Events
             </div>
             <div className="text-2xl sm:text-3xl font-extrabold text-white mt-1 font-mono tracking-tight">
@@ -125,7 +125,7 @@ export function ReportsPage() {
 
         <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm">
           <div>
-            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <div className="text-xs font-medium text-slate-400">
               Unique Attendees
             </div>
             <div className="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-1 font-mono tracking-tight">
@@ -139,14 +139,14 @@ export function ReportsPage() {
 
         <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm">
           <div>
-            <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+            <div className="text-xs font-medium text-slate-400">
               Attendance Turnout
             </div>
             <div className="text-2xl sm:text-3xl font-extrabold text-white mt-1 font-mono tracking-tight">
               {stats.attendanceRate.toFixed(1)}%
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 flex-shrink-0">
+          <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/20 flex items-center justify-center text-teal-400 flex-shrink-0">
             <TrendingUp className="w-5 h-5" />
           </div>
         </div>
@@ -156,7 +156,7 @@ export function ReportsPage() {
       <div className="bg-slate-900/60 border border-slate-800/80 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/[0.05]">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-950/60 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/80">
+            <thead className="bg-slate-950/60 text-xs font-medium text-slate-400 border-b border-slate-800/80">
               <tr>
                 <th className="px-6 py-3.5">Student</th>
                 <th className="px-6 py-3.5">Student ID Code</th>

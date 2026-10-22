@@ -117,7 +117,7 @@ export function DashboardLayout() {
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/[0.05] rounded-full blur-[128px]" />
         <div className="absolute top-1/4 -right-32 w-96 h-96 bg-teal-500/[0.04] rounded-full blur-[140px]" />
-        <div className="absolute -bottom-32 left-1/3 w-[28rem] h-[28rem] bg-indigo-500/[0.03] rounded-full blur-[160px]" />
+        <div className="absolute -bottom-32 left-1/3 w-[28rem] h-[28rem] bg-slate-800/[0.05] rounded-full blur-[160px]" />
       </div>
 
       {/* Sticky Top Glass Header */}

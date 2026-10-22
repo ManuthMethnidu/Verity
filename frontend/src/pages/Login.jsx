@@ -67,7 +67,7 @@ export function Login() {
             VERITY
           </h1>
           <div className="flex items-center justify-center gap-2 mt-1">
-            <span className="text-xs font-semibold text-emerald-400 uppercase tracking-wider">
+            <span className="text-xs font-medium text-emerald-400">
               Multi-Tenant Biometric Platform
             </span>
           </div>

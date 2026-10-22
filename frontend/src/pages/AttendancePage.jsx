@@ -269,7 +269,7 @@ export function AttendancePage() {
             <Camera className="w-6 h-6 text-emerald-400" />
             <span>Face-Recognition Attendance Scanner</span>
             <span
-              className={`text-xs uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${
+              className={`text-xs font-medium px-2.5 py-0.5 rounded-full border ${
                 modelsReady
                   ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                   : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
@@ -336,7 +336,7 @@ export function AttendancePage() {
             className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-medium transition"
             title="Simulate a stable face detection event for testing"
           >
-            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
             <span className="hidden sm:inline">Simulate Match</span>
             <span className="sm:hidden">Simulate</span>
           </button>
@@ -512,7 +512,7 @@ export function AttendancePage() {
 
         {/* Endpoint Display Box */}
         <div className="mb-5">
-          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+          <div className="text-xs font-medium text-slate-400 mb-2">
             REST Endpoint URL
           </div>
           <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-950/80 border border-slate-800 font-mono text-xs text-slate-200 overflow-x-auto">

@@ -11,7 +11,7 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('📦 Service Worker caching app shell assets');
+      console.log('[ServiceWorker] Caching app shell assets');
       return cache.addAll(STATIC_ASSETS).catch((err) => {
         console.warn('Some assets could not be precached during install:', err);
       });
@@ -27,7 +27,7 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
-            console.log('🧹 Removing old cache:', key);
+            console.log('[ServiceWorker] Removing old cache:', key);
             return caches.delete(key);
           }
         })
@@ -83,7 +83,7 @@ self.addEventListener('fetch', (event) => {
 // Background Sync API listener
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-attendance') {
-    console.log('🔄 Background Sync triggered for tag: sync-attendance');
+    console.log('[ServiceWorker] Background Sync triggered for tag: sync-attendance');
     event.waitUntil(
       self.clients.matchAll().then((clients) => {
         clients.forEach((client) => {

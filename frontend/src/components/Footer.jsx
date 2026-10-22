@@ -58,7 +58,7 @@ export function Footer({ footerRef }) {
 
             {/* Col 2: Navigation Links */}
             <div>
-              <h4 className="font-semibold text-white text-xs uppercase tracking-wider mb-3">
+              <h4 className="font-medium text-white text-xs mb-3">
                 Navigation
               </h4>
               <ul className="space-y-2.5 text-xs">
@@ -97,7 +97,7 @@ export function Footer({ footerRef }) {
 
             {/* Col 3: Legal & Privacy */}
             <div>
-              <h4 className="font-semibold text-white text-xs uppercase tracking-wider mb-3">
+              <h4 className="font-medium text-white text-xs mb-3">
                 Trust & Governance
               </h4>
               <ul className="space-y-2.5 text-xs">

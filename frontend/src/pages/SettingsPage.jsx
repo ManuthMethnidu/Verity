@@ -235,7 +235,7 @@ export function SettingsPage() {
         {/* Model Quality Selection */}
         <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md shadow-sm ring-1 ring-white/[0.05]">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
               <Cpu className="w-4 h-4" />
             </div>
             <div>
@@ -269,7 +269,7 @@ export function SettingsPage() {
                 onClick={() => setModelQuality(option.id)}
                 className={`flex items-start gap-3.5 p-4 rounded-xl border cursor-pointer transition-all ${
                   modelQuality === option.id
-                    ? 'bg-indigo-500/10 border-indigo-500/40 text-indigo-200 shadow-sm'
+                    ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-200 shadow-sm'
                     : 'bg-slate-950/60 border-slate-800 hover:bg-slate-800/60 text-slate-400'
                 }`}
               >
@@ -279,7 +279,7 @@ export function SettingsPage() {
                   value={option.id}
                   checked={modelQuality === option.id}
                   onChange={() => setModelQuality(option.id)}
-                  className="mt-1 text-indigo-500 focus:ring-indigo-500"
+                  className="mt-1 text-emerald-500 focus:ring-emerald-500"
                 />
                 <div>
                   <div className="font-bold text-sm text-white">{option.title}</div>
