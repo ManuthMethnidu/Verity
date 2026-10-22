@@ -7,7 +7,7 @@ const router = express.Router();
 // POST /api/attendance - record attendance verification event
 router.post('/', authenticateToken, async (req, res) => {
   try {
-    const { studentId, timestamp, deviceId, confidence } = req.body;
+    const { studentId, timestamp, deviceId, confidence, livenessScore } = req.body;
 
     if (!studentId || !deviceId) {
       return res.status(400).json({ error: 'studentId and deviceId are required.' });
@@ -31,6 +31,7 @@ router.post('/', authenticateToken, async (req, res) => {
         timestamp: eventTime,
         deviceId: String(deviceId),
         confidence: typeof confidence === 'number' ? confidence : null,
+        livenessScore: typeof livenessScore === 'number' ? livenessScore : null,
       },
     });
 
@@ -42,10 +43,62 @@ router.post('/', authenticateToken, async (req, res) => {
       timestamp: record.timestamp,
       deviceId: record.deviceId,
       confidence: record.confidence,
+      livenessScore: record.livenessScore,
     });
   } catch (err) {
     console.error('Attendance recording error:', err);
     return res.status(500).json({ error: 'Failed to record attendance.' });
+  }
+});
+
+// POST /api/attendance/spoof-alert - record suspicious spoof / presentation attack
+router.post('/spoof-alert', authenticateToken, async (req, res) => {
+  try {
+    const { deviceId, livenessScore, reason, candidateName, timestamp } = req.body;
+
+    if (!deviceId) {
+      return res.status(400).json({ error: 'deviceId is required.' });
+    }
+
+    const eventTime = timestamp ? new Date(timestamp) : new Date();
+
+    const alert = await prisma.spoofAttempt.create({
+      data: {
+        tenantId: req.user.tenantId,
+        deviceId: String(deviceId),
+        livenessScore: typeof livenessScore === 'number' ? livenessScore : 0.0,
+        reason: reason ? String(reason) : 'Static face / presentation attack detected',
+        candidateName: candidateName ? String(candidateName) : null,
+        timestamp: eventTime,
+      },
+    });
+
+    return res.status(201).json({
+      success: true,
+      id: alert.id,
+      message: 'Spoof attempt logged for security review.',
+    });
+  } catch (err) {
+    console.error('Spoof alert logging error:', err);
+    return res.status(500).json({ error: 'Failed to log spoof attempt.' });
+  }
+});
+
+// GET /api/attendance/spoof-alerts - retrieve recent spoof alerts for admin review
+router.get('/spoof-alerts', authenticateToken, async (req, res) => {
+  try {
+    const { limit = 20 } = req.query;
+
+    const alerts = await prisma.spoofAttempt.findMany({
+      where: { tenantId: req.user.tenantId },
+      orderBy: { timestamp: 'desc' },
+      take: Math.min(Number(limit) || 20, 100),
+    });
+
+    return res.json({ alerts });
+  } catch (err) {
+    console.error('Fetch spoof alerts error:', err);
+    return res.status(500).json({ error: 'Failed to retrieve spoof alerts.' });
   }
 });
 
