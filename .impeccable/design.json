@@ -1,0 +1,93 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-22T12:37:30.000Z",
+  "title": "Design System: Verity Biometrics",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Signal Emerald",
+        "canonical": "#10b981",
+        "tonalRamp": ["#047857", "#059669", "#10b981", "#34d399", "#6ee7b7"]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "Obsidian Slate",
+        "canonical": "#090d16",
+        "tonalRamp": ["#020408", "#090d16", "#0f172a", "#1e293b", "#334155"]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "Frosted Titanium",
+        "canonical": "#0f172a",
+        "tonalRamp": ["#090d16", "#0f172a", "#1e293b", "#334155", "#475569"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Hero headlines and brand titles only." },
+      "headline": { "displayName": "Headline", "purpose": "Page titles and section headings." },
+      "title": { "displayName": "Title", "purpose": "Card titles and student names." },
+      "body": { "displayName": "Body", "purpose": "General UI labels and descriptive copy." },
+      "label": { "displayName": "Telemetry Mono", "purpose": "Confidence percentages, FPS, latency, and student IDs." }
+    },
+    "shadows": [
+      { "name": "surface-resting", "value": "0 1px 2px 0 rgba(0, 0, 0, 0.05)", "purpose": "Resting card subtle shadow." },
+      { "name": "dock-elevated", "value": "0 20px 50px rgba(0, 0, 0, 0.65)", "purpose": "Floating quick-action dock and dialogs." },
+      { "name": "signal-glow", "value": "0 0 12px rgba(16, 185, 129, 0.25)", "purpose": "Active verification pill glow." }
+    ],
+    "motion": [
+      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "Default easing for state transitions." },
+      { "name": "duration-instant", "value": "150ms", "purpose": "Button click and tap compression." },
+      { "name": "duration-panel", "value": "200ms", "purpose": "Card hover and modal transitions." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Action Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "High-impact CTA for camera launch and student enrollment.",
+      "html": "<button class=\"ds-btn-primary\">Launch Live Scanner</button>",
+      "css": ".ds-btn-primary { background: #10b981; color: #090d16; padding: 10px 20px; font-weight: 700; border-radius: 12px; border: none; cursor: pointer; transition: background 0.2s, transform 0.15s; } .ds-btn-primary:hover { background: #059669; } .ds-btn-primary:active { transform: scale(0.98); }"
+    },
+    {
+      "name": "Telemetry Status Badge",
+      "kind": "chip",
+      "refersTo": "badge-telemetry",
+      "description": "Real-time engine and confidence score indicator.",
+      "html": "<span class=\"ds-telemetry-badge\"><span class=\"ds-dot\"></span>98.4% Match</span>",
+      "css": ".ds-telemetry-badge { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 9999px; font-family: monospace; font-size: 12px; font-weight: 600; background: rgba(16, 185, 129, 0.1); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.2); } .ds-dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Biometric Terminal",
+    "overview": "Verity embodies the clarity, restraint, and operational focus of an enterprise biometric terminal. Designed specifically for teachers navigating fast-paced classroom roll calls on handheld mobile devices, the visual language prioritizes immediate cognitive parsing over decorative noise.",
+    "keyCharacteristics": [
+      "Atmospheric Obsidian Canvas (#090D16)",
+      "Frosted Titanium Surfaces (slate-900/60 with backdrop blur)",
+      "Precision Signal Emerald (#10B981) for verification urgency",
+      "Bifurcated typography with Geist Sans and Geist Mono telemetry"
+    ],
+    "rules": [
+      { "name": "The Signal Rarity Rule", "body": "Signal Emerald covers ≤10% of any viewport to preserve high-consequence operational urgency.", "section": "colors" },
+      { "name": "The Telemetry Mono Rule", "body": "All confidence scores, FPS rates, latency metrics, and student IDs must strictly render in Geist Mono.", "section": "typography" },
+      { "name": "The Specular Highlight Rule", "body": "Translucent glass cards must feature an inner 1px specular top rim to simulate precision-milled glass edges.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do format all machine scores and IDs in Geist Mono.",
+      "Do provide active:scale-[0.98] compression on interactive controls.",
+      "Do maintain min 44px touch targets on mobile touch devices."
+    ],
+    "donts": [
+      "Don't use neon green text for large paragraphs or standard card fills.",
+      "Don't use harsh pitch black (#000000); use obsidian slate (#090D16).",
+      "Don't use retro pixelated icons in production navigation."
+    ]
+  }
+}

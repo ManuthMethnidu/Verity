@@ -18,6 +18,26 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Browser surface polish */
+::selection {
+  background-color: #10b981;
+  color: #090d16;
+}
+
+input, textarea, select {
+  caret-color: #10b981;
+}
+
+/* Tabular numerals for biometric stats and timestamps */
+.tabular-nums, table, [data-tabular] {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Underline offset polish */
+a {
+  text-underline-offset: 3px;
+}
+
 /* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
@@ -40,4 +60,14 @@ body {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

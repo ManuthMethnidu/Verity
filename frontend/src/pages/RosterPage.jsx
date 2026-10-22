@@ -559,7 +559,7 @@ export function RosterPage() {
                     {/* Face Target Guide Oval */}
                     <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
                       <div className="w-44 h-56 border-2 border-dashed border-emerald-400/60 rounded-[50%] flex items-center justify-center">
-                        <span className="text-[10px] text-emerald-400 font-semibold bg-slate-950/80 px-2 py-0.5 rounded-full">
+                        <span className="text-xs text-emerald-400 font-semibold bg-slate-950/80 px-2.5 py-0.5 rounded-full">
                           Position Face Here
                         </span>
                       </div>
@@ -613,7 +613,7 @@ export function RosterPage() {
                     <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2">
                       <CheckCircle className="w-4 h-4 flex-shrink-0" />
                       <span>
-                        ✓ Real 128-D Neural Biometrics Locked ({capturedFace.embeddingVector.length} features)
+                        Real 128-D Neural Biometrics Locked ({capturedFace.embeddingVector.length} features)
                       </span>
                     </div>
                   )}

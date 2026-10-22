@@ -143,7 +143,7 @@ export function SettingsPage() {
             />
           </div>
 
-          <div className="flex justify-between text-[11px] text-slate-400 mt-2 font-mono">
+          <div className="flex justify-between text-xs text-slate-400 mt-2 font-mono">
             <span>50% (Permissive)</span>
             <span className="text-emerald-400 font-semibold">70% (Recommended Spec)</span>
             <span>95% (Strict Biometric)</span>
@@ -218,11 +218,11 @@ export function SettingsPage() {
                   }`}
                 >
                   <span className="text-xl font-extrabold font-mono">{fps} FPS</span>
-                  <span className="text-[11px] font-medium text-slate-400">
+                  <span className="text-xs font-medium text-slate-400">
                     {fps === 15 ? 'Economy (Low Latency)' : fps === 30 ? 'Balanced (Standard)' : 'Ultra-Smooth (High CPU)'}
                   </span>
                   {isDisabled && (
-                    <span className="text-[10px] text-amber-500 font-semibold mt-1">
+                    <span className="text-xs text-amber-500 font-semibold mt-1">
                       Disabled by Battery Saver
                     </span>
                   )}

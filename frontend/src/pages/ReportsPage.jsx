@@ -142,7 +142,7 @@ export function ReportsPage() {
             <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Attendance Turnout
             </div>
-            <div className="text-2xl sm:text-3xl font-extrabold text-indigo-400 mt-1 font-mono tracking-tight">
+            <div className="text-2xl sm:text-3xl font-extrabold text-white mt-1 font-mono tracking-tight">
               {stats.attendanceRate.toFixed(1)}%
             </div>
           </div>

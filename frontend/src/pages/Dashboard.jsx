@@ -67,22 +67,24 @@ export function Dashboard() {
 
             {/* School & System Name */}
             <div>
-              <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 mb-2">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>TensorFlow.js Edge Vision Active</span>
-              </div>
               <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
                 VERITY
               </h1>
-              <h2 className="text-base sm:text-lg font-semibold text-emerald-400 mt-0.5 flex items-center gap-2">
-                <span>{user?.tenantName || "St. Joseph's College Colombo 10"}</span>
+              <div className="flex flex-wrap items-center gap-2.5 mt-1">
+                <span className="text-base sm:text-lg font-semibold text-emerald-400">
+                  {user?.tenantName || "St. Joseph's College Colombo 10"}
+                </span>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <Sparkles className="w-3 h-3" />
+                  <span>Edge Vision Active</span>
+                </div>
                 {user?.tenantId && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-mono font-medium">
+                  <span className="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-mono border border-slate-700/80">
                     Tenant Active
                   </span>
                 )}
-              </h2>
-              <p className="text-xs text-slate-400 mt-1.5 max-w-xl leading-relaxed">
+              </div>
+              <p className="text-xs text-slate-400 mt-2 max-w-xl leading-relaxed">
                 Autonomous real-time facial recognition and individual identity verification for modern classrooms.
               </p>
             </div>

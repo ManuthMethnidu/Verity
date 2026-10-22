@@ -38,7 +38,7 @@ export function Header() {
               <span className="text-base font-extrabold text-white tracking-wider leading-none">
                 VERITY
               </span>
-              <span className="text-[10px] font-semibold text-emerald-400 tracking-wide mt-0.5 uppercase">
+              <span className="text-xs font-semibold text-emerald-400 tracking-wide mt-0.5 uppercase">
                 Biometric Platform
               </span>
             </div>
@@ -56,7 +56,7 @@ export function Header() {
         {/* Right: Engine Telemetry Status & User Controls */}
         <div className="flex items-center gap-3">
           {/* Live Edge Vision Active Status Pill */}
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-medium text-emerald-400">
+          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-400">
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -80,7 +80,7 @@ export function Header() {
               <span className="text-xs font-semibold text-slate-200 leading-none">
                 {user?.email || 'Administrator'}
               </span>
-              <span className="text-[10px] text-slate-400 font-mono mt-0.5">
+              <span className="text-xs text-slate-400 font-mono mt-0.5">
                 {user?.role || 'Institution Admin'}
               </span>
             </div>

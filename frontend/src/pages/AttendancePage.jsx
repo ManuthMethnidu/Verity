@@ -269,7 +269,7 @@ export function AttendancePage() {
             <Camera className="w-6 h-6 text-emerald-400" />
             <span>Face-Recognition Attendance Scanner</span>
             <span
-              className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${
+              className={`text-xs uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${
                 modelsReady
                   ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
                   : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
@@ -284,7 +284,7 @@ export function AttendancePage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-          <div className="px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-[11px] font-mono text-slate-300">
+          <div className="px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-mono text-slate-300">
             Device: <span className="text-emerald-400">{deviceId}</span>
           </div>
 
@@ -437,7 +437,7 @@ export function AttendancePage() {
                   >
                     <div>
                       <div className="text-sm font-bold text-white">{v.name}</div>
-                      <div className="text-[11px] text-emerald-400 font-mono">
+                      <div className="text-xs text-emerald-400 font-mono">
                         Match: {(v.confidence * 100).toFixed(1)}%
                       </div>
                     </div>
@@ -453,7 +453,7 @@ export function AttendancePage() {
           </div>
 
           {/* Quick Roster Indicator */}
-          <div className="pt-4 mt-4 border-t border-slate-800/80 text-[11px] text-slate-400 flex items-center justify-between font-mono">
+          <div className="pt-4 mt-4 border-t border-slate-800/80 text-xs text-slate-400 flex items-center justify-between font-mono">
             <span className="flex items-center gap-1.5 font-sans">
               <HardDrive className="w-3.5 h-3.5 text-slate-500" />
               <span>Offline Ready</span>
@@ -479,7 +479,7 @@ export function AttendancePage() {
                   {tenantName}
                 </span>
                 {tenantId && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 font-mono border border-slate-700/80">
+                  <span className="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-400 font-mono border border-slate-700/80">
                     ID: {tenantId}
                   </span>
                 )}
@@ -512,12 +512,12 @@ export function AttendancePage() {
 
         {/* Endpoint Display Box */}
         <div className="mb-5">
-          <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
             REST Endpoint URL
           </div>
           <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-950/80 border border-slate-800 font-mono text-xs text-slate-200 overflow-x-auto">
             <div className="flex items-center gap-2.5 min-w-0">
-              <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-[10px] tracking-wider">
+              <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-xs tracking-wider">
                 GET
               </span>
               <span className="truncate select-all text-slate-300">
@@ -535,7 +535,7 @@ export function AttendancePage() {
         </div>
 
         {/* Feature Pills */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5 text-[11px]">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5 text-xs">
           <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800/80 text-slate-300">
             <strong className="text-emerald-400 block font-semibold mb-0.5">Unique Attendance</strong>
             Deduplicated students with total counts

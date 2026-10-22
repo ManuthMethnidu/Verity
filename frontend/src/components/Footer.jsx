@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Lock,
   FileCheck,
+  X,
 } from 'lucide-react';
 
 export function Footer({ footerRef }) {
@@ -125,7 +126,7 @@ export function Footer({ footerRef }) {
                   </span>
                 </li>
                 <li>
-                  <span className="text-slate-500 text-[11px] block">FERPA & GDPR Compliant Standard</span>
+                  <span className="text-slate-500 text-xs block">FERPA & GDPR Compliant Standard</span>
                 </li>
               </ul>
             </div>
@@ -179,8 +180,9 @@ export function Footer({ footerRef }) {
               <button
                 onClick={() => setModalType(null)}
                 className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
+                aria-label="Close modal"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 

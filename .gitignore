@@ -33,3 +33,6 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+
+# Impeccable local developer config
+.impeccable/config.local.json

@@ -112,7 +112,7 @@ export function DashboardLayout() {
   }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col font-sans relative selection:bg-emerald-500 selection:text-slate-950">
+    <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col font-sans relative">
       {/* Subtle layered ambient gradient depth */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/[0.05] rounded-full blur-[128px]" />
