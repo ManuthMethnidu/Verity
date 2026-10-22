@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { api, getCurrentUser } from '../auth/auth.js';
 import { getLocalSettings } from '../storage/settingsStore.js';
+import { AttendanceChart } from '../components/AttendanceChart.jsx';
 
 export function Dashboard() {
   const user = getCurrentUser();
@@ -180,6 +181,9 @@ export function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Attendance Chart (Bklit UI Bar Chart) */}
+      <AttendanceChart records={report?.records} />
 
       {/* Recent Verifications Feed */}
       <div className="bg-slate-900/60 border border-slate-800/80 backdrop-blur-md rounded-2xl p-6 shadow-sm">

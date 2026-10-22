@@ -1,56 +1,24 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
 import {
-  LayoutDashboard,
-  Camera,
-  Users,
-  FileText,
-  Sliders,
-} from 'lucide-react';
+  IconBrandTabler,
+  IconCamera,
+  IconUsers,
+  IconFileAnalytics,
+  IconSettings,
+  IconArrowLeft,
+} from '@tabler/icons-react';
 import { Header } from './Header.jsx';
-import { FloatingDock } from './ui/floating-dock.jsx';
-import PillNav from './PillNav.jsx';
 import { Footer } from './Footer.jsx';
-import { isAuthenticated } from '../auth/auth.js';
+import { isAuthenticated, getCurrentUser, signOut } from '../auth/auth.js';
+import { cn } from '@/lib/utils';
 
 export function DashboardLayout() {
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const footerRef = useRef(null);
-  const [hideDock, setHideDock] = useState(false);
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return window.innerWidth < 768;
-    }
-    return false;
-  });
-
-  const navItems = [
-    { label: 'Dashboard', title: 'Dashboard', path: '/dashboard', href: '/dashboard', icon: <LayoutDashboard className="w-5 h-5 text-emerald-400" /> },
-    { label: 'Attendance', title: 'Live Attendance', path: '/attendance', href: '/attendance', icon: <Camera className="w-5 h-5 text-emerald-400" /> },
-    { label: 'Roster', title: 'Student Roster', path: '/roster', href: '/roster', icon: <Users className="w-5 h-5 text-emerald-400" /> },
-    { label: 'Reports', title: 'Attendance Reports', path: '/reports', href: '/reports', icon: <FileText className="w-5 h-5 text-emerald-400" /> },
-    { label: 'Settings', title: 'System Settings', path: '/settings', href: '/settings', icon: <Sliders className="w-5 h-5 text-emerald-400" /> },
-  ];
-
-  const getActiveHref = () => {
-    const currentPath = location.pathname;
-    const match = navItems.find((item) =>
-      item.path === '/dashboard'
-        ? currentPath === '/' || currentPath === '/dashboard'
-        : currentPath.startsWith(item.path)
-    );
-    return match ? match.href : '/dashboard';
-  };
-
-  const handleMobileNavClick = (item, index, event) => {
-    if (event) {
-      event.preventDefault();
-    }
-    if (item?.href && item.href !== location.pathname) {
-      navigate(item.href);
-    }
-  };
+  const user = getCurrentUser();
 
   useEffect(() => {
     if (!isAuthenticated()) {
@@ -58,128 +26,189 @@ export function DashboardLayout() {
     }
   }, [navigate]);
 
-  useEffect(() => {
-    const mql = window.matchMedia('(max-width: 767px)');
-    const onChange = (e) => setIsMobile(e.matches);
-    setIsMobile(mql.matches);
-    mql.addEventListener('change', onChange);
-    return () => mql.removeEventListener('change', onChange);
-  }, []);
+  const userInitial = user?.email ? user.email.charAt(0).toUpperCase() : 'A';
+  const tenantName = user?.tenantName || "St. Joseph's College";
 
-  useEffect(() => {
-    let ticking = false;
-
-    const updateDockVisibility = () => {
-      if (!footerRef.current) return;
-      const rect = footerRef.current.getBoundingClientRect();
-      const windowHeight = window.innerHeight || document.documentElement.clientHeight;
-      const isFooterNear = rect.top < windowHeight - 20;
-      const hasScrolled = window.scrollY > 30;
-
-      setHideDock(isFooterNear && hasScrolled);
-      ticking = false;
-    };
-
-    const onScrollOrResize = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(updateDockVisibility);
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('scroll', onScrollOrResize, { passive: true });
-    window.addEventListener('resize', onScrollOrResize, { passive: true });
-
-    let observer;
-    if (footerRef.current && typeof IntersectionObserver !== 'undefined') {
-      observer = new IntersectionObserver(
-        () => {
-          updateDockVisibility();
-        },
-        { threshold: [0, 0.1, 0.25] }
-      );
-      observer.observe(footerRef.current);
-    }
-
-    // Run initial check
-    updateDockVisibility();
-
-    return () => {
-      window.removeEventListener('scroll', onScrollOrResize);
-      window.removeEventListener('resize', onScrollOrResize);
-      if (observer) observer.disconnect();
-    };
-  }, [location.pathname]);
+  const links = [
+    {
+      label: 'Dashboard',
+      href: '/dashboard',
+      icon: (
+        <IconBrandTabler
+          className={`h-5 w-5 shrink-0 transition-colors ${
+            location.pathname === '/dashboard' || location.pathname === '/'
+              ? 'text-emerald-400'
+              : 'text-slate-400 group-hover/sidebar:text-white'
+          }`}
+        />
+      ),
+    },
+    {
+      label: 'Live Scanner',
+      href: '/attendance',
+      icon: (
+        <IconCamera
+          className={`h-5 w-5 shrink-0 transition-colors ${
+            location.pathname === '/attendance'
+              ? 'text-emerald-400'
+              : 'text-slate-400 group-hover/sidebar:text-white'
+          }`}
+        />
+      ),
+    },
+    {
+      label: 'Student Roster',
+      href: '/roster',
+      icon: (
+        <IconUsers
+          className={`h-5 w-5 shrink-0 transition-colors ${
+            location.pathname === '/roster'
+              ? 'text-emerald-400'
+              : 'text-slate-400 group-hover/sidebar:text-white'
+          }`}
+        />
+      ),
+    },
+    {
+      label: 'Attendance Reports',
+      href: '/reports',
+      icon: (
+        <IconFileAnalytics
+          className={`h-5 w-5 shrink-0 transition-colors ${
+            location.pathname === '/reports'
+              ? 'text-emerald-400'
+              : 'text-slate-400 group-hover/sidebar:text-white'
+          }`}
+        />
+      ),
+    },
+    {
+      label: 'System Settings',
+      href: '/settings',
+      icon: (
+        <IconSettings
+          className={`h-5 w-5 shrink-0 transition-colors ${
+            location.pathname === '/settings'
+              ? 'text-emerald-400'
+              : 'text-slate-400 group-hover/sidebar:text-white'
+          }`}
+        />
+      ),
+    },
+    {
+      label: 'Sign Out',
+      href: '#',
+      onClick: (e) => {
+        e.preventDefault();
+        signOut();
+      },
+      icon: (
+        <IconArrowLeft className="h-5 w-5 shrink-0 text-red-400 group-hover/sidebar:text-red-300 transition-colors" />
+      ),
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col font-sans relative">
-      {/* Subtle layered ambient gradient depth */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute -top-32 -left-32 w-96 h-96 bg-emerald-500/[0.05] rounded-full blur-[128px]" />
-        <div className="absolute top-1/4 -right-32 w-96 h-96 bg-teal-500/[0.04] rounded-full blur-[140px]" />
-        <div className="absolute -bottom-32 left-1/3 w-[28rem] h-[28rem] bg-slate-800/[0.05] rounded-full blur-[160px]" />
-      </div>
+    <div className="flex flex-col md:flex-row h-screen w-screen overflow-hidden bg-[#090d16] text-slate-100 font-sans">
+      {/* Collapsible Animated Sidebar (Aceternity UI) */}
+      <Sidebar open={open} setOpen={setOpen}>
+        <SidebarBody className="justify-between gap-6">
+          <div className="flex flex-1 flex-col overflow-x-hidden overflow-y-auto">
+            {/* Unified Logo: Constant 28px icon box for rock-solid vertical alignment */}
+            <div className="flex items-center h-10 px-2 group/sidebar">
+              <div className="w-7 h-7 flex items-center justify-center shrink-0">
+                <img
+                  src="/logo.png"
+                  alt="Verity"
+                  className="w-6 h-6 object-contain filter drop-shadow-[0_0_8px_rgba(16,185,129,0.3)]"
+                />
+              </div>
+              <div
+                className={cn(
+                  "flex flex-col min-w-0 overflow-hidden whitespace-nowrap transition-all duration-300 ease-in-out pl-3",
+                  open ? "opacity-100 max-w-[180px]" : "opacity-0 max-w-0 pointer-events-none"
+                )}
+              >
+                <span className="font-black text-sm tracking-wider text-white leading-tight">
+                  VERITY
+                </span>
+                <span className="text-[10px] text-emerald-400 font-semibold truncate leading-tight">
+                  {tenantName}
+                </span>
+              </div>
+            </div>
 
-      {/* Sticky Top Glass Header */}
-      <Header />
+            {/* Navigation links */}
+            <div className="mt-6 flex flex-col gap-1.5">
+              {links.map((link, idx) => {
+                const isActive =
+                  link.href === '/dashboard'
+                    ? location.pathname === '/dashboard' || location.pathname === '/'
+                    : location.pathname === link.href;
 
-      {/* Main Content Area */}
-      <main className="relative z-10 flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-36">
-        <Outlet />
-      </main>
+                return (
+                  <SidebarLink
+                    key={idx}
+                    link={link}
+                    onClick={(e) => {
+                      if (link.onClick) {
+                        link.onClick(e);
+                      } else if (link.href && link.href !== '#') {
+                        e.preventDefault();
+                        navigate(link.href);
+                        setOpen(false);
+                      }
+                    }}
+                    className={cn(
+                      "transition-colors",
+                      isActive
+                        ? "bg-emerald-500/15 text-white font-semibold border border-emerald-500/30"
+                        : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                    )}
+                  />
+                );
+              })}
+            </div>
+          </div>
 
-      {/* Floating Bottom Quick-Action Dock */}
-      <div
-        className={`fixed bottom-5 inset-x-0 z-50 flex justify-center items-center pointer-events-none px-3 transition-all duration-300 ease-in-out ${
-          hideDock
-            ? 'opacity-0 translate-y-16 scale-95 pointer-events-none'
-            : 'opacity-100 translate-y-0 scale-100'
-        }`}
-      >
-        {isMobile ? (
-          /* Mobile View (< 768px): Light PillNav */
-          <div
-            className={`transition-all duration-300 ${
-              hideDock ? 'pointer-events-none' : 'pointer-events-auto'
-            }`}
-          >
-            <PillNav
-              items={navItems}
-              activeHref={getActiveHref()}
-              onItemClick={handleMobileNavClick}
-              theme="dark"
-              surface="solid"
-              barColor="#0f172a"
-              itemStyle="plain"
-              indicator="pill"
-              hoverEffect="none"
-              highlightColor="#10b981"
-              highlightTextColor="#090d16"
-              size="sm"
-              collapse="never"
-              bounce={0.15}
-              stretch={0.2}
-              intro={false}
-              className="border border-slate-800 rounded-full shadow-[0_12px_36px_rgba(0,0,0,0.65)]"
+          {/* User Profile / Tenant Identity: Constant 28px avatar box for vertical alignment */}
+          <div className="pt-3 border-t border-slate-800/80">
+            <SidebarLink
+              link={{
+                label: user?.email || 'Institution Admin',
+                href: '/settings',
+                icon: (
+                  <div className="w-7 h-7 rounded-full bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-300 font-bold text-xs uppercase shadow-sm shrink-0">
+                    {userInitial}
+                  </div>
+                ),
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                navigate('/settings');
+                setOpen(false);
+              }}
+              className="hover:bg-slate-800/60 transition-colors text-slate-300"
             />
           </div>
-        ) : (
-          /* Desktop View (>= 768px): Refined FloatingDock */
-          <div
-            className={`transition-all duration-300 ${
-              hideDock ? 'pointer-events-none' : 'pointer-events-auto'
-            }`}
-          >
-            <FloatingDock
-              items={navItems}
-              desktopClassName="bg-slate-900/90 border border-slate-800/80 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.65)]"
-            />
-          </div>
-        )}
-      </div>
+        </SidebarBody>
+      </Sidebar>
 
-      {/* Structured Modern Footer */}
-      <Footer footerRef={footerRef} />
+      {/* Main Dashboard Panel */}
+      <div className="flex flex-1 flex-col overflow-hidden min-w-0 bg-[#090d16]">
+        {/* Top Header */}
+        <Header />
+
+        {/* Scrollable Content View */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <div className="max-w-7xl mx-auto w-full">
+            <Outlet />
+          </div>
+          <Footer />
+        </main>
+      </div>
     </div>
   );
 }
+
+export default DashboardLayout;

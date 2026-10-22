@@ -1,6 +1,8 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { Login } from './pages/Login.jsx';
+import { LegalPage } from './pages/LegalPage.jsx';
+import SidebarDemo from './components/sidebar-demo.tsx';
 import { DashboardLayout } from './components/DashboardLayout.jsx';
 import { Dashboard } from './pages/Dashboard.jsx';
 import { AttendancePage } from './pages/AttendancePage.jsx';
@@ -20,6 +22,18 @@ export const routes = [
   {
     path: '/login',
     element: <Login />,
+  },
+  {
+    path: '/terms',
+    element: <LegalPage initialTab="terms" />,
+  },
+  {
+    path: '/privacy',
+    element: <LegalPage initialTab="privacy" />,
+  },
+  {
+    path: '/sidebar-demo',
+    element: <SidebarDemo />,
   },
   {
     path: '/',

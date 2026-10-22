@@ -10,15 +10,15 @@ import {
   ExternalLink,
   Lock,
   FileCheck,
-  X,
 } from 'lucide-react';
+import { LegalModal } from './LegalModal.jsx';
 
 export function Footer({ footerRef }) {
   const [modalType, setModalType] = useState(null); // 'terms' | 'privacy' | null
 
   return (
     <>
-      <footer ref={footerRef} className="mt-20 border-t border-slate-800/80 bg-[#070b12]/90 backdrop-blur-md text-slate-400 text-sm">
+      <footer ref={footerRef} className="mt-20 border-t border-[#222222] bg-[#111111]/95 backdrop-blur-md text-slate-400 text-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-10">
             {/* Col 1: Brand & Logo */}
@@ -166,87 +166,11 @@ export function Footer({ footerRef }) {
       </footer>
 
       {/* Modal Dialog for Terms or Privacy Policy */}
-      {modalType && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl text-slate-200">
-            {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-800">
-              <div className="flex items-center gap-3">
-                <img src="/logo.png" alt="Verity" className="w-6 h-6 object-contain" />
-                <h3 className="text-lg font-bold text-white tracking-tight">
-                  {modalType === 'privacy' ? 'Privacy Policy' : 'Terms & Conditions'}
-                </h3>
-              </div>
-              <button
-                onClick={() => setModalType(null)}
-                className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
-                aria-label="Close modal"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div className="p-6 overflow-y-auto space-y-4 text-xs leading-relaxed text-slate-300">
-              {modalType === 'privacy' ? (
-                <>
-                  <p className="font-semibold text-emerald-400">
-                    Last updated: October 20, 2026 | Verity Platform Governance
-                  </p>
-                  <h5 className="font-bold text-white text-sm">1. Biometric Data Collection & Processing</h5>
-                  <p>
-                    Verity uses TensorFlow.js to extract facial embeddings (128-dimensional mathematical feature vectors) directly on the local browser runtime. Raw camera images from continuous attendance scans are processed entirely on-device and are not permanently archived or transmitted to third parties without express consent.
-                  </p>
-                  <h5 className="font-bold text-white text-sm">2. Purpose of Processing</h5>
-                  <p>
-                    Facial descriptors are generated solely for verifying student identity and logging educational attendance for subscribed institution tenants. Data is never sold, shared with advertising networks, or used for commercial surveillance.
-                  </p>
-                  <h5 className="font-bold text-white text-sm">3. Local Storage & Cryptographic Security</h5>
-                  <p>
-                    Offline attendance queues and student reference vectors are stored in the client device's encrypted IndexedDB storage. Network transmissions utilize TLS 1.3 encryption with tenant-isolated database access controls.
-                  </p>
-                  <h5 className="font-bold text-white text-sm">4. Data Subject Rights & Revocation</h5>
-                  <p>
-                    Parents, guardians, and enrolled students may request inspection, modification, or complete deletion of their facial biometrics and attendance records at any time by contacting their school or tenant administration.
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="font-semibold text-emerald-400">
-                    Last updated: October 20, 2026 | Verity Platform Governance
-                  </p>
-                  <h5 className="font-bold text-white text-sm">1. Acceptance of Terms</h5>
-                  <p>
-                    By accessing or operating the Verity Attendance System, administrative personnel, faculty, and operators agree to be bound by these Terms and Conditions and adhere to institutional academic integrity standards.
-                  </p>
-                  <h5 className="font-bold text-white text-sm">2. Permitted Use</h5>
-                  <p>
-                    This platform is licensed exclusively for legitimate educational attendance management, student safety verification, and administrative reporting across registered institutional tenants. Unauthorized attempts to bypass cosine similarity filters, spoof biometric sensors, or tamper with IndexedDB audit logs are strictly prohibited.
-                  </p>
-                  <h5 className="font-bold text-white text-sm">3. Device & Camera Responsibility</h5>
-                  <p>
-                    Operators utilizing classroom kiosks or mobile capture stations must ensure cameras are positioned respectfully within designated classroom entrance checkpoints and conform to school privacy standards.
-                  </p>
-                  <h5 className="font-bold text-white text-sm">4. Limitation of Liability</h5>
-                  <p>
-                    Verity provides real-time verification algorithms to assist attendance administrators. Final verification discretion resides with authorized teachers and administrative staff.
-                  </p>
-                </>
-              )}
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-4 border-t border-slate-800 flex justify-end">
-              <button
-                onClick={() => setModalType(null)}
-                className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold rounded-xl text-xs transition"
-              >
-                Close & Return
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <LegalModal
+        isOpen={!!modalType}
+        type={modalType}
+        onClose={() => setModalType(null)}
+      />
     </>
   );
 }

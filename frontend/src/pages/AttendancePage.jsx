@@ -25,6 +25,7 @@ import { loadFaceApiModels } from '../vision/faceApiService.js';
 import { getLocalSettings } from '../storage/settingsStore.js';
 import { getCachedRoster, recordAttendance } from '../storage/attendanceStore.js';
 import { api, getCurrentUser } from '../auth/auth.js';
+import { AttendanceChart } from '../components/AttendanceChart.jsx';
 
 export function AttendancePage() {
   const user = getCurrentUser();
@@ -461,6 +462,15 @@ export function AttendancePage() {
             <span className="text-emerald-400 font-semibold">{roster.length} Profiles</span>
           </div>
         </div>
+      </div>
+
+      {/* Attendance Activity Chart (Bklit UI) */}
+      <div className="mt-8">
+        <AttendanceChart
+          records={recentVerified}
+          title="Attendance Activity & Trends"
+          subtitle="Real-time attendance volume across daily timeline and class hours"
+        />
       </div>
 
       {/* Unique Tenant API Integration Card */}

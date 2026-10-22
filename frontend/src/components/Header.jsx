@@ -22,7 +22,7 @@ export function Header() {
   const tenantDisplayName = user?.tenantName || "St. Joseph's College Colombo 10";
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-[#090d16]/85 backdrop-blur-md border-b border-slate-800/80 transition-colors">
+    <header className="sticky top-0 z-40 w-full bg-[#111111]/90 backdrop-blur-md border-b border-[#222222] transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Left: Brand & Institution Info */}
         <div className="flex items-center gap-4">

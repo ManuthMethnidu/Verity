@@ -9,6 +9,7 @@ import {
   TrendingUp,
 } from 'lucide-react';
 import { api } from '../auth/auth.js';
+import { AttendanceChart } from '../components/AttendanceChart.jsx';
 
 export function ReportsPage() {
   const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
@@ -151,6 +152,13 @@ export function ReportsPage() {
           </div>
         </div>
       </div>
+
+      {/* Attendance Activity Chart (Bklit UI) */}
+      <AttendanceChart
+        records={report?.records}
+        title={`Attendance Analytics — ${date}`}
+        subtitle="Distribution of check-in events and timeline attendance volume"
+      />
 
       {/* Report Records Table */}
       <div className="bg-slate-900/60 border border-slate-800/80 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/[0.05]">
