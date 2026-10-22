@@ -325,7 +325,7 @@ export function RosterPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Notification Toast */}
       {notification && (
         <div
@@ -349,7 +349,10 @@ export function RosterPage() {
       {/* Header & Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Student Roster</h1>
+          <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
+            <Users className="w-6 h-6 text-emerald-400" />
+            <span>Student Roster</span>
+          </h1>
           <p className="text-sm text-slate-400 mt-1">
             Manage student enrollment and 128-D facial feature embeddings for offline matching.
           </p>
@@ -358,7 +361,7 @@ export function RosterPage() {
         <div className="flex flex-wrap items-center gap-2.5">
           <button
             onClick={handleManualCache}
-            className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold transition"
+            className="flex items-center gap-2 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 rounded-xl text-xs font-semibold transition"
             title="Ensure roster is cached in browser IndexedDB"
           >
             <HardDriveDownload className="w-3.5 h-3.5 text-emerald-400" />
@@ -374,7 +377,7 @@ export function RosterPage() {
           </button>
           <button
             onClick={() => setShowBatchModal(true)}
-            className="flex items-center gap-2 px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold transition"
+            className="flex items-center gap-2 px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 rounded-xl text-xs font-semibold transition"
           >
             <Upload className="w-3.5 h-3.5" />
             <span>Upload CSV/JSON</span>
@@ -389,7 +392,7 @@ export function RosterPage() {
               setShowAddModal(true);
               setTimeout(() => startEnrollCamera(), 100);
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold rounded-xl text-xs transition shadow-lg shadow-emerald-500/20"
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold rounded-xl text-xs transition-all duration-200 active:scale-[0.98] shadow-sm"
           >
             <Plus className="w-4 h-4" />
             <span>Enroll Student</span>
@@ -405,15 +408,15 @@ export function RosterPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by student name or ID code..."
-          className="w-full pl-10 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+          className="w-full pl-10 pr-4 py-2 bg-slate-900/80 border border-slate-800 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
         />
       </div>
 
       {/* Roster Table */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+      <div className="bg-slate-900/60 border border-slate-800/80 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/[0.05]">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-800/60 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800">
+            <thead className="bg-slate-950/60 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/80">
               <tr>
                 <th className="px-6 py-3.5">Student</th>
                 <th className="px-6 py-3.5">Student ID Code</th>
@@ -436,10 +439,10 @@ export function RosterPage() {
                 </tr>
               ) : (
                 filtered.map((s) => (
-                  <tr key={s.id} className="hover:bg-slate-800/30 transition">
+                  <tr key={s.id} className="hover:bg-slate-800/20 transition">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 overflow-hidden flex items-center justify-center flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700/80 overflow-hidden flex items-center justify-center flex-shrink-0">
                           {s.imageUrl ? (
                             <img
                               src={s.imageUrl}
@@ -453,7 +456,7 @@ export function RosterPage() {
                         <span className="font-semibold text-white">{s.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-slate-300 font-mono text-xs">
+                    <td className="px-6 py-4 text-emerald-400 font-mono text-xs">
                       {s.studentIdCode || '—'}
                     </td>
                     <td className="px-6 py-4">
@@ -502,23 +505,23 @@ export function RosterPage() {
 
       {/* Add / Enroll Student Modal with Live Camera Snap */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
           <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl my-6">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
               <h2 className="text-lg font-bold text-white flex items-center gap-2">
                 <Camera className="w-5 h-5 text-emerald-400" />
                 <span>Enroll Student Face</span>
               </h2>
-              <div className="flex bg-slate-800 p-1 rounded-lg text-xs font-semibold">
+              <div className="flex bg-slate-950 p-1 rounded-xl text-xs font-semibold border border-slate-800">
                 <button
                   type="button"
                   onClick={() => {
                     setEnrollTab('camera');
                     startEnrollCamera();
                   }}
-                  className={`px-3 py-1 rounded-md transition ${
+                  className={`px-3 py-1 rounded-lg transition ${
                     enrollTab === 'camera'
-                      ? 'bg-emerald-500 text-slate-950 shadow'
+                      ? 'bg-slate-800 text-white shadow-sm'
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -530,9 +533,9 @@ export function RosterPage() {
                     setEnrollTab('manual');
                     stopEnrollCamera();
                   }}
-                  className={`px-3 py-1 rounded-md transition ${
+                  className={`px-3 py-1 rounded-lg transition ${
                     enrollTab === 'manual'
-                      ? 'bg-emerald-500 text-slate-950 shadow'
+                      ? 'bg-slate-800 text-white shadow-sm'
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -574,12 +577,12 @@ export function RosterPage() {
                   </div>
 
                   {/* Snap and Preview Bar */}
-                  <div className="flex items-center justify-between gap-3 bg-slate-800/50 p-3 rounded-xl border border-slate-700/60">
+                  <div className="flex items-center justify-between gap-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
                     <button
                       type="button"
                       disabled={isExtractingFace}
                       onClick={handleSnapFace}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-slate-950 font-bold rounded-lg text-sm transition shadow-lg shadow-emerald-500/20 active:scale-95"
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-slate-950 font-bold rounded-xl text-sm transition-all duration-200 active:scale-95 shadow-sm"
                     >
                       {isExtractingFace ? (
                         <>
@@ -619,14 +622,14 @@ export function RosterPage() {
 
               {enrollTab === 'manual' && (
                 <div className="space-y-3">
-                  <div className="p-4 rounded-xl border border-dashed border-slate-700 bg-slate-800/40 text-center space-y-2">
+                  <div className="p-4 rounded-xl border border-dashed border-slate-700 bg-slate-950/50 text-center space-y-2">
                     <div className="flex justify-center">
                       <Upload className="w-8 h-8 text-emerald-400" />
                     </div>
                     <p className="text-xs text-slate-300 font-medium">
                       Upload a student portrait photo to extract neural biometrics
                     </p>
-                    <label className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs font-semibold cursor-pointer transition">
+                    <label className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-semibold cursor-pointer transition">
                       <span>Choose Portrait Photo</span>
                       <input
                         type="file"
@@ -638,7 +641,7 @@ export function RosterPage() {
                   </div>
 
                   {capturedFace && (
-                    <div className="flex items-center gap-3 p-3 bg-slate-800/60 rounded-xl border border-emerald-500/40">
+                    <div className="flex items-center gap-3 p-3 bg-slate-950/60 rounded-xl border border-emerald-500/40">
                       <img
                         src={capturedFace.thumbnailUrl}
                         alt="Enrolled portrait"
@@ -670,7 +673,7 @@ export function RosterPage() {
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
                     placeholder="e.g. Liam Parker"
-                    className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
                   />
                 </div>
                 <div>
@@ -682,7 +685,7 @@ export function RosterPage() {
                     value={formCode}
                     onChange={(e) => setFormCode(e.target.value)}
                     placeholder="e.g. STU-2041"
-                    className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
                   />
                 </div>
 
@@ -696,7 +699,7 @@ export function RosterPage() {
                       value={formImage}
                       onChange={(e) => setFormImage(e.target.value)}
                       placeholder="https://example.com/photo.jpg"
-                      className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
                     />
                   </div>
                 )}
@@ -712,7 +715,7 @@ export function RosterPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-500/20"
+                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-xl text-sm transition-all duration-200 active:scale-[0.98] shadow-sm"
                 >
                   Save & Enroll in Roster
                 </button>
@@ -724,7 +727,7 @@ export function RosterPage() {
 
       {/* Edit Student Modal */}
       {editStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
           <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
             <h2 className="text-lg font-bold text-white mb-4">Edit Student</h2>
             <form onSubmit={handleUpdateStudent} className="space-y-4">
@@ -735,7 +738,7 @@ export function RosterPage() {
                   required
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
                 />
               </div>
               <div>
@@ -746,7 +749,7 @@ export function RosterPage() {
                   type="text"
                   value={formCode}
                   onChange={(e) => setFormCode(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
                 />
               </div>
               <div>
@@ -755,11 +758,11 @@ export function RosterPage() {
                   type="url"
                   value={formImage}
                   onChange={(e) => setFormImage(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3">
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={() => setEditStudent(null)}
@@ -769,7 +772,7 @@ export function RosterPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold rounded-xl text-sm transition"
+                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-xl text-sm transition-all duration-200 active:scale-[0.98] shadow-sm"
                 >
                   Save Changes
                 </button>
@@ -781,15 +784,15 @@ export function RosterPage() {
 
       {/* Batch Upload Modal */}
       {showBatchModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
           <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
             <h2 className="text-lg font-bold text-white mb-2">Upload Student Roster Batch</h2>
             <p className="text-xs text-slate-400 mb-4">
-              Select a CSV file formatted as <code className="text-emerald-400">student_id,name,image_url</code>{' '}
+              Select a CSV file formatted as <code className="text-emerald-400 font-mono">student_id,name,image_url</code>{' '}
               or JSON array of students with embeddings.
             </p>
 
-            <div className="border-2 border-dashed border-slate-700 hover:border-emerald-500/50 rounded-2xl p-8 text-center cursor-pointer transition bg-slate-800/40">
+            <div className="border-2 border-dashed border-slate-700 hover:border-emerald-500/50 rounded-2xl p-8 text-center cursor-pointer transition bg-slate-950/50">
               <input
                 type="file"
                 accept=".csv,.json"

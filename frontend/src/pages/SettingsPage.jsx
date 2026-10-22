@@ -7,8 +7,9 @@ import {
   CheckCircle,
   AlertCircle,
   ShieldCheck,
+  LogOut,
+  Sparkles,
 } from 'lucide-react';
-import { PixelSettings, PixelLogout } from '../components/PixelIcon.jsx';
 import WakeSlider from '../components/WakeSlider.jsx';
 import { getLocalSettings, saveSettings } from '../storage/settingsStore.js';
 import { signOut, getCurrentUser } from '../auth/auth.js';
@@ -72,15 +73,15 @@ export function SettingsPage() {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-500">Loading settings...</div>;
+    return <div className="p-8 text-center text-slate-500 font-sans">Loading settings...</div>;
   }
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="max-w-3xl space-y-6 font-sans">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-          <PixelSettings className="w-5 h-5" />
+          <Sliders className="w-5 h-5" />
         </div>
         <div>
           <h1 className="text-2xl font-bold text-white tracking-tight">System & Device Settings</h1>
@@ -109,10 +110,10 @@ export function SettingsPage() {
 
       <form onSubmit={handleSave} className="space-y-6">
         {/* Cosine Matcher Confidence Threshold with WakeSlider */}
-        <div className="p-6 rounded-2xl bg-[#181322]/90 border border-[#2e263d] shadow-sm">
+        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md shadow-sm ring-1 ring-white/[0.05]">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="font-bold text-white text-base">Cosine Biometric Threshold</h2>
+              <h2 className="font-bold text-white text-base tracking-tight">Cosine Biometric Threshold</h2>
               <p className="text-xs text-slate-400 mt-0.5">
                 Minimum vector similarity score required to trigger positive student identification.
               </p>
@@ -135,7 +136,7 @@ export function SettingsPage() {
               restHeight={14}
               gap={4}
               fillColor="#10b981"
-              trackColor="#262033"
+              trackColor="#1e293b"
               crestColor="#34d399"
               showValue={false}
               ariaLabel="Biometric Match Confidence Threshold"
@@ -150,7 +151,7 @@ export function SettingsPage() {
         </div>
 
         {/* Battery Saver Mode */}
-        <div className="p-6 rounded-2xl bg-[#181322]/90 border border-[#2e263d] shadow-sm">
+        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md shadow-sm ring-1 ring-white/[0.05]">
           <div className="flex items-center justify-between">
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0 mt-0.5">
@@ -159,7 +160,7 @@ export function SettingsPage() {
               <div>
                 <label
                   htmlFor="battery-saver"
-                  className="font-bold text-base text-white cursor-pointer select-none"
+                  className="font-bold text-base text-white cursor-pointer select-none tracking-tight"
                 >
                   Battery Saver Override
                 </label>
@@ -178,19 +179,19 @@ export function SettingsPage() {
                 onChange={(e) => handleBatterySaverToggle(e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-[#262033] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
             </label>
           </div>
         </div>
 
         {/* Target FPS */}
-        <div className="p-6 rounded-2xl bg-[#181322]/90 border border-[#2e263d] shadow-sm">
+        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md shadow-sm ring-1 ring-white/[0.05]">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
               <Sliders className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="font-bold text-white text-base">Target Camera Frame Rate (FPS)</h2>
+              <h2 className="font-bold text-white text-base tracking-tight">Target Camera Frame Rate (FPS)</h2>
               <p className="text-xs text-slate-400">
                 Negotiates frame-budget frequency for the <code>requestVideoFrameCallback</code> loop.
               </p>
@@ -208,15 +209,15 @@ export function SettingsPage() {
                   key={fps}
                   disabled={isDisabled}
                   onClick={() => setTargetFps(fps)}
-                  className={`p-4 rounded-xl border text-center transition flex flex-col items-center justify-center gap-1.5 ${
+                  className={`p-4 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-1.5 ${
                     isSelected
-                      ? 'bg-emerald-500/15 border-emerald-500 text-emerald-400 font-bold shadow-lg shadow-emerald-500/10'
+                      ? 'bg-emerald-500/15 border-emerald-500 text-emerald-400 font-bold shadow-sm'
                       : isDisabled
-                      ? 'bg-[#181322]/40 border-[#262033]/40 text-slate-600 cursor-not-allowed'
-                      : 'bg-[#221b30]/60 border-[#362b4c]/60 hover:bg-[#2c233e] text-slate-300'
+                      ? 'bg-slate-950/40 border-slate-800/40 text-slate-600 cursor-not-allowed'
+                      : 'bg-slate-950/60 border-slate-800 hover:bg-slate-800 text-slate-300'
                   }`}
                 >
-                  <span className="text-xl font-extrabold">{fps} FPS</span>
+                  <span className="text-xl font-extrabold font-mono">{fps} FPS</span>
                   <span className="text-[11px] font-medium text-slate-400">
                     {fps === 15 ? 'Economy (Low Latency)' : fps === 30 ? 'Balanced (Standard)' : 'Ultra-Smooth (High CPU)'}
                   </span>
@@ -232,13 +233,13 @@ export function SettingsPage() {
         </div>
 
         {/* Model Quality Selection */}
-        <div className="p-6 rounded-2xl bg-[#181322]/90 border border-[#2e263d] shadow-sm">
+        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md shadow-sm ring-1 ring-white/[0.05]">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
               <Cpu className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="font-bold text-white text-base">Model Quality & Vision Architecture</h2>
+              <h2 className="font-bold text-white text-base tracking-tight">Model Quality & Vision Architecture</h2>
               <p className="text-xs text-slate-400">
                 Configures BlazeFace detector size and WebGL/WASM-SIMD delegates.
               </p>
@@ -266,10 +267,10 @@ export function SettingsPage() {
               <label
                 key={option.id}
                 onClick={() => setModelQuality(option.id)}
-                className={`flex items-start gap-3.5 p-4 rounded-xl border cursor-pointer transition ${
+                className={`flex items-start gap-3.5 p-4 rounded-xl border cursor-pointer transition-all ${
                   modelQuality === option.id
-                    ? 'bg-purple-500/10 border-purple-500/40 text-purple-200 shadow-md'
-                    : 'bg-[#221b30]/40 border-[#362b4c]/50 hover:bg-[#2c233e]/80 text-slate-400'
+                    ? 'bg-indigo-500/10 border-indigo-500/40 text-indigo-200 shadow-sm'
+                    : 'bg-slate-950/60 border-slate-800 hover:bg-slate-800/60 text-slate-400'
                 }`}
               >
                 <input
@@ -278,7 +279,7 @@ export function SettingsPage() {
                   value={option.id}
                   checked={modelQuality === option.id}
                   onChange={() => setModelQuality(option.id)}
-                  className="mt-1 text-purple-500 focus:ring-purple-500"
+                  className="mt-1 text-indigo-500 focus:ring-indigo-500"
                 />
                 <div>
                   <div className="font-bold text-sm text-white">{option.title}</div>
@@ -294,7 +295,7 @@ export function SettingsPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-slate-950 font-bold rounded-xl text-sm transition shadow-lg shadow-emerald-500/20 active:scale-[0.99]"
+            className="flex items-center gap-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-slate-950 font-bold rounded-xl text-sm transition-all duration-200 active:scale-[0.98] shadow-sm"
           >
             <Save className="w-4 h-4" />
             <span>{saving ? 'Saving...' : 'Save & Persist Preferences'}</span>
@@ -302,19 +303,19 @@ export function SettingsPage() {
         </div>
       </form>
 
-      {/* Account & Session Management (Sign Out Moved Here) */}
-      <div className="p-6 rounded-2xl bg-[#181322]/90 border border-red-500/20 shadow-sm mt-8">
+      {/* Account & Session Management */}
+      <div className="p-6 rounded-2xl bg-slate-900/60 border border-red-500/20 backdrop-blur-md shadow-sm mt-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 flex-shrink-0 mt-0.5">
-              <PixelLogout className="w-5 h-5" />
+              <LogOut className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="font-bold text-white text-base">Account & Session</h2>
+              <h2 className="font-bold text-white text-base tracking-tight">Account & Session</h2>
               <div className="text-xs text-slate-400 mt-0.5">
                 Logged in as <span className="text-slate-200 font-semibold">{user?.email || 'admin@verity.edu'}</span>
               </div>
-              <div className="text-xs text-emerald-400 mt-0.5">
+              <div className="text-xs text-emerald-400 mt-0.5 font-medium">
                 Tenant: {user?.tenantName || "Institution Tenant"}
               </div>
             </div>
@@ -323,9 +324,9 @@ export function SettingsPage() {
           <button
             type="button"
             onClick={signOut}
-            className="flex items-center gap-2 px-5 py-2.5 bg-red-500/15 hover:bg-red-500/25 border border-red-500/40 text-red-400 hover:text-red-300 font-bold rounded-xl text-xs transition active:scale-[0.98]"
+            className="flex items-center gap-2 px-5 py-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 hover:text-red-300 font-bold rounded-xl text-xs transition active:scale-[0.98]"
           >
-            <PixelLogout className="w-4 h-4" />
+            <LogOut className="w-4 h-4" />
             <span>Sign Out of Verity</span>
           </button>
         </div>

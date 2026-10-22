@@ -67,7 +67,7 @@ export const FloatingDockMobile = ({
                       setOpen(false);
                     }
                   }}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1e192b] border border-[#2e263d] text-slate-200 shadow-md hover:border-emerald-500/40"
+                  className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-900 border border-slate-800 text-slate-200 shadow-lg hover:border-emerald-500/40 transition-colors"
                 >
                   <div className="h-5 w-5 flex items-center justify-center">{item.icon}</div>
                 </a>
@@ -78,7 +78,7 @@ export const FloatingDockMobile = ({
       </AnimatePresence>
       <button
         onClick={() => setOpen(!open)}
-        className="flex h-11 w-11 items-center justify-center rounded-full bg-[#181322] border border-[#2e263d] shadow-lg text-slate-300 hover:text-white"
+        className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-900/95 border border-slate-800 shadow-xl text-slate-300 hover:text-white transition-colors"
         aria-label="Toggle Dock Menu"
       >
         <svg
@@ -111,7 +111,7 @@ export const FloatingDockDesktop = ({
       onMouseMove={(e) => mouseX.set(e.pageX)}
       onMouseLeave={() => mouseX.set(Infinity)}
       className={cn(
-        "mx-auto hidden h-16 items-end gap-3.5 rounded-2xl bg-[#181322]/90 border border-[#2e263d] px-4 pb-3 md:flex backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.85)]",
+        "mx-auto hidden h-16 items-end gap-3 rounded-2xl bg-slate-900/90 border border-slate-800/80 px-4 pb-3 md:flex backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.65)]",
         className
       )}
     >
@@ -152,11 +152,11 @@ function IconContainer({
     return val - bounds.x - bounds.width / 2;
   });
 
-  const widthTransform = useTransform(distance, [-150, 0, 150], [42, 82, 42]);
-  const heightTransform = useTransform(distance, [-150, 0, 150], [42, 82, 42]);
+  const widthTransform = useTransform(distance, [-150, 0, 150], [42, 80, 42]);
+  const heightTransform = useTransform(distance, [-150, 0, 150], [42, 80, 42]);
 
-  const widthTransformIcon = useTransform(distance, [-150, 0, 150], [22, 42, 22]);
-  const heightTransformIcon = useTransform(distance, [-150, 0, 150], [22, 42, 22]);
+  const widthTransformIcon = useTransform(distance, [-150, 0, 150], [22, 40, 22]);
+  const heightTransformIcon = useTransform(distance, [-150, 0, 150], [22, 40, 22]);
 
   const width = useSpring(widthTransform, {
     mass: 0.1,
@@ -201,10 +201,10 @@ function IconContainer({
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         className={cn(
-          "relative flex aspect-square items-center justify-center rounded-full transition-colors cursor-pointer",
+          "relative flex aspect-square items-center justify-center rounded-xl transition-all cursor-pointer",
           active
-            ? "bg-[#251f33] border border-emerald-500/60 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
-            : "bg-[#1f192b] border border-[#2e263d] hover:border-emerald-500/40 hover:bg-[#251f33]"
+            ? "bg-slate-800 border border-emerald-500/70 shadow-[0_0_12px_rgba(16,185,129,0.25)]"
+            : "bg-slate-800/60 border border-slate-700/60 hover:border-slate-600 hover:bg-slate-800"
         )}
       >
         <AnimatePresence>
@@ -213,7 +213,7 @@ function IconContainer({
               initial={{ opacity: 0, y: 10, x: "-50%" }}
               animate={{ opacity: 1, y: 0, x: "-50%" }}
               exit={{ opacity: 0, y: 2, x: "-50%" }}
-              className="absolute -top-9 left-1/2 w-fit rounded-lg border border-[#2e263d] bg-[#181322] px-2.5 py-1 text-xs whitespace-pre font-medium text-slate-100 shadow-xl pointer-events-none"
+              className="absolute -top-9 left-1/2 w-fit rounded-lg border border-slate-800 bg-slate-900 px-2.5 py-1 text-xs whitespace-pre font-medium text-slate-100 shadow-xl pointer-events-none"
             >
               {title}
             </motion.div>

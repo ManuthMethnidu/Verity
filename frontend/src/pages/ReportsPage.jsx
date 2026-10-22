@@ -65,7 +65,7 @@ export function ReportsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -85,13 +85,13 @@ export function ReportsPage() {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="pl-9 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-semibold focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
             />
           </div>
 
           <button
             onClick={() => fetchReport(date)}
-            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl transition"
+            className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 rounded-xl transition"
             title="Refresh Report"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -99,7 +99,7 @@ export function ReportsPage() {
 
           <button
             onClick={exportCSV}
-            className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-semibold transition"
+            className="flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-xl text-xs transition-all duration-200 active:scale-[0.98] shadow-sm"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Export CSV</span>
@@ -109,54 +109,54 @@ export function ReportsPage() {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm">
           <div>
             <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Total Logged Events
             </div>
-            <div className="text-2xl font-bold text-white mt-1">
+            <div className="text-2xl sm:text-3xl font-extrabold text-white mt-1 font-mono tracking-tight">
               {stats.totalAttendanceEvents}
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+          <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 flex-shrink-0">
             <ClipboardList className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm">
           <div>
             <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Unique Attendees
             </div>
-            <div className="text-2xl font-bold text-emerald-400 mt-1">
-              {stats.uniquePresent} / {stats.totalEnrolled}
+            <div className="text-2xl sm:text-3xl font-extrabold text-emerald-400 mt-1 font-mono tracking-tight">
+              {stats.uniquePresent} <span className="text-sm font-sans text-slate-400 font-normal">/ {stats.totalEnrolled}</span>
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
             <CheckCircle2 className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm">
           <div>
             <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
               Attendance Turnout
             </div>
-            <div className="text-2xl font-bold text-purple-400 mt-1">
+            <div className="text-2xl sm:text-3xl font-extrabold text-indigo-400 mt-1 font-mono tracking-tight">
               {stats.attendanceRate.toFixed(1)}%
             </div>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400">
+          <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 flex-shrink-0">
             <TrendingUp className="w-5 h-5" />
           </div>
         </div>
       </div>
 
       {/* Report Records Table */}
-      <div className="bg-slate-900/80 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+      <div className="bg-slate-900/60 border border-slate-800/80 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/[0.05]">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-800/60 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800">
+            <thead className="bg-slate-950/60 text-xs font-semibold text-slate-400 uppercase tracking-wider border-b border-slate-800/80">
               <tr>
                 <th className="px-6 py-3.5">Student</th>
                 <th className="px-6 py-3.5">Student ID Code</th>
@@ -180,15 +180,15 @@ export function ReportsPage() {
                 </tr>
               ) : (
                 report.records.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-800/30 transition">
+                  <tr key={r.id} className="hover:bg-slate-800/20 transition">
                     <td className="px-6 py-4 font-semibold text-white">
                       {r.studentName}
                     </td>
-                    <td className="px-6 py-4 text-slate-300 font-mono text-xs">
+                    <td className="px-6 py-4 text-emerald-400 font-mono text-xs">
                       {r.studentCode || '—'}
                     </td>
-                    <td className="px-6 py-4 text-slate-300 text-xs">
-                      {new Date(r.timestamp).toLocaleString([], {
+                    <td className="px-6 py-4 text-slate-300 font-mono text-xs">
+                      {new Date(r.timestamp).toLocaleTimeString([], {
                         hour: '2-digit',
                         minute: '2-digit',
                         second: '2-digit',
@@ -198,7 +198,7 @@ export function ReportsPage() {
                       {r.deviceId}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
                         {r.confidence ? `${(r.confidence * 100).toFixed(1)}%` : 'Verified'}
                       </span>
                     </td>
