@@ -11,6 +11,7 @@ import {
   loadFaceApiModels,
   detectAllFacesWithDescriptors,
   matchDescriptorToRoster,
+  clearRosterTensorCache,
 } from './faceApiService.js';
 
 export class DetectorLoop {
@@ -23,6 +24,7 @@ export class DetectorLoop {
     onMetricsUpdate = null,
     isMirrored = true,
     threshold = 0.55,
+    batterySaver = false,
   }) {
     this.video = videoElement;
     this.canvas = canvasElement;
@@ -33,14 +35,20 @@ export class DetectorLoop {
     this.onMetricsUpdate = onMetricsUpdate;
     this.isMirrored = Boolean(isMirrored);
     this.threshold = threshold;
+    this.batterySaver = Boolean(batterySaver);
+
+    this.isMobileDevice =
+      typeof navigator !== 'undefined' &&
+      (/Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+        (typeof window !== 'undefined' && window.innerWidth <= 768));
 
     this.isRunning = false;
     this.animationId = null;
     this.detectorReady = false;
     this.isDetecting = false;
 
-    // Quality setting
-    this.inputSize = 320;
+    // Quality setting (optimized for mobile)
+    this.inputSize = this.isMobileDevice ? 224 : 320;
     this.scoreThreshold = 0.45;
 
     // Active detected & matched faces
@@ -69,6 +77,7 @@ export class DetectorLoop {
 
   setRoster(roster) {
     this.roster = Array.isArray(roster) ? roster : [];
+    clearRosterTensorCache();
   }
 
   setThreshold(threshold) {
@@ -79,14 +88,15 @@ export class DetectorLoop {
    * Initializes face-api neural network models (TinyFaceDetector, Landmarks, ResNet FaceRecognition)
    */
   async initDetector(quality = 'medium') {
-    if (quality === 'low') {
-      this.inputSize = 224;
+    if (quality === 'low' || this.batterySaver) {
+      this.inputSize = this.isMobileDevice ? 160 : 224;
       this.scoreThreshold = 0.40;
     } else if (quality === 'high') {
-      this.inputSize = 416;
+      this.inputSize = this.isMobileDevice ? 320 : 416;
       this.scoreThreshold = 0.50;
     } else {
-      this.inputSize = 320;
+      // Default / medium: 224 on mobile cuts neural FLOPs in half!
+      this.inputSize = this.isMobileDevice ? 224 : 320;
       this.scoreThreshold = 0.45;
     }
 
@@ -183,8 +193,10 @@ export class DetectorLoop {
       // 2. Clear canvas for fresh frame
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-      // 3. Trigger async detection cycle if not already running
-      if (!this.isDetecting && this.detectorReady) {
+      // 3. Trigger async detection cycle if cadence threshold satisfied (keeps mobile GPU cool)
+      const minInterval = this.batterySaver ? 220 : (this.isMobileDevice ? 90 : 50);
+      if (!this.isDetecting && this.detectorReady && (now - this.lastDetectionTime >= minInterval)) {
+        this.lastDetectionTime = now;
         this.runFaceDetectionAsync(now);
       }
 

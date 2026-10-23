@@ -193,6 +193,7 @@ export function AttendancePage() {
         roster,
         isMirrored,
         threshold: prefs.confidenceThreshold || 0.55,
+        batterySaver: prefs.batterySaver,
         onVerifiedMatch: async ({ student, confidence, distance }) => {
           // Play pleasant confirmation audio ping
           try {

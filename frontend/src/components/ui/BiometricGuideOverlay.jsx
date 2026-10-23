@@ -7,6 +7,28 @@ import { Check, Info, AlertCircle, Sparkles } from 'lucide-react';
  * Renders 64 radiating tick-marks around the circular camera frame.
  * Ticks illuminate in vibrant emerald as the user turns to each angle and completes the circle.
  */
+// Precompute static radial tick coordinates once (viewBox 0 0 320 320, center 160 160)
+const TOTAL_TICKS = 64;
+const BASE_TICKS = Array.from({ length: TOTAL_TICKS }, (_, i) => {
+  const angleDeg = (i * 360) / TOTAL_TICKS - 90;
+  const angleRad = (angleDeg * Math.PI) / 180;
+  const rInner = 118;
+  const rOuter = 136;
+  return {
+    index: i,
+    x1: 160 + rInner * Math.cos(angleRad),
+    y1: 160 + rInner * Math.sin(angleRad),
+    x2: 160 + rOuter * Math.cos(angleRad),
+    y2: 160 + rOuter * Math.sin(angleRad),
+    angleDeg,
+  };
+});
+
+/**
+ * Radial Ticks Biometric Circle Guide (Meta / Yoti / Apple Face ID style).
+ * Renders 64 radiating tick-marks around the circular camera frame.
+ * Optimized with precomputed coordinates & grouped GPU filter rasterization.
+ */
 export function BiometricGuideOverlay({
   step = 'front', // 'front' | 'left' | 'right'
   livePose = null,
@@ -14,8 +36,6 @@ export function BiometricGuideOverlay({
   capturedAngles = { front: null, left: null, right: null },
   isMirrored = true,
 }) {
-  const TOTAL_TICKS = 64;
-
   const hasFront = Boolean(capturedAngles.front);
   const hasLeft = Boolean(capturedAngles.left);
   const hasRight = Boolean(capturedAngles.right);
@@ -29,31 +49,13 @@ export function BiometricGuideOverlay({
 
   const isOverrotated = livePose && livePose.pose === 'overrotated';
 
-  // Sector mappings for 64 ticks (index 0 is at 12 o'clock, clockwise):
-  // Top / Front: indices 54..63 and 0..10 (approx 21 ticks)
-  // Right Profile: indices 10..26 (approx 17 ticks on right, ~3 o'clock)
-  // Bottom: indices 26..38 (approx 13 ticks at 6 o'clock)
-  // Left Profile: indices 38..54 (approx 17 ticks on left, ~9 o'clock)
   const isFrontTick = (idx) => idx >= 54 || idx <= 10;
   const isRightTick = (idx) => idx >= 10 && idx <= 26;
   const isBottomTick = (idx) => idx >= 26 && idx <= 38;
   const isLeftTick = (idx) => idx >= 38 && idx <= 54;
 
-  // Generate radial tick coordinates
-  // viewBox="0 0 320 320", center at (160, 160)
-  // Inner radius: 114, Outer radius: 130 (length 16px)
-  const ticks = Array.from({ length: TOTAL_TICKS }, (_, i) => {
-    const angleDeg = (i * 360) / TOTAL_TICKS - 90; // 0 deg is top center
-    const angleRad = (angleDeg * Math.PI) / 180;
-    const rInner = 118;
-    const rOuter = 136;
-
-    const x1 = 160 + rInner * Math.cos(angleRad);
-    const y1 = 160 + rInner * Math.sin(angleRad);
-    const x2 = 160 + rOuter * Math.cos(angleRad);
-    const y2 = 160 + rOuter * Math.sin(angleRad);
-
-    // Determine if this tick is illuminated
+  const ticks = BASE_TICKS.map((base) => {
+    const i = base.index;
     let isLit = false;
     let isActiveSector = false;
 
@@ -65,7 +67,7 @@ export function BiometricGuideOverlay({
       if (hasRight && isRightTick(i)) isLit = true;
 
       // When bottom ticks connect after front, left, or right are captured
-      if ((hasLeft && hasRight) && isBottomTick(i)) isLit = true;
+      if (hasLeft && hasRight && isBottomTick(i)) isLit = true;
 
       // Active step sector highlighting
       if (step === 'front' && isFrontTick(i)) {
@@ -81,14 +83,9 @@ export function BiometricGuideOverlay({
     }
 
     return {
-      index: i,
-      x1,
-      y1,
-      x2,
-      y2,
+      ...base,
       isLit,
       isActiveSector,
-      angleDeg,
     };
   });
 
@@ -102,42 +99,53 @@ export function BiometricGuideOverlay({
       >
         <defs>
           <filter id="tick-glow" x="-20%" y="-20%" width="140%" height="140%">
-            <feGaussianBlur stdDeviation="3" result="blur" />
+            <feGaussianBlur stdDeviation="2.5" result="blur" />
             <feComposite in="SourceGraphic" in2="blur" operator="over" />
           </filter>
         </defs>
 
-        {/* Render all 64 radiating ticks */}
-        {ticks.map((tick) => {
-          let strokeColor = 'rgba(148, 163, 184, 0.25)'; // Faint gray by default
-          let strokeW = 2.5;
-          let filter = undefined;
+        {/* Group unlit / base ticks without filter */}
+        <g strokeLinecap="round">
+          {ticks
+            .filter((t) => !t.isLit)
+            .map((tick) => {
+              const strokeColor = tick.isActiveSector
+                ? isTargetMatched
+                  ? '#34d399'
+                  : 'rgba(16, 185, 129, 0.45)'
+                : 'rgba(148, 163, 184, 0.25)';
+              const strokeW = tick.isActiveSector ? 3 : 2.5;
 
-          if (tick.isLit) {
-            strokeColor = '#10b981'; // Vibrant emerald green
-            strokeW = 3.5;
-            filter = 'url(#tick-glow)';
-          } else if (tick.isActiveSector) {
-            // Pulse active target sector in amber/emerald to visually guide user
-            strokeColor = isTargetMatched ? '#34d399' : 'rgba(16, 185, 129, 0.45)';
-            strokeW = 3;
-          }
+              return (
+                <line
+                  key={tick.index}
+                  x1={tick.x1}
+                  y1={tick.y1}
+                  x2={tick.x2}
+                  y2={tick.y2}
+                  stroke={strokeColor}
+                  strokeWidth={strokeW}
+                  className="transition-colors duration-150"
+                />
+              );
+            })}
+        </g>
 
-          return (
-            <line
-              key={tick.index}
-              x1={tick.x1}
-              y1={tick.y1}
-              x2={tick.x2}
-              y2={tick.y2}
-              stroke={strokeColor}
-              strokeWidth={strokeW}
-              strokeLinecap="round"
-              filter={filter}
-              className="transition-colors duration-200"
-            />
-          );
-        })}
+        {/* Group illuminated ticks under single GPU filter pass */}
+        <g filter="url(#tick-glow)" stroke="#10b981" strokeWidth="3.5" strokeLinecap="round">
+          {ticks
+            .filter((t) => t.isLit)
+            .map((tick) => (
+              <line
+                key={tick.index}
+                x1={tick.x1}
+                y1={tick.y1}
+                x2={tick.x2}
+                y2={tick.y2}
+                className="transition-colors duration-150"
+              />
+            ))}
+        </g>
       </svg>
 
       {/* Target Gate Arc Indicator (sweeps towards left/right) */}

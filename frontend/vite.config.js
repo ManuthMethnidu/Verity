@@ -32,4 +32,29 @@ export default defineConfig({
   worker: {
     format: 'es',
   },
+  build: {
+    target: 'esnext',
+    chunkSizeWarningLimit: 1200,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('@vladmandic/face-api') || id.includes('@tensorflow')) {
+            return 'vision-engine';
+          }
+          if (id.includes('@phosphor-icons/react') || id.includes('lucide-react')) {
+            return 'icons';
+          }
+          if (id.includes('d3') || id.includes('@visx')) {
+            return 'charts-engine';
+          }
+          if (id.includes('framer-motion') || id.includes('motion')) {
+            return 'motion-engine';
+          }
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        },
+      },
+    },
+  },
 });

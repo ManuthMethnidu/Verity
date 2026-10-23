@@ -26,6 +26,7 @@ import { cacheRoster, getCachedRoster } from '../storage/attendanceStore.js';
 import { CameraManager } from '../vision/cameraManager.js';
 import {
   detectSingleFaceWithDescriptor,
+  detectSingleFaceLandmarks,
   extractFaceThumbnail,
   loadFaceApiModels,
 } from '../vision/faceApiService.js';
@@ -188,9 +189,19 @@ export function RosterPage() {
   };
 
   // Start enrollment webcam
-  const startEnrollCamera = async () => {
+  const startEnrollCamera = async (retries = 8) => {
     try {
-      enrollCameraManagerRef.current = new CameraManager();
+      if (!enrollVideoRef.current) {
+        if (retries > 0) {
+          setTimeout(() => startEnrollCamera(retries - 1), 50);
+          return;
+        }
+        console.warn('Enrollment video ref unavailable after retries');
+        return;
+      }
+      if (!enrollCameraManagerRef.current) {
+        enrollCameraManagerRef.current = new CameraManager();
+      }
       await enrollCameraManagerRef.current.start(enrollVideoRef.current, {
         targetFps: 30,
         facingMode: 'user',
@@ -217,6 +228,18 @@ export function RosterPage() {
     holdCounterRef.current = 0;
   };
 
+  // Manage enrollment camera lifecycle when modal opens / closes / changes tabs
+  useEffect(() => {
+    if (showAddModal && enrollTab === 'camera') {
+      startEnrollCamera();
+    } else {
+      stopEnrollCamera();
+    }
+    return () => {
+      stopEnrollCamera();
+    };
+  }, [showAddModal, enrollTab]);
+
   // Real-time pose tracking & automatic 0.6s hold auto-snap
   const checkPoseFrame = async () => {
     if (
@@ -228,7 +251,7 @@ export function RosterPage() {
     if (enrollVideoRef.current.readyState < 2 || enrollVideoRef.current.videoWidth === 0) return;
 
     try {
-      const detection = await detectSingleFaceWithDescriptor(enrollVideoRef.current, 224, 0.4);
+      const detection = await detectSingleFaceLandmarks(enrollVideoRef.current, 224, 0.4);
       if (!detection || !detection.landmarks) {
         setLivePose(null);
         holdCounterRef.current = 0;
@@ -473,7 +496,6 @@ export function RosterPage() {
 
     setShowAddModal(true);
     setEnrollTab('camera');
-    setTimeout(() => startEnrollCamera(), 100);
   };
 
   const handleUpdateStudent = async (e) => {
@@ -598,10 +620,10 @@ export function RosterPage() {
         setFormName('');
         setFormCode('');
         setFormImage('');
-        setCapturedFace(null);
+        setCapturedAngles({ front: null, left: null, right: null });
+        setCurrentAngleStep('front');
         setEnrollTab('camera');
         setShowAddModal(true);
-        setTimeout(() => startEnrollCamera(), 100);
       },
     },
     {
@@ -688,7 +710,6 @@ export function RosterPage() {
               setCurrentAngleStep('front');
               setEnrollTab('camera');
               setShowAddModal(true);
-              setTimeout(() => startEnrollCamera(), 100);
             }}
             className="flex items-center gap-2 px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-full text-xs transition-all duration-200 active:scale-[0.98] shadow-sm cursor-pointer"
           >
@@ -991,16 +1012,23 @@ export function RosterPage() {
 
                       {/* Circular Camera Mask Viewport */}
                       <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-full overflow-hidden border-4 border-[#282828] bg-[#0d0d0d] shadow-2xl relative z-10 flex items-center justify-center ring-2 ring-emerald-500/20">
-                        {enrollCameraActive ? (
-                          <video
-                            ref={enrollVideoRef}
-                            className={`w-full h-full object-cover scale-110 ${
-                              enrollMirrored ? 'scale-x-[-1.1]' : ''
-                            }`}
-                          />
-                        ) : (
-                          <div className="w-full h-full bg-[#161616] flex items-center justify-center text-slate-500">
-                            <Camera className="w-10 h-10 animate-pulse text-slate-400" />
+                        <video
+                          ref={enrollVideoRef}
+                          autoPlay
+                          playsInline
+                          muted
+                          className={`w-full h-full object-cover transition-opacity duration-300 ${
+                            enrollCameraActive ? 'opacity-100' : 'opacity-0'
+                          }`}
+                          style={{
+                            transform: enrollMirrored ? 'scaleX(-1)' : 'none',
+                          }}
+                        />
+
+                        {!enrollCameraActive && (
+                          <div className="absolute inset-0 bg-[#161616] flex flex-col items-center justify-center text-slate-500 gap-2">
+                            <Camera className="w-10 h-10 animate-pulse text-emerald-400" />
+                            <span className="text-[11px] text-slate-400 font-medium">Starting camera...</span>
                           </div>
                         )}
                       </div>

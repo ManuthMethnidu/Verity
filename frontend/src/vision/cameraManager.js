@@ -17,6 +17,9 @@ export class CameraManager {
    * @param {object} options - { targetFps, batterySaver, deviceId, facingMode }
    */
   async start(videoElement, options = {}) {
+    if (!videoElement) {
+      throw new Error('Video element is required to start camera stream.');
+    }
     this.stop(); // Clean up existing stream
 
     this.videoElement = videoElement;
@@ -55,11 +58,19 @@ export class CameraManager {
         if (this.videoElement.readyState >= 2) {
           resolve();
         } else {
-          this.videoElement.onloadedmetadata = () => resolve();
+          const timeout = setTimeout(resolve, 1500);
+          this.videoElement.onloadedmetadata = () => {
+            clearTimeout(timeout);
+            resolve();
+          };
         }
       });
 
-      await this.videoElement.play();
+      try {
+        await this.videoElement.play();
+      } catch (playErr) {
+        console.warn('Video element play() caught (autoplay policy or already playing):', playErr);
+      }
 
       const track = this.stream.getVideoTracks()[0];
       const settings = track ? track.getSettings() : {};
