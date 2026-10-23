@@ -219,7 +219,7 @@ export function GooeyDropdown({
       className={cn("relative inline-block text-left", isOpen ? "z-50" : "z-30", className)}
       style={
         {
-          "--dropdown-fill": fill ?? "#0f172a",
+          "--dropdown-fill": fill ?? "#181818",
           "--dropdown-ink": ink ?? "#f8fafc",
         } as React.CSSProperties
       }
@@ -253,9 +253,9 @@ export function GooeyDropdown({
         }}
         className={cn(
           "relative flex items-center gap-2 h-11 px-4 rounded-full text-xs sm:text-sm font-semibold select-none cursor-pointer outline-none transition-all duration-200 shadow-sm",
-          "bg-slate-900 border border-slate-700/80 text-slate-100 hover:bg-slate-800 hover:border-slate-600 hover:text-white",
+          "bg-[#181818] border border-[#2e2e2e] text-slate-100 hover:bg-[#222222] hover:border-[#3a3a3a] hover:text-white",
           "focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:border-emerald-500",
-          isOpen && "bg-slate-850 border-emerald-500/60 ring-2 ring-emerald-500/20 text-white shadow-md",
+          isOpen && "bg-[#222222] border-emerald-500/60 ring-2 ring-emerald-500/20 text-white shadow-md",
           triggerClassName
         )}
       >
@@ -317,7 +317,7 @@ export function GooeyDropdown({
               }
             }}
             className={cn(
-              "absolute z-50 rounded-2xl bg-slate-900/98 border border-slate-700/80 shadow-2xl backdrop-blur-xl p-1.5 ring-1 ring-white/[0.08]",
+              "absolute z-50 rounded-2xl bg-[#181818]/98 border border-[#2e2e2e] shadow-2xl backdrop-blur-xl p-1.5 ring-1 ring-white/[0.08]",
               openUp ? "bottom-[calc(100%+8px)]" : "top-[calc(100%+8px)]"
             )}
           >
@@ -327,7 +327,7 @@ export function GooeyDropdown({
                   {action.divider && (
                     <div
                       role="separator"
-                      className="mx-2 my-1.5 h-px bg-slate-800 border-t border-slate-800"
+                      className="mx-2 my-1.5 h-px bg-[#262626] border-t border-[#262626]"
                     />
                   )}
                   <button
@@ -347,7 +347,7 @@ export function GooeyDropdown({
                       "flex w-full items-center gap-3 px-3 py-2.5 rounded-xl text-left outline-none transition-all cursor-pointer select-none",
                       action.destructive
                         ? "text-red-400 hover:bg-red-500/10 focus:bg-red-500/15 focus:text-red-300"
-                        : "text-slate-200 hover:bg-slate-800/90 hover:text-white focus:bg-slate-800 focus:text-white"
+                        : "text-slate-200 hover:bg-[#242424] hover:text-white focus:bg-[#242424] focus:text-white"
                     )}
                     style={{
                       color: action.destructive ? danger : undefined,

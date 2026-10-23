@@ -19,6 +19,7 @@ import {
   ArrowCounterClockwise as RotateCcw,
   UserCheck,
   Check,
+  Info,
 } from '@phosphor-icons/react';
 import { api } from '../auth/auth.js';
 import { cacheRoster, getCachedRoster } from '../storage/attendanceStore.js';
@@ -30,6 +31,7 @@ import {
 } from '../vision/faceApiService.js';
 import { estimateHeadPose, isPoseMatchingTarget } from '../vision/poseEstimation.js';
 import { GooeyDropdown } from '../components/ui/GooeyDropdown.tsx';
+import { BiometricGuideOverlay } from '../components/ui/BiometricGuideOverlay.jsx';
 
 export function RosterPage() {
   const [students, setStudents] = useState([]);
@@ -699,7 +701,7 @@ export function RosterPage() {
             actions={rosterDropdownActions}
             anchor="end"
             menuWidth={260}
-            fill="#0f172a"
+            fill="#181818"
             ink="#f8fafc"
             danger="#ef4444"
           />
@@ -715,12 +717,12 @@ export function RosterPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by student name or ID code..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-900/80 border border-slate-800 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
+            className="w-full pl-10 pr-4 py-2 bg-[#181818] border border-[#282828] rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
           />
         </div>
 
         <div className="flex items-center gap-2 text-xs font-mono">
-          <div className="px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300 flex items-center gap-2">
+          <div className="px-3 py-1.5 rounded-xl bg-[#181818] border border-[#282828] text-slate-300 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span>Active (3 Angles):</span>
             <span className="text-emerald-400 font-bold">
@@ -731,17 +733,17 @@ export function RosterPage() {
               }
             </span>
           </div>
-          <div className="px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-400">
+          <div className="px-3 py-1.5 rounded-xl bg-[#181818] border border-[#282828] text-slate-400">
             Total: <span className="text-white font-bold">{students.length}</span>
           </div>
         </div>
       </div>
 
       {/* Roster Table */}
-      <div className="bg-slate-900/60 border border-slate-800/80 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/[0.05]">
+      <div className="bg-[#181818]/90 border border-[#282828] backdrop-blur-md rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/[0.05]">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-950/60 text-xs font-medium text-slate-400 border-b border-slate-800/80">
+            <thead className="bg-[#0d0d0d] text-xs font-medium text-slate-400 border-b border-[#282828]">
               <tr>
                 <th className="px-6 py-3.5">Student</th>
                 <th className="px-6 py-3.5">Student ID Code</th>
@@ -749,7 +751,7 @@ export function RosterPage() {
                 <th className="px-6 py-3.5 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-[#242424]">
               {loading ? (
                 <tr>
                   <td colSpan="4" className="text-center py-12 text-slate-500">
@@ -770,10 +772,10 @@ export function RosterPage() {
                     (s.embeddingVector && s.embeddingVector.length >= 384);
 
                   return (
-                    <tr key={s.id} className="hover:bg-slate-800/20 transition">
+                    <tr key={s.id} className="hover:bg-white/[0.03] transition">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700/80 overflow-hidden flex items-center justify-center flex-shrink-0">
+                          <div className="w-10 h-10 rounded-full bg-[#222222] border border-[#333333] overflow-hidden flex items-center justify-center flex-shrink-0">
                             {s.imageUrl ? (
                               <img
                                 src={s.imageUrl}
@@ -803,7 +805,7 @@ export function RosterPage() {
                                   src={s.imageUrl}
                                   alt="Front"
                                   title="Frontal Portrait"
-                                  className="w-5 h-5 rounded-full object-cover border border-slate-900 ring-1 ring-emerald-500/50"
+                                  className="w-5 h-5 rounded-full object-cover border border-[#181818] ring-1 ring-emerald-500/50"
                                 />
                               )}
                               {s.imageLeftUrl && (
@@ -811,7 +813,7 @@ export function RosterPage() {
                                   src={s.imageLeftUrl}
                                   alt="Left"
                                   title="Left Profile (~35°)"
-                                  className="w-5 h-5 rounded-full object-cover border border-slate-900 ring-1 ring-emerald-500/50"
+                                  className="w-5 h-5 rounded-full object-cover border border-[#181818] ring-1 ring-emerald-500/50"
                                 />
                               )}
                               {s.imageRightUrl && (
@@ -819,7 +821,7 @@ export function RosterPage() {
                                   src={s.imageRightUrl}
                                   alt="Right"
                                   title="Right Profile (~35°)"
-                                  className="w-5 h-5 rounded-full object-cover border border-slate-900 ring-1 ring-emerald-500/50"
+                                  className="w-5 h-5 rounded-full object-cover border border-[#181818] ring-1 ring-emerald-500/50"
                                 />
                               )}
                             </div>
@@ -840,7 +842,7 @@ export function RosterPage() {
                         <div className="flex items-center justify-end gap-2">
                           <button
                             onClick={() => openEditModal(s)}
-                            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition"
+                            className="p-1.5 text-slate-400 hover:text-white hover:bg-[#242424] rounded-lg transition"
                             title="Edit Student Face Profile"
                           >
                             <Edit2 className="w-4 h-4" />
@@ -866,26 +868,26 @@ export function RosterPage() {
       {/* Add / Edit Student Multi-Angle Enrollment Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
-          <div className="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl my-6">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
-                  <Camera className="w-5 h-5" />
-                </div>
+          <div className="w-full max-w-xl bg-[#161616] border border-[#282828] rounded-2xl p-6 shadow-2xl my-6">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#282828]">
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={closeAddModal}
+                  className="p-1.5 -ml-1 text-slate-400 hover:text-white hover:bg-[#242424] rounded-xl transition cursor-pointer"
+                  title="Close"
+                >
+                  <ArrowLeft className="w-5 h-5" />
+                </button>
                 <div>
-                  <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-                    <span>{editStudent ? 'Edit Student Profile' : 'Enroll Student Face'}</span>
-                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
-                      3 Angles
-                    </span>
+                  <h2 className="text-base sm:text-lg font-bold text-white tracking-tight flex items-center gap-2">
+                    <span>{editStudent ? 'Face Verification & Update' : 'Face Verification'}</span>
                   </h2>
-                  <p className="text-xs text-slate-400 mt-0.5">
-                    Capture Front, Left, and Right profiles for reliable recognition.
-                  </p>
+                  <p className="text-xs text-slate-400">Position your face within the frame</p>
                 </div>
               </div>
 
-              <div className="flex bg-slate-950 p-1 rounded-xl text-xs font-semibold border border-slate-800">
+              <div className="flex bg-[#0d0d0d] p-1 rounded-xl text-xs font-semibold border border-[#282828]">
                 <button
                   type="button"
                   onClick={() => {
@@ -894,7 +896,7 @@ export function RosterPage() {
                   }}
                   className={`px-3 py-1 rounded-lg transition ${
                     enrollTab === 'camera'
-                      ? 'bg-slate-800 text-white shadow-sm'
+                      ? 'bg-[#222222] text-white shadow-sm'
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -908,7 +910,7 @@ export function RosterPage() {
                   }}
                   className={`px-3 py-1 rounded-lg transition ${
                     enrollTab === 'manual'
-                      ? 'bg-slate-800 text-white shadow-sm'
+                      ? 'bg-[#222222] text-white shadow-sm'
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
@@ -918,7 +920,7 @@ export function RosterPage() {
             </div>
 
             {/* 3-Angle Step Tabs */}
-            <div className="grid grid-cols-3 gap-2 p-1.5 bg-slate-950 rounded-xl border border-slate-800/80 mb-3.5">
+            <div className="grid grid-cols-3 gap-2 p-1.5 bg-[#0d0d0d] rounded-xl border border-[#282828] mb-3.5">
               {ANGLE_STEPS.map((step) => {
                 const isCaptured = Boolean(capturedAngles[step.id]);
                 const isActive = currentAngleStep === step.id;
@@ -929,10 +931,10 @@ export function RosterPage() {
                     onClick={() => setCurrentAngleStep(step.id)}
                     className={`flex items-center gap-2 p-2 rounded-lg text-left transition relative ${
                       isActive
-                        ? 'bg-slate-800/90 text-white ring-1 ring-emerald-500/60 shadow-sm'
+                        ? 'bg-[#222222] text-white ring-1 ring-emerald-500/60 shadow-sm'
                         : isCaptured
                         ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'
-                        : 'bg-slate-900/50 text-slate-400 hover:text-slate-200'
+                        : 'bg-[#161616] text-slate-400 hover:text-slate-200'
                     }`}
                   >
                     {isCaptured ? (
@@ -948,7 +950,7 @@ export function RosterPage() {
                         className={`w-7 h-7 rounded-md flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${
                           isActive
                             ? 'bg-emerald-500 text-slate-950'
-                            : 'bg-slate-800 text-slate-400'
+                            : 'bg-[#222222] text-slate-400'
                         }`}
                       >
                         {step.id === 'front' ? '1' : step.id === 'left' ? '2' : '3'}
@@ -959,7 +961,7 @@ export function RosterPage() {
                         <span>{step.shortName}</span>
                         {isCaptured && <Check className="w-3 h-3 text-emerald-400 inline" />}
                       </div>
-                      <div className="text-[10px] text-slate-400 truncate font-mono">
+                      <div className="text-[10px] text-slate-400 font-mono">
                         {step.targetDeg}
                       </div>
                     </div>
@@ -974,112 +976,63 @@ export function RosterPage() {
             >
               {enrollTab === 'camera' && (
                 <div className="space-y-3">
-                  {/* Step Guidance Header */}
-                  <div className="flex items-center justify-between px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs">
-                    <div className="flex items-center gap-2 text-slate-300">
-                      {currentAngleStep === 'front' && (
-                        <UserCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      )}
-                      {currentAngleStep === 'left' && (
-                        <ArrowLeft className="w-4 h-4 text-emerald-400 flex-shrink-0 animate-pulse" />
-                      )}
-                      {currentAngleStep === 'right' && (
-                        <ArrowRight className="w-4 h-4 text-emerald-400 flex-shrink-0 animate-pulse" />
-                      )}
-                      <span>
-                        <strong className="text-white">
-                          {ANGLE_STEPS.find((s) => s.id === currentAngleStep)?.prompt}
-                        </strong>
-                      </span>
-                    </div>
-                    <span className="text-[11px] font-mono text-emerald-400 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
-                      Hold 0.6s to auto-snap
-                    </span>
-                  </div>
+                  {/* Circular Face Verification Viewport (Meta / Yoti / Apple Face ID style) */}
+                  <div className="relative flex flex-col items-center justify-center py-2">
+                    {/* Radial Ticks + Camera Frame Container */}
+                    <div className="relative w-64 h-64 sm:w-72 sm:h-72 flex items-center justify-center">
+                      {/* Radiating Ticks SVG Ring (wrapping directly around circular frame) */}
+                      <BiometricGuideOverlay
+                        step={currentAngleStep}
+                        livePose={livePose}
+                        holdProgress={holdProgress}
+                        capturedAngles={capturedAngles}
+                        isMirrored={enrollMirrored}
+                      />
 
-                  {/* Live Camera Viewport */}
-                  <div className="relative w-full aspect-[4/3] bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center">
-                    <video
-                      ref={enrollVideoRef}
-                      className={`w-full h-full object-cover ${
-                        enrollMirrored ? 'scale-x-[-1]' : ''
-                      }`}
-                    />
-
-                    {/* Face Target Guide Oval */}
-                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                      <div
-                        className={`w-44 h-56 rounded-[50%] transition-all duration-200 border-2 flex flex-col items-center justify-center ${
-                          livePose && isPoseMatchingTarget(livePose, currentAngleStep)
-                            ? 'border-emerald-400 ring-4 ring-emerald-500/30 bg-emerald-500/5'
-                            : livePose && livePose.pose === 'overrotated'
-                            ? 'border-rose-400 ring-4 ring-rose-500/30'
-                            : livePose
-                            ? 'border-amber-400/80 border-dashed'
-                            : 'border-slate-500/40 border-dashed'
-                        }`}
-                      >
-                        <div className="bg-slate-950/85 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold border border-slate-700/80 flex items-center gap-1.5 shadow-lg">
-                          {livePose && isPoseMatchingTarget(livePose, currentAngleStep) ? (
-                            <>
-                              <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
-                              <span className="text-emerald-400">Angle Matched! Hold still...</span>
-                            </>
-                          ) : (
-                            <span className="text-slate-300">
-                              {ANGLE_STEPS.find((s) => s.id === currentAngleStep)?.targetDeg}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Auto-Snap Hold Progress Overlay */}
-                    {holdProgress > 0 && (
-                      <div className="absolute bottom-12 left-6 right-6 pointer-events-none">
-                        <div className="bg-slate-950/90 backdrop-blur-md p-2 rounded-xl border border-emerald-500/40 shadow-xl flex items-center gap-3">
-                          <div className="text-[11px] font-mono text-emerald-400 font-bold whitespace-nowrap">
-                            Holding... {holdProgress}%
-                          </div>
-                          <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-emerald-400 transition-all duration-100 ease-linear rounded-full"
-                              style={{ width: `${holdProgress}%` }}
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Real-time pose feedback badge */}
-                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs font-mono pointer-events-none">
-                      <div className="px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur-md border border-slate-800 text-slate-300">
-                        {livePose ? (
-                          <span
-                            className={
-                              isPoseMatchingTarget(livePose, currentAngleStep)
-                                ? 'text-emerald-400 font-bold'
-                                : 'text-amber-400'
-                            }
-                          >
-                            Pose: {livePose.feedback} ({livePose.yaw > 0 ? '+' : ''}
-                            {livePose.yaw}°)
-                          </span>
+                      {/* Circular Camera Mask Viewport */}
+                      <div className="w-48 h-48 sm:w-56 sm:h-56 rounded-full overflow-hidden border-4 border-[#282828] bg-[#0d0d0d] shadow-2xl relative z-10 flex items-center justify-center ring-2 ring-emerald-500/20">
+                        {enrollCameraActive ? (
+                          <video
+                            ref={enrollVideoRef}
+                            className={`w-full h-full object-cover scale-110 ${
+                              enrollMirrored ? 'scale-x-[-1.1]' : ''
+                            }`}
+                          />
                         ) : (
-                          <span className="text-slate-500">Align face inside the oval</span>
+                          <div className="w-full h-full bg-[#161616] flex items-center justify-center text-slate-500">
+                            <Camera className="w-10 h-10 animate-pulse text-slate-400" />
+                          </div>
                         )}
                       </div>
+
+                      {/* Mirror button on camera overlay */}
+                      <button
+                        type="button"
+                        onClick={() => setEnrollMirrored(!enrollMirrored)}
+                        className="absolute bottom-2 right-2 z-20 p-2 bg-[#181818] hover:bg-[#222222] text-slate-300 rounded-full border border-[#333333] text-xs flex items-center justify-center shadow-lg backdrop-blur-md cursor-pointer transition hover:scale-105"
+                        title="Toggle camera mirror reflection"
+                      >
+                        <FlipHorizontal className="w-3.5 h-3.5" />
+                      </button>
                     </div>
 
-                    {/* Mirror button on camera overlay */}
-                    <button
-                      type="button"
-                      onClick={() => setEnrollMirrored(!enrollMirrored)}
-                      className="absolute top-3 right-3 p-2 bg-slate-900/80 hover:bg-slate-900 text-slate-300 rounded-lg border border-slate-700 text-xs flex items-center gap-1.5 shadow cursor-pointer"
-                    >
-                      <FlipHorizontal className="w-3.5 h-3.5" />
-                      <span>{enrollMirrored ? 'Mirrored' : 'Normal'}</span>
-                    </button>
+                    {/* Instruction Card below Circle (directly matching the user's uploaded image!) */}
+                    <div className="w-full max-w-md mt-3 p-3 rounded-2xl bg-[#0d0d0d]/90 border border-[#282828] flex items-center gap-3 text-xs shadow-sm">
+                      <div className="w-7 h-7 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400 flex-shrink-0">
+                        <Info className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-slate-200 font-medium">
+                          {currentAngleStep === 'front' && 'Position your face within the frame and look straight ahead.'}
+                          {currentAngleStep === 'left' && 'Move your head slowly to the left. Follow the green ticks.'}
+                          {currentAngleStep === 'right' && 'Move your head slowly to the right. Follow the green ticks.'}
+                          {capturedAngles.front && capturedAngles.left && capturedAngles.right && 'All angles verified! All green ticks completed.'}
+                        </p>
+                        <p className="text-[11px] text-slate-400 mt-0.5">
+                          Make sure your face is bright and easy to see. Holds for 0.6s to auto-capture.
+                        </p>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Manual Snap & Retake Bar */}
@@ -1118,7 +1071,7 @@ export function RosterPage() {
                             `Reset ${currentAngleStep} angle. Position your face to retake.`
                           );
                         }}
-                        className="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700 flex items-center gap-1.5 transition cursor-pointer"
+                        className="px-3.5 py-2.5 bg-[#222222] hover:bg-[#2a2a2a] text-slate-300 text-xs font-semibold rounded-xl border border-[#333333] flex items-center gap-1.5 transition cursor-pointer"
                         title="Retake this angle"
                       >
                         <RotateCcw className="w-3.5 h-3.5" />
@@ -1140,7 +1093,7 @@ export function RosterPage() {
                       return (
                         <div
                           key={step.id}
-                          className="p-3.5 rounded-xl border border-slate-800 bg-slate-950/60 text-center flex flex-col items-center justify-between min-h-[160px]"
+                          className="p-3.5 rounded-xl border border-[#282828] bg-[#0d0d0d] text-center flex flex-col items-center justify-between min-h-[160px]"
                         >
                           <div className="w-full">
                             <div className="text-xs font-bold text-white mb-0.5">
@@ -1158,15 +1111,15 @@ export function RosterPage() {
                                 alt={step.name}
                                 className="w-full h-full object-cover"
                               />
-                              <div className="absolute top-1 right-1 w-3 h-3 bg-emerald-400 rounded-full border border-slate-950" />
+                              <div className="absolute top-1 right-1 w-3 h-3 bg-emerald-400 rounded-full border border-[#0d0d0d]" />
                             </div>
                           ) : (
-                            <div className="w-16 h-16 rounded-xl border border-dashed border-slate-700 flex items-center justify-center text-slate-500 my-1">
+                            <div className="w-16 h-16 rounded-xl border border-dashed border-[#333333] flex items-center justify-center text-slate-500 my-1">
                               <Upload className="w-5 h-5 text-slate-400" />
                             </div>
                           )}
 
-                          <label className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-semibold cursor-pointer transition">
+                          <label className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-[#222222] hover:bg-[#2a2a2a] text-slate-200 border border-[#333333] rounded-lg text-xs font-semibold cursor-pointer transition">
                             <span>{captured ? 'Replace' : 'Upload'}</span>
                             <input
                               type="file"
@@ -1193,17 +1146,17 @@ export function RosterPage() {
                     <img
                       src={capturedAngles.front.thumbnailUrl}
                       alt="Front"
-                      className="w-6 h-6 rounded-full object-cover border border-slate-900 ring-1 ring-emerald-500"
+                      className="w-6 h-6 rounded-full object-cover border border-[#181818] ring-1 ring-emerald-500"
                     />
                     <img
                       src={capturedAngles.left.thumbnailUrl}
                       alt="Left"
-                      className="w-6 h-6 rounded-full object-cover border border-slate-900 ring-1 ring-emerald-500"
+                      className="w-6 h-6 rounded-full object-cover border border-[#181818] ring-1 ring-emerald-500"
                     />
                     <img
                       src={capturedAngles.right.thumbnailUrl}
                       alt="Right"
-                      className="w-6 h-6 rounded-full object-cover border border-slate-900 ring-1 ring-emerald-500"
+                      className="w-6 h-6 rounded-full object-cover border border-[#181818] ring-1 ring-emerald-500"
                     />
                   </div>
                 </div>
@@ -1236,7 +1189,7 @@ export function RosterPage() {
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
                     placeholder="e.g. Liam Parker"
-                    className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
+                    className="w-full px-3.5 py-2 bg-[#0d0d0d] border border-[#282828] rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
                   />
                 </div>
                 <div>
@@ -1248,27 +1201,38 @@ export function RosterPage() {
                     value={formCode}
                     onChange={(e) => setFormCode(e.target.value)}
                     placeholder="e.g. STU-2041"
-                    className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
+                    className="w-full px-3.5 py-2 bg-[#0d0d0d] border border-[#282828] rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
-                <button
-                  type="button"
-                  onClick={closeAddModal}
-                  className="px-4 py-2 text-sm text-slate-400 hover:text-white cursor-pointer"
-                >
-                  Cancel
-                </button>
+              <div className="pt-4 border-t border-[#282828] flex flex-col gap-2">
                 <button
                   type="submit"
                   disabled={
                     !capturedAngles.front || !capturedAngles.left || !capturedAngles.right
                   }
-                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-bold rounded-xl text-sm transition-all duration-200 active:scale-[0.98] shadow-sm cursor-pointer"
+                  className={`w-full py-3.5 font-bold rounded-2xl text-sm transition-all duration-200 shadow-lg flex items-center justify-center gap-2 cursor-pointer ${
+                    capturedAngles.front && capturedAngles.left && capturedAngles.right
+                      ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-500/25 active:scale-[0.99]'
+                      : 'bg-[#222222] text-slate-500 cursor-not-allowed opacity-60'
+                  }`}
                 >
-                  {editStudent ? 'Save Changes' : 'Save & Enroll in Roster'}
+                  <Check className="w-4 h-4 stroke-[3]" />
+                  <span>
+                    {capturedAngles.front && capturedAngles.left && capturedAngles.right
+                      ? editStudent
+                        ? 'Done • Save Changes'
+                        : 'Done • Save & Enroll in Roster'
+                      : 'Done (Complete 3 Angles to Save)'}
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={closeAddModal}
+                  className="w-full py-1.5 text-xs text-slate-400 hover:text-white cursor-pointer transition text-center"
+                >
+                  Cancel
                 </button>
               </div>
             </form>
@@ -1279,14 +1243,14 @@ export function RosterPage() {
       {/* Batch Upload Modal */}
       {showBatchModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+          <div className="w-full max-w-lg bg-[#161616] border border-[#282828] rounded-2xl p-6 shadow-2xl">
             <h2 className="text-lg font-bold text-white mb-2">Upload Student Roster Batch</h2>
             <p className="text-xs text-slate-400 mb-4">
               Select a CSV file formatted as <code className="text-emerald-400 font-mono">student_id,name,image_url</code>{' '}
               or JSON array of students with face profiles.
             </p>
 
-            <div className="border-2 border-dashed border-slate-700 hover:border-emerald-500/50 rounded-2xl p-8 text-center cursor-pointer transition bg-slate-950/50">
+            <div className="border-2 border-dashed border-[#333333] hover:border-emerald-500/50 rounded-2xl p-8 text-center cursor-pointer transition bg-[#0d0d0d]">
               <input
                 type="file"
                 accept=".csv,.json"

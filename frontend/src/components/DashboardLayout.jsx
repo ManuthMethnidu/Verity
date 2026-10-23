@@ -172,7 +172,7 @@ export function DashboardLayout() {
                       "transition-colors",
                       isActive
                         ? "bg-emerald-500/15 text-white font-semibold border border-emerald-500/30"
-                        : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                        : "text-slate-400 hover:text-white hover:bg-white/[0.04]"
                     )}
                   />
                 );
@@ -203,7 +203,7 @@ export function DashboardLayout() {
                 navigate('/settings');
                 setOpen(false);
               }}
-              className="hover:bg-slate-800/60 transition-colors text-slate-300"
+              className="hover:bg-white/[0.04] transition-colors text-slate-300"
             />
           </div>
         </SidebarBody>

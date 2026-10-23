@@ -33,10 +33,11 @@ export default {
   		colors: {
   			darkbg: '#111111',
   			surface: {
-  				'50': '#1e293b',
-  				'100': '#151d30',
-  				DEFAULT: '#0f172a',
-  				card: '#0f172a'
+  				'50': '#262626',
+  				'100': '#1e1e1e',
+  				DEFAULT: '#181818',
+  				card: '#181818',
+  				sunken: '#0d0d0d',
   			},
   			brand: {
   				'50': '#ecfdf5',

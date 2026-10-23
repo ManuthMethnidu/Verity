@@ -358,12 +358,12 @@ export function AttendancePage() {
             actions={apiDropdownActions}
             anchor="end"
             menuWidth={260}
-            fill="#0f172a"
+            fill="#181818"
             ink="#f8fafc"
             danger="#ef4444"
           />
 
-          <div className="px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs font-mono text-slate-300">
+          <div className="px-3 py-1.5 rounded-xl bg-[#181818] border border-[#282828] text-xs font-mono text-slate-300">
             Station: <span className="text-emerald-400">{deviceId?.replace('DEVICE-CAM-', 'Scanner ') || deviceId}</span>
           </div>
 
@@ -373,7 +373,7 @@ export function AttendancePage() {
             className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
               isMirrored
                 ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                : 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-slate-300'
+                : 'bg-[#222222] hover:bg-[#2a2a2a] border-[#333333] text-slate-300'
             }`}
             title="Toggle camera horizontal mirror reflection"
           >
@@ -385,7 +385,7 @@ export function AttendancePage() {
           {cameraActive && (
             <button
               onClick={toggleCameraFacing}
-              className="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-semibold transition"
+              className="p-2 bg-[#222222] hover:bg-[#2a2a2a] text-slate-300 border border-[#333333] rounded-xl text-xs font-semibold transition"
               title="Flip Front / Back Camera"
             >
               <SwitchCamera className="w-4 h-4" />
@@ -412,7 +412,7 @@ export function AttendancePage() {
           {/* Simulate button for testing */}
           <button
             onClick={handleSimulatedMatch}
-            className="flex items-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-medium transition"
+            className="flex items-center gap-1.5 px-3 py-2 bg-[#222222] hover:bg-[#2a2a2a] text-slate-300 border border-[#333333] rounded-xl text-xs font-medium transition"
             title="Simulate a stable face detection event for testing"
           >
             <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
@@ -432,7 +432,7 @@ export function AttendancePage() {
       {/* Main Viewport & Camera Stage */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         {/* Camera Container */}
-        <div className="lg:col-span-3 bg-slate-900/70 border border-slate-800/80 rounded-2xl overflow-hidden relative shadow-2xl flex flex-col items-center justify-center w-full aspect-[4/3] sm:aspect-video max-h-[55vh] sm:max-h-[65vh] ring-1 ring-white/[0.05]">
+        <div className="lg:col-span-3 bg-[#181818]/90 border border-[#282828] rounded-2xl overflow-hidden relative shadow-2xl flex flex-col items-center justify-center w-full aspect-[4/3] sm:aspect-video max-h-[55vh] sm:max-h-[65vh] ring-1 ring-white/[0.05]">
           <video
             ref={videoRef}
             className={`w-full h-full object-cover transition-transform duration-200 ${
@@ -450,7 +450,7 @@ export function AttendancePage() {
           {/* Idle Placeholder */}
           {!cameraActive && (
             <div className="text-center p-6 sm:p-8 space-y-4">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-400 mx-auto">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#222222] border border-[#333333] flex items-center justify-center text-slate-400 mx-auto">
                 <Camera className="w-7 h-7 sm:w-8 sm:h-8" />
               </div>
               <div>
@@ -477,7 +477,7 @@ export function AttendancePage() {
           {/* Live Telemetry Heads-Up Overlay */}
           {cameraActive && (
             <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs pointer-events-none">
-              <div className="flex items-center gap-2 bg-slate-950/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-800 text-slate-300 font-mono">
+              <div className="flex items-center gap-2 bg-[#0d0d0d]/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-[#282828] text-slate-300 font-mono">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
                 <span>
                   FPS: <strong className="text-white">{fps}</strong>
@@ -488,7 +488,7 @@ export function AttendancePage() {
                 </span>
               </div>
 
-              <div className="bg-slate-950/85 backdrop-blur-md px-3 py-1.5 rounded-xl border border-slate-800 text-slate-300 font-mono">
+              <div className="bg-[#0d0d0d]/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-[#282828] text-slate-300 font-mono">
                 Roster: <strong className="text-emerald-400">{roster.length}</strong> active profiles
               </div>
             </div>
@@ -496,9 +496,9 @@ export function AttendancePage() {
         </div>
 
         {/* Live Attendance Activity Sidebar (1 Col) */}
-        <div className="bg-slate-900/70 border border-slate-800/80 rounded-2xl p-4 sm:p-5 flex flex-col justify-between w-full backdrop-blur-md shadow-xl ring-1 ring-white/[0.05]">
+        <div className="bg-[#181818]/90 border border-[#282828] rounded-2xl p-4 sm:p-5 flex flex-col justify-between w-full backdrop-blur-md shadow-xl ring-1 ring-white/[0.05]">
           <div>
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3 mb-4">
+            <div className="flex items-center justify-between border-b border-[#282828] pb-3 mb-4">
               <h2 className="text-sm font-bold text-white flex items-center gap-2 tracking-tight">
                 <UserCheck className="w-4 h-4 text-emerald-400" />
                 <span>Verified in this Session</span>
@@ -531,7 +531,7 @@ export function AttendancePage() {
           </div>
 
           {/* Quick Roster Indicator */}
-          <div className="pt-4 mt-4 border-t border-slate-800/80 text-xs text-slate-400 flex items-center justify-between font-mono">
+          <div className="pt-4 mt-4 border-t border-[#282828] text-xs text-slate-400 flex items-center justify-between font-mono">
             <span className="flex items-center gap-1.5 font-sans">
               <HardDrive className="w-3.5 h-3.5 text-slate-500" />
               <span>Multi-Angle Engine</span>
@@ -568,7 +568,7 @@ export function AttendancePage() {
       </div>
 
       {/* Sleek, Uncluttered API Integration Capsule */}
-      <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:px-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md shadow-md">
+      <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:px-6 rounded-2xl bg-[#181818]/90 border border-[#282828] backdrop-blur-md shadow-md">
         <div className="flex items-center gap-3.5">
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
             <Globe className="w-5 h-5" />
@@ -592,7 +592,7 @@ export function AttendancePage() {
           actions={apiDropdownActions}
           anchor="end"
           menuWidth={260}
-          fill="#0f172a"
+          fill="#181818"
           ink="#f8fafc"
           danger="#ef4444"
         />
@@ -601,8 +601,8 @@ export function AttendancePage() {
       {/* API Setup & Integration Modal */}
       {showApiSetup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
-          <div className="w-full max-w-2xl bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl my-6">
-            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+          <div className="w-full max-w-2xl bg-[#161616] border border-[#282828] rounded-2xl p-6 shadow-2xl my-6">
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#282828]">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
                   <Globe className="w-5 h-5" />
@@ -621,7 +621,7 @@ export function AttendancePage() {
               </div>
               <button
                 onClick={() => setShowApiSetup(false)}
-                className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-white hover:bg-[#242424] rounded-lg transition cursor-pointer"
                 title="Close Setup"
               >
                 <X className="w-5 h-5" />
@@ -634,7 +634,7 @@ export function AttendancePage() {
                 <span>REST Endpoint URL</span>
                 {tenantId && <span className="font-mono text-[11px] text-slate-500">Tenant ID: {tenantId}</span>}
               </div>
-              <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-950 border border-slate-800 font-mono text-xs text-slate-200">
+              <div className="flex items-center justify-between gap-3 p-3 rounded-xl bg-[#0d0d0d] border border-[#282828] font-mono text-xs text-slate-200">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-bold text-xs tracking-wider">
                     GET
@@ -646,7 +646,7 @@ export function AttendancePage() {
                 <div className="flex items-center gap-2 shrink-0">
                   <button
                     onClick={copyToClipboard}
-                    className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-white transition cursor-pointer"
+                    className="p-1.5 hover:bg-[#242424] rounded-lg text-slate-400 hover:text-white transition cursor-pointer"
                     title="Copy URL"
                   >
                     {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
@@ -655,7 +655,7 @@ export function AttendancePage() {
                     href={feedApiUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-1.5 hover:bg-slate-800 rounded-lg text-slate-400 hover:text-emerald-400 transition cursor-pointer"
+                    className="p-1.5 hover:bg-[#242424] rounded-lg text-slate-400 hover:text-emerald-400 transition cursor-pointer"
                     title="Open JSON Feed"
                   >
                     <ExternalLink className="w-4 h-4" />
@@ -666,27 +666,27 @@ export function AttendancePage() {
 
             {/* Feature Pills */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4 text-xs">
-              <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 text-slate-300">
+              <div className="p-2.5 rounded-xl bg-[#0d0d0d]/80 border border-[#242424] text-slate-300">
                 <strong className="text-emerald-400 block font-semibold mb-0.5">Unique Attendance</strong>
                 Deduplicated counts
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 text-slate-300">
+              <div className="p-2.5 rounded-xl bg-[#0d0d0d]/80 border border-[#242424] text-slate-300">
                 <strong className="text-emerald-400 block font-semibold mb-0.5">Identities & Codes</strong>
                 Student IDs & photos
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 text-slate-300">
+              <div className="p-2.5 rounded-xl bg-[#0d0d0d]/80 border border-[#242424] text-slate-300">
                 <strong className="text-emerald-400 block font-semibold mb-0.5">Timeline Series</strong>
                 Daily trend arrays
               </div>
-              <div className="p-2.5 rounded-xl bg-slate-950/60 border border-slate-800/80 text-slate-300">
+              <div className="p-2.5 rounded-xl bg-[#0d0d0d]/80 border border-[#242424] text-slate-300">
                 <strong className="text-emerald-400 block font-semibold mb-0.5">Query Filters</strong>
                 ?startDate, ?endDate
               </div>
             </div>
 
             {/* Code Integration Snippet Tabs */}
-            <div className="border border-slate-800 rounded-xl overflow-hidden bg-slate-950">
-              <div className="flex items-center justify-between px-4 py-2 border-b border-slate-800 bg-slate-900/90 text-xs">
+            <div className="border border-[#282828] rounded-xl overflow-hidden bg-[#0d0d0d]">
+              <div className="flex items-center justify-between px-4 py-2 border-b border-[#282828] bg-[#161616] text-xs">
                 <div className="flex items-center gap-2">
                   <Code2 className="w-4 h-4 text-emerald-400" />
                   <span className="font-semibold text-white">Integration Snippet</span>
@@ -762,10 +762,10 @@ curl -X GET "${feedApiUrl}" \\
               </div>
             </div>
 
-            <div className="mt-5 flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+            <div className="mt-5 flex items-center justify-end gap-3 pt-3 border-t border-[#282828]">
               <button
                 onClick={() => setShowApiSetup(false)}
-                className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition cursor-pointer"
+                className="px-4 py-2 bg-[#222222] hover:bg-[#2a2a2a] text-slate-200 text-xs font-semibold rounded-xl transition cursor-pointer"
               >
                 Close
               </button>

@@ -19,18 +19,18 @@ export function LegalModal({ isOpen, type, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="legal-modal-title"
     >
       <div
-        className="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl text-slate-200 overflow-hidden ring-1 ring-white/[0.08]"
+        className="bg-[#161616] border border-[#282828] rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl text-slate-200 overflow-hidden ring-1 ring-white/[0.08]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="flex items-center justify-between p-5 sm:p-6 border-b border-slate-800 bg-slate-950/60">
+        <div className="flex items-center justify-between p-5 sm:p-6 border-b border-[#282828] bg-[#0d0d0d]">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
               {isPrivacy ? <Lock className="w-5 h-5" /> : <FileCheck className="w-5 h-5" />}
@@ -51,7 +51,7 @@ export function LegalModal({ isOpen, type, onClose }) {
           </div>
           <button
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-slate-800 transition"
+            className="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-[#222222] transition"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
@@ -60,7 +60,7 @@ export function LegalModal({ isOpen, type, onClose }) {
 
         {/* Modal Content */}
         <div className="p-6 overflow-y-auto space-y-5 text-xs leading-relaxed text-slate-300">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800/80">
+          <div className="flex items-center justify-between pb-3 border-b border-[#282828]">
             <span className="font-semibold text-emerald-400">
               Effective: October 20, 2026 • Version 1.2
             </span>
@@ -155,7 +155,7 @@ export function LegalModal({ isOpen, type, onClose }) {
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 sm:p-5 border-t border-slate-800 bg-slate-950/60 flex items-center justify-between gap-3">
+        <div className="p-4 sm:p-5 border-t border-[#282828] bg-[#0d0d0d] flex items-center justify-between gap-3">
           <div className="text-[11px] text-slate-500 hidden sm:block">
             {isPrivacy ? (
               <button
@@ -193,7 +193,7 @@ export function LegalModal({ isOpen, type, onClose }) {
             <Link
               to={isPrivacy ? '/privacy' : '/terms'}
               onClick={onClose}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition border border-slate-700/80"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#222222] hover:bg-[#2a2a2a] text-slate-200 text-xs font-semibold transition border border-[#333333]"
             >
               <span>Full Page</span>
               <ExternalLink className="w-3.5 h-3.5 text-slate-400" />

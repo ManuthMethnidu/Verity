@@ -52,7 +52,7 @@ export function Dashboard() {
   return (
     <div className="space-y-8 font-sans">
       {/* Editorial Hero Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-slate-900/60 border border-slate-800/80 p-6 sm:p-8 backdrop-blur-md shadow-xl ring-1 ring-white/[0.05]">
+      <div className="relative overflow-hidden rounded-2xl bg-[#181818]/90 border border-[#282828] p-6 sm:p-8 backdrop-blur-md shadow-xl ring-1 ring-white/[0.05]">
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 bg-emerald-500/[0.06] rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -80,7 +80,7 @@ export function Dashboard() {
                   <span>Edge Vision Active</span>
                 </div>
                 {user?.tenantId && (
-                  <span className="text-xs px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-mono border border-slate-700/80">
+                  <span className="text-xs px-2 py-0.5 rounded-md bg-[#222222] text-slate-300 font-mono border border-[#333333]">
                     Tenant Active
                   </span>
                 )}
@@ -103,7 +103,7 @@ export function Dashboard() {
             </Link>
             <Link
               to="/roster"
-              className="inline-flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 transition-all duration-200"
+              className="inline-flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold bg-[#222222] hover:bg-[#2a2a2a] text-slate-200 border border-[#333333] transition-all duration-200"
             >
               <Users className="w-4 h-4 text-emerald-400" />
               <span>Student Roster</span>
@@ -115,7 +115,7 @@ export function Dashboard() {
       {/* Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Enrolled Students */}
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm hover:border-slate-700/80 transition-all duration-200">
+        <div className="p-5 rounded-2xl bg-[#181818]/90 border border-[#282828] backdrop-blur-sm flex items-center justify-between shadow-sm hover:border-[#383838] transition-all duration-200">
           <div>
             <div className="text-xs font-medium text-slate-400">
               Enrolled Students
@@ -131,7 +131,7 @@ export function Dashboard() {
         </div>
 
         {/* Present Today */}
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm hover:border-slate-700/80 transition-all duration-200">
+        <div className="p-5 rounded-2xl bg-[#181818]/90 border border-[#282828] backdrop-blur-sm flex items-center justify-between shadow-sm hover:border-[#383838] transition-all duration-200">
           <div>
             <div className="text-xs font-medium text-slate-400">
               Verified Today
@@ -147,7 +147,7 @@ export function Dashboard() {
         </div>
 
         {/* Attendance Rate */}
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm hover:border-slate-700/80 transition-all duration-200">
+        <div className="p-5 rounded-2xl bg-[#181818]/90 border border-[#282828] backdrop-blur-sm flex items-center justify-between shadow-sm hover:border-[#383838] transition-all duration-200">
           <div>
             <div className="text-xs font-medium text-slate-400">
               Attendance Rate
@@ -163,7 +163,7 @@ export function Dashboard() {
         </div>
 
         {/* Performance Mode */}
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm hover:border-slate-700/80 transition-all duration-200">
+        <div className="p-5 rounded-2xl bg-[#181818]/90 border border-[#282828] backdrop-blur-sm flex items-center justify-between shadow-sm hover:border-[#383838] transition-all duration-200">
           <div>
             <div className="text-xs font-medium text-slate-400">
               Target FPS & Quality
@@ -186,7 +186,7 @@ export function Dashboard() {
       <AttendanceChart records={report?.records} />
 
       {/* Recent Verifications Feed */}
-      <div className="bg-slate-900/60 border border-slate-800/80 backdrop-blur-md rounded-2xl p-6 shadow-sm">
+      <div className="bg-[#181818]/90 border border-[#282828] backdrop-blur-md rounded-2xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
@@ -209,11 +209,11 @@ export function Dashboard() {
         </div>
 
         {report?.records?.length > 0 ? (
-          <div className="divide-y divide-slate-800/60">
+          <div className="divide-y divide-[#242424]">
             {report.records.slice(0, 5).map((rec) => (
-              <div key={rec.id} className="py-3.5 flex items-center justify-between transition hover:bg-slate-800/20 px-2 rounded-xl">
+              <div key={rec.id} className="py-3.5 flex items-center justify-between transition hover:bg-white/[0.03] px-2 rounded-xl">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700/80 overflow-hidden flex items-center justify-center flex-shrink-0">
+                  <div className="w-10 h-10 rounded-full bg-[#222222] border border-[#333333] overflow-hidden flex items-center justify-center flex-shrink-0">
                     {rec.imageUrl ? (
                       <img
                         src={rec.imageUrl}

@@ -144,7 +144,7 @@ export function ReportsPage() {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="pl-9 pr-4 py-2 bg-slate-900 border border-slate-800 rounded-xl text-white text-xs font-semibold focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
+              className="pl-9 pr-4 py-2 bg-[#181818] border border-[#282828] rounded-xl text-white text-xs font-semibold focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
             />
           </div>
 
@@ -161,7 +161,7 @@ export function ReportsPage() {
             actions={reportDropdownActions}
             anchor="end"
             menuWidth={260}
-            fill="#0f172a"
+            fill="#181818"
             ink="#f8fafc"
             danger="#ef4444"
           />
@@ -170,7 +170,7 @@ export function ReportsPage() {
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm">
+        <div className="p-5 rounded-2xl bg-[#181818]/90 border border-[#282828] backdrop-blur-sm flex items-center justify-between shadow-sm">
           <div>
             <div className="text-xs font-medium text-slate-400">
               Total Logged Events
@@ -184,7 +184,7 @@ export function ReportsPage() {
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm">
+        <div className="p-5 rounded-2xl bg-[#181818]/90 border border-[#282828] backdrop-blur-sm flex items-center justify-between shadow-sm">
           <div>
             <div className="text-xs font-medium text-slate-400">
               Unique Attendees
@@ -198,7 +198,7 @@ export function ReportsPage() {
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-sm flex items-center justify-between shadow-sm">
+        <div className="p-5 rounded-2xl bg-[#181818]/90 border border-[#282828] backdrop-blur-sm flex items-center justify-between shadow-sm">
           <div>
             <div className="text-xs font-medium text-slate-400">
               Attendance Turnout
@@ -221,10 +221,10 @@ export function ReportsPage() {
       />
 
       {/* Report Records Table */}
-      <div className="bg-slate-900/60 border border-slate-800/80 backdrop-blur-md rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/[0.05]">
+      <div className="bg-[#181818]/90 border border-[#282828] backdrop-blur-md rounded-2xl overflow-hidden shadow-xl ring-1 ring-white/[0.05]">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-950/60 text-xs font-medium text-slate-400 border-b border-slate-800/80">
+            <thead className="bg-[#0d0d0d] text-xs font-medium text-slate-400 border-b border-[#282828]">
               <tr>
                 <th className="px-6 py-3.5">Student</th>
                 <th className="px-6 py-3.5">Student ID Code</th>
@@ -233,7 +233,7 @@ export function ReportsPage() {
                 <th className="px-6 py-3.5 text-right">Match Accuracy</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-[#242424]">
               {loading ? (
                 <tr>
                   <td colSpan="5" className="text-center py-12 text-slate-500">
@@ -248,7 +248,7 @@ export function ReportsPage() {
                 </tr>
               ) : (
                 report.records.map((r) => (
-                  <tr key={r.id} className="hover:bg-slate-800/20 transition">
+                  <tr key={r.id} className="hover:bg-white/[0.03] transition">
                     <td className="px-6 py-4 font-semibold text-white">
                       {r.studentName}
                     </td>

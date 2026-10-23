@@ -104,7 +104,7 @@ export function Header() {
           </Link>
 
           {/* Tenant Divider & Badge */}
-          <div className="hidden sm:flex items-center gap-2 pl-4 border-l border-slate-800/80">
+          <div className="hidden sm:flex items-center gap-2 pl-4 border-l border-[#222222]">
             <Building2 className="w-3.5 h-3.5 text-slate-400" />
             <span className="text-xs font-medium text-slate-300 max-w-[200px] truncate" title={tenantDisplayName}>
               {tenantDisplayName}
@@ -127,14 +127,14 @@ export function Header() {
           {/* Quick Scanner Action */}
           <Link
             to="/attendance"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-800 text-slate-200 border border-slate-700/80 text-xs font-semibold transition"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1e1e1e] hover:bg-[#282828] text-slate-200 border border-[#2a2a2a] text-xs font-semibold transition"
           >
             <Camera className="w-3.5 h-3.5 text-emerald-400" />
             <span>Live Scanner</span>
           </Link>
 
           {/* User Profile Pill & Gooey Dropdown */}
-          <div className="flex items-center pl-2 border-l border-slate-800/80">
+          <div className="flex items-center pl-2 border-l border-[#222222]">
             <GooeyDropdown
               label={user?.name || (user?.email ? user.email.split('@')[0] : 'Account')}
               icon={

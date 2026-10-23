@@ -409,7 +409,7 @@ export function SettingsPage() {
   return (
     <div className="max-w-4xl space-y-8 font-sans pb-16">
       {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800/80">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#282828]">
         <div className="flex items-center gap-3">
           <div className="w-11 h-11 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shadow-sm">
             <Sliders className="w-5 h-5" />
@@ -423,7 +423,7 @@ export function SettingsPage() {
         </div>
 
         {/* Live Status Tag */}
-        <div className="flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono text-slate-300">
+        <div className="flex items-center gap-2 self-start sm:self-auto px-3 py-1.5 rounded-xl bg-[#181818] border border-[#282828] text-xs font-mono text-slate-300">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span>Engine: <strong className="text-white">Active</strong></span>
         </div>
@@ -459,7 +459,7 @@ export function SettingsPage() {
       {/* =========================================================================
           SECTION 1: ADMINISTRATOR PROFILE & INSTITUTION IDENTITY
           ========================================================================= */}
-      <form onSubmit={handleSaveProfile} className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md shadow-sm ring-1 ring-white/[0.05] space-y-6">
+      <form onSubmit={handleSaveProfile} className="p-6 rounded-2xl bg-[#181818]/90 border border-[#282828] backdrop-blur-md shadow-sm ring-1 ring-white/[0.05] space-y-6">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
             <User className="w-4 h-4" />
@@ -473,7 +473,7 @@ export function SettingsPage() {
         </div>
 
         {/* Avatar Selection & Upload */}
-        <div className="p-5 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-4">
+        <div className="p-5 rounded-xl bg-[#0d0d0d] border border-[#282828] space-y-4">
           <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
             Profile Avatar Picture
           </label>
@@ -506,7 +506,7 @@ export function SettingsPage() {
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition active:scale-[0.98]"
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#222222] hover:bg-[#2a2a2a] text-slate-200 border border-[#333333] text-xs font-semibold transition active:scale-[0.98]"
                 >
                   <Upload className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Upload Photo</span>
@@ -568,7 +568,7 @@ export function SettingsPage() {
               value={adminName}
               onChange={(e) => setAdminName(e.target.value)}
               placeholder="e.g. Dr. Alistair Vance"
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 transition"
+              className="w-full px-4 py-2.5 rounded-xl bg-[#0d0d0d] border border-[#282828] text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 transition"
             />
           </div>
 
@@ -582,13 +582,13 @@ export function SettingsPage() {
               value={tenantName}
               onChange={(e) => setTenantName(e.target.value)}
               placeholder="e.g. St. Joseph's College"
-              className="w-full px-4 py-2.5 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 transition"
+              className="w-full px-4 py-2.5 rounded-xl bg-[#0d0d0d] border border-[#282828] text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 transition"
             />
           </div>
         </div>
 
         {/* Account Info (Read-Only) */}
-        <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-950/40 border border-slate-800/60 text-xs">
+        <div className="flex items-center justify-between p-3.5 rounded-xl bg-[#0d0d0d] border border-[#282828] text-xs">
           <div className="flex items-center gap-2 text-slate-400">
             <ShieldCheck className="w-4 h-4 text-emerald-400" />
             <span>Authenticated as <strong className="text-slate-200">{currentUser?.email || 'admin@verity.edu'}</strong></span>
@@ -614,7 +614,7 @@ export function SettingsPage() {
       {/* =========================================================================
           SECTION 2: AUDIO, SCANNER DISPLAY & HARDWARE ID
           ========================================================================= */}
-      <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md shadow-sm ring-1 ring-white/[0.05] space-y-6">
+      <div className="p-6 rounded-2xl bg-[#181818]/90 border border-[#282828] backdrop-blur-md shadow-sm ring-1 ring-white/[0.05] space-y-6">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
             <Volume2 className="w-4 h-4" />
@@ -629,7 +629,7 @@ export function SettingsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Sound Chime Toggle */}
-          <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between gap-4">
+          <div className="p-4 rounded-xl bg-[#0d0d0d] border border-[#282828] flex items-center justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
                 {soundChime ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
@@ -657,12 +657,12 @@ export function SettingsPage() {
                 onChange={(e) => handleSoundToggle(e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              <div className="w-11 h-6 bg-[#262626] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
             </label>
           </div>
 
           {/* Camera Mirroring Toggle */}
-          <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 flex items-center justify-between gap-4">
+          <div className="p-4 rounded-xl bg-[#0d0d0d] border border-[#282828] flex items-center justify-between gap-4">
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-400 shrink-0 mt-0.5">
                 <Camera className="w-4 h-4" />
@@ -685,13 +685,13 @@ export function SettingsPage() {
                 onChange={(e) => handleMirrorToggle(e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              <div className="w-11 h-6 bg-[#262626] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
             </label>
           </div>
         </div>
 
         {/* Hardware Kiosk Identifier */}
-        <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="p-4 rounded-xl bg-[#0d0d0d] border border-[#282828] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <HardDrive className="w-4 h-4 text-slate-400" />
             <div>
@@ -703,7 +703,7 @@ export function SettingsPage() {
             <button
               type="button"
               onClick={handleCopyDeviceId}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#222222] hover:bg-[#2a2a2a] text-slate-300 text-xs font-medium transition"
             >
               {copiedDeviceId ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
               <span>{copiedDeviceId ? 'Copied' : 'Copy Name'}</span>
@@ -711,7 +711,7 @@ export function SettingsPage() {
             <button
               type="button"
               onClick={handleRegenerateDeviceId}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium transition"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#222222] hover:bg-[#2a2a2a] text-slate-300 text-xs font-medium transition"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               <span>Regenerate</span>
@@ -725,7 +725,7 @@ export function SettingsPage() {
           ========================================================================= */}
       <form onSubmit={handleSaveVision} className="space-y-6">
         {/* Match Accuracy Threshold with WakeSlider */}
-        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md shadow-sm ring-1 ring-white/[0.05]">
+        <div className="p-6 rounded-2xl bg-[#181818]/90 border border-[#282828] backdrop-blur-md shadow-sm ring-1 ring-white/[0.05]">
           <div className="flex items-center justify-between mb-4">
             <div>
               <h2 className="font-bold text-white text-base tracking-tight">Recognition Accuracy Threshold</h2>
@@ -751,7 +751,7 @@ export function SettingsPage() {
               restHeight={14}
               gap={4}
               fillColor="#10b981"
-              trackColor="#1e293b"
+              trackColor="#262626"
               crestColor="#34d399"
               showValue={false}
               ariaLabel="Recognition Accuracy Threshold"
@@ -766,7 +766,7 @@ export function SettingsPage() {
         </div>
 
         {/* Battery Saver Mode */}
-        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md shadow-sm ring-1 ring-white/[0.05]">
+        <div className="p-6 rounded-2xl bg-[#181818]/90 border border-[#282828] backdrop-blur-md shadow-sm ring-1 ring-white/[0.05]">
           <div className="flex items-center justify-between">
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0 mt-0.5">
@@ -798,13 +798,13 @@ export function SettingsPage() {
                 }}
                 className="sr-only peer"
               />
-              <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+              <div className="w-11 h-6 bg-[#262626] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
             </label>
           </div>
         </div>
 
         {/* Target FPS */}
-        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md shadow-sm ring-1 ring-white/[0.05]">
+        <div className="p-6 rounded-2xl bg-[#181818]/90 border border-[#282828] backdrop-blur-md shadow-sm ring-1 ring-white/[0.05]">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
               <Sliders className="w-4 h-4" />
@@ -832,8 +832,8 @@ export function SettingsPage() {
                     isSelected
                       ? 'bg-emerald-500/15 border-emerald-500 text-emerald-400 font-bold shadow-sm'
                       : isDisabled
-                      ? 'bg-slate-950/40 border-slate-800/40 text-slate-600 cursor-not-allowed'
-                      : 'bg-slate-950/60 border-slate-800 hover:bg-slate-800 text-slate-300'
+                      ? 'bg-[#0d0d0d]/40 border-[#282828]/40 text-slate-600 cursor-not-allowed'
+                      : 'bg-[#0d0d0d] border-[#282828] hover:bg-[#222222] text-slate-300'
                   }`}
                 >
                   <span className="text-xl font-extrabold font-mono">{fps} FPS</span>
@@ -852,7 +852,7 @@ export function SettingsPage() {
         </div>
 
         {/* Model Quality Selection */}
-        <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md shadow-sm ring-1 ring-white/[0.05]">
+        <div className="p-6 rounded-2xl bg-[#181818]/90 border border-[#282828] backdrop-blur-md shadow-sm ring-1 ring-white/[0.05]">
           <div className="flex items-center gap-3 mb-4">
             <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
               <Cpu className="w-4 h-4" />
@@ -889,7 +889,7 @@ export function SettingsPage() {
                 className={`flex items-start gap-3.5 p-4 rounded-xl border cursor-pointer transition-all ${
                   modelQuality === option.id
                     ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-200 shadow-sm'
-                    : 'bg-slate-950/60 border-slate-800 hover:bg-slate-800/60 text-slate-400'
+                    : 'bg-[#0d0d0d] border-[#282828] hover:bg-[#222222]/60 text-slate-400'
                 }`}
               >
                 <input
@@ -925,7 +925,7 @@ export function SettingsPage() {
       {/* =========================================================================
           SECTION 4: DATA BACKUP, EXPORT & OFFLINE CACHE
           ========================================================================= */}
-      <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md shadow-sm ring-1 ring-white/[0.05] space-y-5">
+      <div className="p-6 rounded-2xl bg-[#181818]/90 border border-[#282828] backdrop-blur-md shadow-sm ring-1 ring-white/[0.05] space-y-5">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
             <Database className="w-4 h-4" />
@@ -940,7 +940,7 @@ export function SettingsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Export JSON Backup */}
-          <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 flex flex-col justify-between gap-4">
+          <div className="p-4 rounded-xl bg-[#0d0d0d] border border-[#282828] flex flex-col justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 text-slate-200 font-bold text-sm mb-1">
                 <FileDown className="w-4 h-4 text-emerald-400" />
@@ -954,7 +954,7 @@ export function SettingsPage() {
               type="button"
               onClick={handleExportBackup}
               disabled={exporting}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#222222] hover:bg-[#2a2a2a] text-slate-200 border border-[#333333] text-xs font-semibold transition active:scale-[0.98]"
             >
               {exporting ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5 text-emerald-400" />}
               <span>{exporting ? 'Generating Backup...' : 'Download JSON Backup'}</span>
@@ -962,7 +962,7 @@ export function SettingsPage() {
           </div>
 
           {/* Clear Offline IndexedDB Cache */}
-          <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 flex flex-col justify-between gap-4">
+          <div className="p-4 rounded-xl bg-[#0d0d0d] border border-[#282828] flex flex-col justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 text-slate-200 font-bold text-sm mb-1">
                 <HardDrive className="w-4 h-4 text-blue-400" />
@@ -975,7 +975,7 @@ export function SettingsPage() {
             <button
               type="button"
               onClick={handleClearCache}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-semibold transition active:scale-[0.98]"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#222222] hover:bg-[#2a2a2a] text-slate-200 border border-[#333333] text-xs font-semibold transition active:scale-[0.98]"
             >
               <RefreshCw className="w-3.5 h-3.5 text-blue-400" />
               <span>Clear Local IndexedDB Cache</span>
@@ -1002,7 +1002,7 @@ export function SettingsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Option A: Purge Attendance Only */}
-          <div className="p-4 rounded-xl bg-slate-950/80 border border-red-500/20 flex flex-col justify-between gap-4">
+          <div className="p-4 rounded-xl bg-[#0d0d0d] border border-red-500/20 flex flex-col justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 text-slate-200 font-bold text-sm mb-1">
                 <Trash2 className="w-4 h-4 text-amber-400" />
@@ -1027,7 +1027,7 @@ export function SettingsPage() {
           </div>
 
           {/* Option B: Full Tenant Database Reset */}
-          <div className="p-4 rounded-xl bg-slate-950/80 border border-red-500/20 flex flex-col justify-between gap-4">
+          <div className="p-4 rounded-xl bg-[#0d0d0d] border border-red-500/20 flex flex-col justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 text-slate-200 font-bold text-sm mb-1">
                 <Database className="w-4 h-4 text-red-400" />
@@ -1056,7 +1056,7 @@ export function SettingsPage() {
       {/* =========================================================================
           SECTION 6: ACCOUNT SESSION LOGOUT
           ========================================================================= */}
-      <div className="p-6 rounded-2xl bg-slate-900/60 border border-slate-800/80 backdrop-blur-md shadow-sm">
+      <div className="p-6 rounded-2xl bg-[#181818]/90 border border-[#282828] backdrop-blur-md shadow-sm">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-400 flex-shrink-0 mt-0.5">
@@ -1089,7 +1089,7 @@ export function SettingsPage() {
           ========================================================================= */}
       {resetModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="w-full max-w-md rounded-2xl bg-[#141416] border border-red-500/40 p-6 shadow-2xl space-y-5">
+          <div className="w-full max-w-md rounded-2xl bg-[#161616] border border-red-500/40 p-6 shadow-2xl space-y-5">
             {/* Header */}
             <div className="flex items-start gap-4">
               <div className="w-11 h-11 rounded-2xl bg-red-500/15 border border-red-500/30 flex items-center justify-center text-red-400 shrink-0">
@@ -1131,7 +1131,7 @@ export function SettingsPage() {
                   setConfirmInput('');
                 }}
                 disabled={resetLoading}
-                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold transition"
+                className="px-4 py-2 rounded-xl bg-[#222222] hover:bg-[#2a2a2a] text-slate-300 text-xs font-semibold transition"
               >
                 Cancel
               </button>

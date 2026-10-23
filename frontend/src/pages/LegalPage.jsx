@@ -18,15 +18,15 @@ export function LegalPage({ initialTab = 'terms' }) {
   const isPrivacy = activeTab === 'privacy';
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 font-sans flex flex-col justify-between selection:bg-emerald-500 selection:text-slate-950">
+    <div className="min-h-screen bg-[#111111] text-slate-100 font-sans flex flex-col justify-between selection:bg-emerald-500 selection:text-slate-950">
       {/* Top Navigation Bar */}
-      <header className="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40">
+      <header className="border-b border-[#222222] bg-[#111111]/90 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link
             to="/login"
             className="inline-flex items-center gap-2.5 text-xs sm:text-sm font-semibold text-slate-300 hover:text-white transition group"
           >
-            <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700/80 flex items-center justify-center group-hover:border-slate-600 transition">
+            <div className="w-8 h-8 rounded-lg bg-[#1e1e1e] border border-[#2a2a2a] flex items-center justify-center group-hover:border-[#444444] transition">
               <ArrowLeft className="w-4 h-4 text-emerald-400 group-hover:-translate-x-0.5 transition-transform" />
             </div>
             <span>Back to Login</span>
@@ -46,7 +46,7 @@ export function LegalPage({ initialTab = 'terms' }) {
       {/* Main Content Area */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-14 flex-1 w-full">
         {/* Title & Tab Switcher */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 pb-6 border-b border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-8 pb-6 border-b border-[#222222]">
           <div>
             <h1 className="text-3xl font-black text-white tracking-tight flex items-center gap-3">
               {isPrivacy ? (
@@ -68,7 +68,7 @@ export function LegalPage({ initialTab = 'terms' }) {
           </div>
 
           {/* Tab Selector */}
-          <div className="inline-flex p-1 rounded-xl bg-slate-900 border border-slate-800 text-xs font-semibold self-start sm:self-auto">
+          <div className="inline-flex p-1 rounded-xl bg-[#181818] border border-[#282828] text-xs font-semibold self-start sm:self-auto">
             <button
               onClick={() => setActiveTab('terms')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all ${
@@ -95,7 +95,7 @@ export function LegalPage({ initialTab = 'terms' }) {
         </div>
 
         {/* Content Body */}
-        <div className="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-6 sm:p-10 backdrop-blur-md shadow-xl text-slate-300 text-sm leading-relaxed space-y-8 ring-1 ring-white/[0.05]">
+        <div className="bg-[#181818]/90 border border-[#282828] rounded-2xl p-6 sm:p-10 backdrop-blur-md shadow-xl text-slate-300 text-sm leading-relaxed space-y-8 ring-1 ring-white/[0.05]">
           {isPrivacy ? (
             <>
               {/* Privacy Policy Content */}
@@ -110,7 +110,7 @@ export function LegalPage({ initialTab = 'terms' }) {
                 <p>
                   Verity is built with a strict <strong>privacy-first, on-device processing</strong> architecture. Facial recognition computations—including face detection and secure facial feature mapping—are executed entirely on the local device browser without transmitting raw facial imagery to external cloud services.
                 </p>
-                <p className="bg-slate-950/60 p-4 rounded-xl border border-slate-800 text-xs text-slate-400 font-mono">
+                <p className="bg-[#0d0d0d] p-4 rounded-xl border border-[#282828] text-xs text-slate-400 font-mono">
                   KEY GUARANTEE: Raw camera video frames analyzed during live attendance monitoring are held solely in temporary device memory (RAM) and are permanently discarded after verification. Live video feeds are never streamed or persisted to remote servers.
                 </p>
               </section>

@@ -161,7 +161,7 @@ export const MobileSidebar = ({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 transition"
+        className="p-2 rounded-xl bg-[#1e1e1e] hover:bg-[#282828] text-slate-200 border border-[#2a2a2a] transition"
         aria-label="Toggle Navigation Menu"
       >
         {open ? <X className="w-5 h-5" /> : <List className="w-5 h-5" />}
@@ -198,7 +198,7 @@ export const MobileSidebar = ({
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
+                  className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-[#222222] transition"
                 >
                   <X className="w-5 h-5" />
                 </button>

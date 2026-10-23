@@ -129,7 +129,7 @@ export function AttendanceChart({
 
   return (
     <div
-      className={`relative overflow-hidden rounded-2xl bg-slate-900/60 border border-slate-800/80 p-5 sm:p-6 backdrop-blur-md shadow-xl ring-1 ring-white/[0.05] ${className}`}
+      className={`relative overflow-hidden rounded-2xl bg-[#181818]/90 border border-[#282828] p-5 sm:p-6 backdrop-blur-md shadow-xl ring-1 ring-white/[0.05] ${className}`}
     >
       {/* Background glow accent */}
       <div className="absolute top-0 right-1/4 -mt-12 w-64 h-64 bg-emerald-500/[0.04] rounded-full blur-3xl pointer-events-none" />
@@ -158,7 +158,7 @@ export function AttendanceChart({
         {/* Action Controls */}
         <div className="flex items-center gap-2 self-start sm:self-auto">
           {/* View Mode Toggle */}
-          <div className="inline-flex p-1 rounded-xl bg-slate-950/80 border border-slate-800 text-xs font-semibold">
+          <div className="inline-flex p-1 rounded-xl bg-[#0d0d0d] border border-[#242424] text-xs font-semibold">
             <button
               type="button"
               onClick={() => setViewMode('daily')}
@@ -188,7 +188,7 @@ export function AttendanceChart({
           <button
             type="button"
             onClick={fetchFeed}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 transition"
+            className="p-2 rounded-xl bg-[#222222] hover:bg-[#2a2a2a] text-slate-300 border border-[#333333] transition"
             title="Refresh Chart Data"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
@@ -198,7 +198,7 @@ export function AttendanceChart({
 
       {/* Mini Stats Banner */}
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-        <div className="p-3 rounded-xl bg-slate-950/40 border border-slate-800/60 flex items-center gap-3">
+        <div className="p-3 rounded-xl bg-[#0d0d0d]/80 border border-[#242424] flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center flex-shrink-0">
             <Users className="w-4 h-4" />
           </div>
@@ -208,7 +208,7 @@ export function AttendanceChart({
           </div>
         </div>
 
-        <div className="p-3 rounded-xl bg-slate-950/40 border border-slate-800/60 flex items-center gap-3">
+        <div className="p-3 rounded-xl bg-[#0d0d0d]/80 border border-[#242424] flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-teal-500/10 text-teal-400 flex items-center justify-center flex-shrink-0">
             <TrendingUp className="w-4 h-4" />
           </div>
@@ -223,7 +223,7 @@ export function AttendanceChart({
           </div>
         </div>
 
-        <div className="col-span-2 sm:col-span-1 p-3 rounded-xl bg-slate-950/40 border border-slate-800/60 flex items-center gap-3">
+        <div className="col-span-2 sm:col-span-1 p-3 rounded-xl bg-[#0d0d0d]/80 border border-[#242424] flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center flex-shrink-0">
             <CheckCircle2 className="w-4 h-4" />
           </div>
@@ -237,7 +237,7 @@ export function AttendanceChart({
       </div>
 
       {/* Bar Chart Container */}
-      <div className="relative w-full rounded-xl bg-slate-950/50 border border-slate-800/70 p-2 sm:p-4 overflow-hidden">
+      <div className="relative w-full rounded-xl bg-[#0d0d0d]/90 border border-[#242424] p-2 sm:p-4 overflow-hidden">
         <BarChart
           data={chartData}
           xDataKey="label"
