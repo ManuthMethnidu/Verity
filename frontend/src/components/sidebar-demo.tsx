@@ -2,11 +2,11 @@
 import React, { useState } from "react";
 import { Sidebar, SidebarBody, SidebarLink } from "@/components/ui/sidebar";
 import {
-  IconArrowLeft,
-  IconBrandTabler,
-  IconSettings,
-  IconUserBolt,
-} from "@tabler/icons-react";
+  ArrowLeft as IconArrowLeft,
+  SquaresFour as IconBrandTabler,
+  Gear as IconSettings,
+  UserFocus as IconUserBolt,
+} from "@phosphor-icons/react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 

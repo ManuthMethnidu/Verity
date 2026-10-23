@@ -3,17 +3,17 @@ import { Link } from 'react-router-dom';
 import {
   Camera,
   Users,
-  CheckCircle2,
-  TrendingUp,
+  CheckCircle as CheckCircle2,
+  TrendUp as TrendingUp,
   Clock,
   ArrowRight,
-  Sparkles,
+  Sparkle as Sparkles,
   ShieldCheck,
   FileText,
-  Building2,
+  Buildings as Building2,
   Cpu,
-  Zap,
-} from 'lucide-react';
+  Lightning as Zap,
+} from '@phosphor-icons/react';
 import { api, getCurrentUser } from '../auth/auth.js';
 import { getLocalSettings } from '../storage/settingsStore.js';
 import { AttendanceChart } from '../components/AttendanceChart.jsx';

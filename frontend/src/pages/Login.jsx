@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Lock, Mail, Building2, ArrowRight, Sparkles, ShieldCheck, CheckCircle2, Shield } from 'lucide-react';
+import {
+  Lock,
+  EnvelopeSimple as Mail,
+  Buildings as Building2,
+  ArrowRight,
+  Sparkle as Sparkles,
+  ShieldCheck,
+  CheckCircle as CheckCircle2,
+  Shield,
+} from '@phosphor-icons/react';
 import { signIn, registerAdmin } from '../auth/auth.js';
 import GradientASCII from '../components/GradientASCII.jsx';
 import { LegalModal } from '../components/LegalModal.jsx';

@@ -8,13 +8,13 @@ import React, {
 } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  ChevronDown,
-  Pencil,
+  CaretDown as ChevronDown,
+  PencilSimple as Pencil,
   Copy,
-  FolderSymlink,
+  FolderSimple as FolderSymlink,
   Archive,
-  Trash2,
-} from "lucide-react";
+  Trash as Trash2,
+} from "@phosphor-icons/react";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 

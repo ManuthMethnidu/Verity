@@ -230,6 +230,7 @@ export class DetectorLoop {
         const student = matchResult.match;
         const confidence = matchResult.confidence;
         const distance = matchResult.distance;
+        const matchedAngle = matchResult.matchedAngle;
 
         processedFaces.push({
           box: det.box,
@@ -239,6 +240,7 @@ export class DetectorLoop {
           studentCode: student ? student.studentIdCode : null,
           confidence,
           distance,
+          matchedAngle,
         });
 
         // If recognized student, check cooldown and trigger verified attendance
@@ -253,6 +255,7 @@ export class DetectorLoop {
                 student,
                 confidence,
                 distance,
+                matchedAngle,
                 box: det.box,
               });
             }

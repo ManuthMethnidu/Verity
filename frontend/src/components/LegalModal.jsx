@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { X, ShieldCheck, FileCheck, Lock, ExternalLink } from 'lucide-react';
+import { X, ShieldCheck, FileDoc as FileCheck, Lock, ArrowSquareOut as ExternalLink } from '@phosphor-icons/react';
 
 export function LegalModal({ isOpen, type, onClose }) {
   // Close on Escape key

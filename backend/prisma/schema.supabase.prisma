@@ -39,6 +39,8 @@ model Student {
   studentIdCode String?      @map("student_id_code")
   name          String
   imageUrl      String?      @map("image_url")
+  imageLeftUrl  String?      @map("image_left_url")
+  imageRightUrl String?      @map("image_right_url")
   embedding     Bytes?
   createdAt     DateTime     @default(now()) @map("created_at")
   attendance    Attendance[]
@@ -70,6 +72,8 @@ model TenantSettings {
   modelQuality        String   @default("medium") @map("model_quality")
   batterySaver        Boolean  @default(false) @map("battery_saver")
   confidenceThreshold Float    @default(0.70) @map("confidence_threshold")
+  livenessEnabled     Boolean  @default(false) @map("liveness_enabled")
+  livenessStrictness  String   @default("medium") @map("liveness_strictness")
   updatedAt           DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("tenant_settings")

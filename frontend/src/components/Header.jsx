@@ -2,16 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   ShieldCheck,
-  Building2,
-  LogOut,
+  Buildings as Building2,
+  SignOut as LogOut,
   Camera,
-  Activity,
+  Pulse as Activity,
   User,
-  LayoutDashboard,
+  SquaresFour as LayoutDashboard,
   Users,
-  ClipboardList,
-  Settings,
-} from 'lucide-react';
+  ClipboardText as ClipboardList,
+  Gear as Settings,
+} from '@phosphor-icons/react';
 import { getCurrentUser, signOut } from '../auth/auth.js';
 import { GooeyDropdown } from './ui/GooeyDropdown.tsx';
 

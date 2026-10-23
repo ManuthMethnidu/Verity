@@ -191,32 +191,41 @@ export function computeFaceDistance(d1, d2) {
 }
 
 /**
- * Matches a probe 128-D face descriptor against the enrolled student roster.
+ * Matches a probe 128-D face descriptor against the multi-angle student roster.
  * Uses GPU-accelerated TensorFlow.js tensor math with strict biometric thresholding.
  *
- * STRICT INDIVIDUAL BIOMETRICS:
+ * STRICT INDIVIDUAL BIOMETRICS (Multi-Angle 3-Vector Matching):
+ * - Evaluates Front, Left Profile, and Right Profile vectors simultaneously in a single GPU pass.
  * - Same person (identical face): Euclidean distance 0.15 - 0.42
  * - Different person: Euclidean distance > 0.50
- * - Maximum distance allowed for individual recognition: 0.46
+ * - Maximum distance allowed for individual recognition: 0.46 (STRICT CEILING)
  * - Any distance > 0.46 is STRICTLY UNRECOGNIZED (NO FALSE POSITIVES).
  *
  * @param {Array<number>|Float32Array} probeDescriptor - Detected 128-D face descriptor
- * @param {Array<object>} roster - List of enrolled students with real 128-D descriptors
+ * @param {Array<object>} roster - List of enrolled students with 3-angle descriptors
  * @param {number} minConfidenceThreshold - Minimum match confidence (e.g. 0.70)
  */
 export function matchDescriptorToRoster(probeDescriptor, roster, minConfidenceThreshold = 0.70) {
   if (!probeDescriptor || !roster || roster.length === 0) {
-    return { match: null, confidence: 0, distance: 1.0 };
+    return { match: null, confidence: 0, distance: 1.0, matchedAngle: null };
   }
 
-  // Filter valid enrolled students with 128-D vectors
+  // Filter valid enrolled students with complete 3-angle vectors (or unpack vectors)
   const validStudents = [];
-  const vectors = [];
+  const vectors = []; // Flattened: for each student, [front128, left128, right128]
 
   for (const student of roster) {
-    let candidateVector = student.embeddingVector;
+    let floatArray = null;
 
-    if (!candidateVector && student.embedding) {
+    if (student.embeddingVectors && student.embeddingVectors.front && student.embeddingVectors.left && student.embeddingVectors.right) {
+      floatArray = [
+        ...student.embeddingVectors.front,
+        ...student.embeddingVectors.left,
+        ...student.embeddingVectors.right,
+      ];
+    } else if (Array.isArray(student.embeddingVector) && student.embeddingVector.length >= 384) {
+      floatArray = student.embeddingVector;
+    } else if (student.embedding) {
       if (typeof student.embedding === 'string') {
         try {
           const binaryString = atob(student.embedding);
@@ -224,24 +233,31 @@ export function matchDescriptorToRoster(probeDescriptor, roster, minConfidenceTh
           for (let i = 0; i < binaryString.length; i++) {
             bytes[i] = binaryString.charCodeAt(i);
           }
-          candidateVector = Array.from(new Float32Array(bytes.buffer));
+          const decoded = new Float32Array(bytes.buffer);
+          if (decoded.length >= 384) {
+            floatArray = Array.from(decoded);
+          }
         } catch {}
-      } else if (Array.isArray(student.embedding)) {
-        candidateVector = student.embedding;
+      } else if (Array.isArray(student.embedding) && student.embedding.length >= 384) {
+        floatArray = student.embedding;
       }
     }
 
-    if (candidateVector && candidateVector.length === 128) {
+    // Only include students with complete 3-angle profiles (Strict requirement)
+    if (floatArray && floatArray.length >= 384) {
       validStudents.push(student);
-      vectors.push(candidateVector);
+      const front = floatArray.slice(0, 128);
+      const left = floatArray.slice(128, 256);
+      const right = floatArray.slice(256, 384);
+      vectors.push(front, left, right);
     }
   }
 
-  if (validStudents.length === 0) {
-    return { match: null, confidence: 0, distance: 1.0 };
+  if (validStudents.length === 0 || vectors.length === 0) {
+    return { match: null, confidence: 0, distance: 1.0, matchedAngle: null };
   }
 
-  // Compute vectorized Euclidean distances via TensorFlow.js on GPU
+  // Compute vectorized Euclidean distances across all 3N angle vectors via TensorFlow.js on GPU
   const { minIdx, lowestDistance } = tf.tidy(() => {
     const probeTensor = tf.tensor2d([Array.from(probeDescriptor)], [1, 128]);
     const rosterTensor = tf.tensor2d(vectors, [vectors.length, 128]);
@@ -270,10 +286,15 @@ export function matchDescriptorToRoster(probeDescriptor, roster, minConfidenceTh
     ) / 100;
 
     if (confidence >= minConfidenceThreshold) {
+      const studentIdx = Math.floor(minIdx / 3);
+      const angleIdx = minIdx % 3;
+      const matchedAngle = angleIdx === 0 ? 'front' : (angleIdx === 1 ? 'left' : 'right');
+
       return {
-        match: validStudents[minIdx],
+        match: validStudents[studentIdx],
         confidence,
         distance: lowestDistance,
+        matchedAngle,
       };
     }
   }
@@ -282,6 +303,7 @@ export function matchDescriptorToRoster(probeDescriptor, roster, minConfidenceTh
     match: null,
     confidence: 0,
     distance: lowestDistance,
+    matchedAngle: null,
   };
 }
 

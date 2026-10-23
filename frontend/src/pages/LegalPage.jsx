@@ -3,12 +3,12 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   ArrowLeft,
   ShieldCheck,
-  FileCheck,
+  FileDoc as FileCheck,
   Lock,
-  Building2,
+  Buildings as Building2,
   Calendar,
-  CheckCircle2,
-} from 'lucide-react';
+  CheckCircle as CheckCircle2,
+} from '@phosphor-icons/react';
 
 export function LegalPage({ initialTab = 'terms' }) {
   const location = useLocation();

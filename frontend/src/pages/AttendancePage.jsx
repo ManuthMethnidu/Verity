@@ -1,28 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Camera,
-  RefreshCw,
-  Zap,
-  CheckCircle2,
-  AlertTriangle,
+  ArrowClockwise as RefreshCw,
+  Lightning as Zap,
+  CheckCircle as CheckCircle2,
+  Warning as AlertTriangle,
   HardDrive,
-  Maximize2,
-  Volume2,
-  Wifi,
-  Sparkles,
+  ArrowsOut as Maximize2,
+  SpeakerHigh as Volume2,
+  WifiHigh as Wifi,
+  Sparkle as Sparkles,
   UserCheck,
   FlipHorizontal,
-  SwitchCamera,
+  CameraRotate as SwitchCamera,
   Copy,
   Check,
-  ExternalLink,
+  ArrowSquareOut as ExternalLink,
   Globe,
-  Code2,
+  Code as Code2,
   Terminal,
-  Download,
-  Trash2,
+  DownloadSimple as Download,
+  Trash as Trash2,
   X,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import { GooeyDropdown } from '../components/ui/GooeyDropdown.tsx';
 import { CameraManager } from '../vision/cameraManager.js';
 import { DetectorLoop } from '../vision/detectorLoop.js';
@@ -534,9 +534,26 @@ export function AttendancePage() {
           <div className="pt-4 mt-4 border-t border-slate-800/80 text-xs text-slate-400 flex items-center justify-between font-mono">
             <span className="flex items-center gap-1.5 font-sans">
               <HardDrive className="w-3.5 h-3.5 text-slate-500" />
-              <span>Offline Ready</span>
+              <span>Multi-Angle Engine</span>
             </span>
-            <span className="text-emerald-400 font-semibold">{roster.length} Profiles</span>
+            <span className="text-emerald-400 font-semibold">
+              {
+                roster.filter(
+                  (s) =>
+                    s.isComplete ||
+                    s.angleCount === 3 ||
+                    (s.embeddingVector && s.embeddingVector.length >= 384)
+                ).length
+              }{' '}
+              Active (
+              {roster.filter(
+                (s) =>
+                  s.isComplete ||
+                  s.angleCount === 3 ||
+                  (s.embeddingVector && s.embeddingVector.length >= 384)
+              ).length * 3}{' '}
+              Vectors)
+            </span>
           </div>
         </div>
       </div>

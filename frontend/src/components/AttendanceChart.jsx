@@ -7,14 +7,14 @@ import {
   ChartTooltip,
 } from '@/components/charts';
 import {
-  BarChart3,
+  ChartBar as BarChart3,
   Calendar,
   Clock,
-  TrendingUp,
-  RefreshCw,
+  TrendUp as TrendingUp,
+  ArrowClockwise as RefreshCw,
   Users,
-  CheckCircle2,
-} from 'lucide-react';
+  CheckCircle as CheckCircle2,
+} from '@phosphor-icons/react';
 import { api } from '../auth/auth.js';
 
 export function AttendanceChart({

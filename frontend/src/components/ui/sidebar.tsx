@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, createContext, useContext, useRef, useCallback } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { IconMenu2, IconX } from "@tabler/icons-react";
+import { List, X } from "@phosphor-icons/react";
 import { cn } from "@/lib/utils";
 
 interface Links {
@@ -164,7 +164,7 @@ export const MobileSidebar = ({
         className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700/80 transition"
         aria-label="Toggle Navigation Menu"
       >
-        {open ? <IconX className="w-5 h-5" /> : <IconMenu2 className="w-5 h-5" />}
+        {open ? <X className="w-5 h-5" /> : <List className="w-5 h-5" />}
       </button>
 
       <AnimatePresence>
@@ -200,7 +200,7 @@ export const MobileSidebar = ({
                   onClick={() => setOpen(false)}
                   className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition"
                 >
-                  <IconX className="w-5 h-5" />
+                  <X className="w-5 h-5" />
                 </button>
               </div>
 

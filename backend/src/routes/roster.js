@@ -4,27 +4,45 @@ import { authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// Helper: Convert embedding input (Array or Base64 string) to Buffer
+// Helper: Convert embedding input (Array, Base64 string, or multi-angle Object) to Buffer
 function parseEmbeddingToBuffer(embedding) {
   if (!embedding) return null;
 
   if (typeof embedding === 'string') {
     // If base64
     const buffer = Buffer.from(embedding, 'base64');
-    if (buffer.length > 4096) {
-      throw new Error('Embedding payload exceeds 4KB limit.');
+    if (buffer.length > 16384) {
+      throw new Error('Embedding payload exceeds size limit.');
     }
     return buffer;
   }
 
   if (Array.isArray(embedding)) {
-    // Float array (e.g. 128 elements)
-    const floatArr = new Float32Array(embedding);
+    // Can be:
+    // 1) Flat array of 128 (1 angle) or 384 (3 angles) floats
+    // 2) Array of arrays: [[128 floats], [128 floats], [128 floats]]
+    let flatArray = embedding;
+    if (Array.isArray(embedding[0])) {
+      flatArray = embedding.flat();
+    }
+    const floatArr = new Float32Array(flatArray);
     const buffer = Buffer.from(floatArr.buffer, floatArr.byteOffset, floatArr.byteLength);
-    if (buffer.length > 4096) {
-      throw new Error('Embedding payload exceeds 4KB limit.');
+    if (buffer.length > 16384) {
+      throw new Error('Embedding payload exceeds size limit.');
     }
     return buffer;
+  }
+
+  if (typeof embedding === 'object') {
+    // Multi-angle object: { front: [...], left: [...], right: [...] }
+    const parts = [];
+    if (Array.isArray(embedding.front)) parts.push(...embedding.front);
+    if (Array.isArray(embedding.left)) parts.push(...embedding.left);
+    if (Array.isArray(embedding.right)) parts.push(...embedding.right);
+    if (parts.length > 0) {
+      const floatArr = new Float32Array(parts);
+      return Buffer.from(floatArr.buffer, floatArr.byteOffset, floatArr.byteLength);
+    }
   }
 
   return null;
@@ -34,16 +52,34 @@ function parseEmbeddingToBuffer(embedding) {
 function formatStudent(student) {
   let embeddingBase64 = null;
   let embeddingArray = null;
+  let embeddingFront = null;
+  let embeddingLeft = null;
+  let embeddingRight = null;
+  let isComplete = false;
+  let angleCount = 0;
 
   if (student.embedding) {
     embeddingBase64 = Buffer.from(student.embedding).toString('base64');
-    // Also provide float array representation for convenience
     const float32 = new Float32Array(
       student.embedding.buffer,
       student.embedding.byteOffset,
       student.embedding.byteLength / 4
     );
     embeddingArray = Array.from(float32);
+
+    if (embeddingArray.length >= 384) {
+      // 3 full angles (front, left, right)
+      embeddingFront = embeddingArray.slice(0, 128);
+      embeddingLeft = embeddingArray.slice(128, 256);
+      embeddingRight = embeddingArray.slice(256, 384);
+      isComplete = true;
+      angleCount = 3;
+    } else if (embeddingArray.length >= 128) {
+      // Legacy or partial single angle
+      embeddingFront = embeddingArray.slice(0, 128);
+      isComplete = false;
+      angleCount = 1;
+    }
   }
 
   return {
@@ -52,8 +88,17 @@ function formatStudent(student) {
     studentIdCode: student.studentIdCode,
     name: student.name,
     imageUrl: student.imageUrl,
+    imageLeftUrl: student.imageLeftUrl || null,
+    imageRightUrl: student.imageRightUrl || null,
     embedding: embeddingBase64,
-    embeddingVector: embeddingArray,
+    embeddingVector: embeddingFront, // primary for backward compatibility
+    embeddingVectors: {
+      front: embeddingFront,
+      left: embeddingLeft,
+      right: embeddingRight,
+    },
+    isComplete,
+    angleCount,
     createdAt: student.createdAt,
   };
 }
@@ -92,7 +137,7 @@ router.post('/batch', authenticateToken, async (req, res) => {
 
       let embeddingBuffer = null;
       try {
-        embeddingBuffer = parseEmbeddingToBuffer(item.embedding);
+        embeddingBuffer = parseEmbeddingToBuffer(item.embeddings || item.embedding);
       } catch (embErr) {
         return res.status(400).json({ error: embErr.message });
       }
@@ -103,6 +148,8 @@ router.post('/batch', authenticateToken, async (req, res) => {
           studentIdCode: item.studentIdCode || item.student_id || item.id || null,
           name: item.name,
           imageUrl: item.imageUrl || item.image_url || null,
+          imageLeftUrl: item.imageLeftUrl || item.image_left_url || null,
+          imageRightUrl: item.imageRightUrl || item.image_right_url || null,
           embedding: embeddingBuffer,
         },
       });
@@ -125,7 +172,7 @@ router.post('/batch', authenticateToken, async (req, res) => {
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, studentIdCode, imageUrl, embedding } = req.body;
+    const { name, studentIdCode, imageUrl, imageLeftUrl, imageRightUrl, embedding, embeddings } = req.body;
 
     const existing = await prisma.student.findFirst({
       where: { id, tenantId: req.user.tenantId },
@@ -136,8 +183,9 @@ router.put('/:id', authenticateToken, async (req, res) => {
     }
 
     let embeddingBuffer = existing.embedding;
-    if (embedding !== undefined) {
-      embeddingBuffer = parseEmbeddingToBuffer(embedding);
+    const incomingEmbedding = embeddings !== undefined ? embeddings : embedding;
+    if (incomingEmbedding !== undefined) {
+      embeddingBuffer = parseEmbeddingToBuffer(incomingEmbedding);
     }
 
     const updated = await prisma.student.update({
@@ -146,6 +194,8 @@ router.put('/:id', authenticateToken, async (req, res) => {
         name: name !== undefined ? name : existing.name,
         studentIdCode: studentIdCode !== undefined ? studentIdCode : existing.studentIdCode,
         imageUrl: imageUrl !== undefined ? imageUrl : existing.imageUrl,
+        imageLeftUrl: imageLeftUrl !== undefined ? imageLeftUrl : existing.imageLeftUrl,
+        imageRightUrl: imageRightUrl !== undefined ? imageRightUrl : existing.imageRightUrl,
         embedding: embeddingBuffer,
       },
     });

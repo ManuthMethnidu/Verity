@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import {
-  ClipboardList,
+  ClipboardText as ClipboardList,
   Calendar,
-  Download,
-  RefreshCw,
+  DownloadSimple as Download,
+  ArrowClockwise as RefreshCw,
   Users,
-  CheckCircle2,
-  TrendingUp,
+  CheckCircle as CheckCircle2,
+  TrendUp as TrendingUp,
   Archive,
   Printer,
-  FileSpreadsheet,
-} from 'lucide-react';
+  FileCsv as FileSpreadsheet,
+} from '@phosphor-icons/react';
 import { api } from '../auth/auth.js';
 import { AttendanceChart } from '../components/AttendanceChart.jsx';
 import { GooeyDropdown } from '../components/ui/GooeyDropdown.tsx';

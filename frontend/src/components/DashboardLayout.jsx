@@ -2,13 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Sidebar, SidebarBody, SidebarLink } from '@/components/ui/sidebar';
 import {
-  IconBrandTabler,
-  IconCamera,
-  IconUsers,
-  IconFileAnalytics,
-  IconSettings,
-  IconArrowLeft,
-} from '@tabler/icons-react';
+  SquaresFour,
+  Camera,
+  Users,
+  ChartBar,
+  Gear,
+  SignOut as IconSignOut,
+} from '@phosphor-icons/react';
 import { Footer } from './Footer.jsx';
 import { isAuthenticated, getCurrentUser, signOut } from '../auth/auth.js';
 import { cn } from '@/lib/utils';
@@ -41,7 +41,7 @@ export function DashboardLayout() {
       label: 'Dashboard',
       href: '/dashboard',
       icon: (
-        <IconBrandTabler
+        <SquaresFour
           className={`h-5 w-5 shrink-0 transition-colors ${
             location.pathname === '/dashboard' || location.pathname === '/'
               ? 'text-emerald-400'
@@ -54,7 +54,7 @@ export function DashboardLayout() {
       label: 'Live Scanner',
       href: '/attendance',
       icon: (
-        <IconCamera
+        <Camera
           className={`h-5 w-5 shrink-0 transition-colors ${
             location.pathname === '/attendance'
               ? 'text-emerald-400'
@@ -67,7 +67,7 @@ export function DashboardLayout() {
       label: 'Student Roster',
       href: '/roster',
       icon: (
-        <IconUsers
+        <Users
           className={`h-5 w-5 shrink-0 transition-colors ${
             location.pathname === '/roster'
               ? 'text-emerald-400'
@@ -80,7 +80,7 @@ export function DashboardLayout() {
       label: 'Attendance Reports',
       href: '/reports',
       icon: (
-        <IconFileAnalytics
+        <ChartBar
           className={`h-5 w-5 shrink-0 transition-colors ${
             location.pathname === '/reports'
               ? 'text-emerald-400'
@@ -93,7 +93,7 @@ export function DashboardLayout() {
       label: 'System Settings',
       href: '/settings',
       icon: (
-        <IconSettings
+        <Gear
           className={`h-5 w-5 shrink-0 transition-colors ${
             location.pathname === '/settings'
               ? 'text-emerald-400'
@@ -110,7 +110,7 @@ export function DashboardLayout() {
         signOut();
       },
       icon: (
-        <IconArrowLeft className="h-5 w-5 shrink-0 text-red-400 group-hover/sidebar:text-red-300 transition-colors" />
+        <IconSignOut className="h-5 w-5 shrink-0 text-red-400 group-hover/sidebar:text-red-300 transition-colors" />
       ),
     },
   ];

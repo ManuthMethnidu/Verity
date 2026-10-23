@@ -1,20 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Users,
-  Upload,
+  UploadSimple as Upload,
   Plus,
-  Trash2,
-  Edit2,
-  HardDriveDownload,
+  Trash as Trash2,
+  PencilSimple as Edit2,
+  DownloadSimple as HardDriveDownload,
   CheckCircle,
-  AlertCircle,
-  Search,
-  FileSpreadsheet,
+  WarningCircle as AlertCircle,
+  MagnifyingGlass as Search,
+  FileCsv as FileSpreadsheet,
   Camera,
-  RefreshCw,
-  Sparkles,
+  ArrowClockwise as RefreshCw,
+  Sparkle as Sparkles,
   FlipHorizontal,
-} from 'lucide-react';
+  ArrowLeft,
+  ArrowRight,
+  ArrowCounterClockwise as RotateCcw,
+  UserCheck,
+  Check,
+} from '@phosphor-icons/react';
 import { api } from '../auth/auth.js';
 import { cacheRoster, getCachedRoster } from '../storage/attendanceStore.js';
 import { CameraManager } from '../vision/cameraManager.js';
@@ -23,6 +28,7 @@ import {
   extractFaceThumbnail,
   loadFaceApiModels,
 } from '../vision/faceApiService.js';
+import { estimateHeadPose, isPoseMatchingTarget } from '../vision/poseEstimation.js';
 import { GooeyDropdown } from '../components/ui/GooeyDropdown.tsx';
 
 export function RosterPage() {
@@ -36,14 +42,49 @@ export function RosterPage() {
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [editStudent, setEditStudent] = useState(null);
 
+  // Angle Steps Definition
+  const ANGLE_STEPS = [
+    {
+      id: 'front',
+      name: 'Frontal Portrait',
+      shortName: 'Front',
+      targetDeg: '0° Center',
+      prompt: 'Look straight ahead at the camera',
+    },
+    {
+      id: 'left',
+      name: 'Left Profile',
+      shortName: 'Left Profile',
+      targetDeg: '~30° to 45° Left',
+      prompt: 'Slowly turn your head to the left',
+    },
+    {
+      id: 'right',
+      name: 'Right Profile',
+      shortName: 'Right Profile',
+      targetDeg: '~30° to 45° Right',
+      prompt: 'Slowly turn your head to the right',
+    },
+  ];
+
   // Enrollment Camera state
   const [enrollTab, setEnrollTab] = useState('camera'); // 'camera' | 'manual'
   const [enrollCameraActive, setEnrollCameraActive] = useState(false);
   const [enrollMirrored, setEnrollMirrored] = useState(true);
-  const [capturedFace, setCapturedFace] = useState(null); // { thumbnailUrl, embeddingVector }
+  const [capturedAngles, setCapturedAngles] = useState({
+    front: null,  // { thumbnailUrl, embeddingVector, pose }
+    left: null,   // { thumbnailUrl, embeddingVector, pose }
+    right: null,  // { thumbnailUrl, embeddingVector, pose }
+  });
+  const [currentAngleStep, setCurrentAngleStep] = useState('front'); // 'front' | 'left' | 'right'
+  const [livePose, setLivePose] = useState(null);
+  const [holdProgress, setHoldProgress] = useState(0); // 0 to 100%
   const [isExtractingFace, setIsExtractingFace] = useState(false);
   const enrollVideoRef = useRef(null);
   const enrollCameraManagerRef = useRef(null);
+  const holdCounterRef = useRef(0);
+  const poseLoopIntervalRef = useRef(null);
+  const isAutoSnappingRef = useRef(false);
 
   // Form states
   const [formName, setFormName] = useState('');
@@ -54,6 +95,36 @@ export function RosterPage() {
   const showNotice = (msg, type = 'success') => {
     setNotification({ msg, type });
     setTimeout(() => setNotification(null), 4000);
+  };
+
+  const playSnapSound = (isLast = false) => {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = 'sine';
+      if (isLast) {
+        osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+        osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08);
+        osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.16);
+        osc.frequency.setValueAtTime(1046.50, ctx.currentTime + 0.24);
+        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.42);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.42);
+      } else {
+        osc.frequency.setValueAtTime(587.33, ctx.currentTime);
+        osc.frequency.setValueAtTime(880, ctx.currentTime + 0.08);
+        gain.gain.setValueAtTime(0.12, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.28);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.28);
+      }
+    } catch {}
   };
 
   const fetchRoster = async () => {
@@ -130,46 +201,133 @@ export function RosterPage() {
   };
 
   const stopEnrollCamera = () => {
+    if (poseLoopIntervalRef.current) {
+      clearInterval(poseLoopIntervalRef.current);
+      poseLoopIntervalRef.current = null;
+    }
     if (enrollCameraManagerRef.current) {
       enrollCameraManagerRef.current.stop();
       enrollCameraManagerRef.current = null;
     }
     setEnrollCameraActive(false);
+    setLivePose(null);
+    setHoldProgress(0);
+    holdCounterRef.current = 0;
   };
 
-  const handleSnapFace = async () => {
+  // Real-time pose tracking & automatic 0.6s hold auto-snap
+  const checkPoseFrame = async () => {
+    if (
+      !enrollVideoRef.current ||
+      !enrollCameraActive ||
+      isExtractingFace ||
+      isAutoSnappingRef.current
+    ) return;
+    if (enrollVideoRef.current.readyState < 2 || enrollVideoRef.current.videoWidth === 0) return;
+
+    try {
+      const detection = await detectSingleFaceWithDescriptor(enrollVideoRef.current, 224, 0.4);
+      if (!detection || !detection.landmarks) {
+        setLivePose(null);
+        holdCounterRef.current = 0;
+        setHoldProgress(0);
+        return;
+      }
+
+      const pose = estimateHeadPose(detection.landmarks, enrollMirrored);
+      setLivePose(pose);
+
+      const isTargetMatched = isPoseMatchingTarget(pose, currentAngleStep);
+      if (isTargetMatched) {
+        holdCounterRef.current += 1;
+        // 6 ticks * 100ms = 600ms hold time
+        const progress = Math.min(100, Math.round((holdCounterRef.current / 6) * 100));
+        setHoldProgress(progress);
+
+        if (holdCounterRef.current >= 6) {
+          isAutoSnappingRef.current = true;
+          holdCounterRef.current = 0;
+          setHoldProgress(0);
+          await snapCurrentAngle(detection);
+          isAutoSnappingRef.current = false;
+        }
+      } else {
+        holdCounterRef.current = 0;
+        setHoldProgress(0);
+      }
+    } catch {}
+  };
+
+  useEffect(() => {
+    if (enrollCameraActive && enrollTab === 'camera') {
+      poseLoopIntervalRef.current = setInterval(checkPoseFrame, 100);
+    } else {
+      if (poseLoopIntervalRef.current) {
+        clearInterval(poseLoopIntervalRef.current);
+        poseLoopIntervalRef.current = null;
+      }
+      setLivePose(null);
+      setHoldProgress(0);
+      holdCounterRef.current = 0;
+    }
+    return () => {
+      if (poseLoopIntervalRef.current) {
+        clearInterval(poseLoopIntervalRef.current);
+        poseLoopIntervalRef.current = null;
+      }
+    };
+  }, [enrollCameraActive, enrollTab, currentAngleStep, enrollMirrored, isExtractingFace]);
+
+  const snapCurrentAngle = async (existingDetection = null) => {
     if (!enrollVideoRef.current || !enrollCameraActive) return;
     setIsExtractingFace(true);
     try {
-      const detection = await detectSingleFaceWithDescriptor(enrollVideoRef.current);
+      let detection = existingDetection;
+      if (!detection || !detection.descriptor) {
+        detection = await detectSingleFaceWithDescriptor(enrollVideoRef.current, 320, 0.45);
+      }
       if (!detection) {
-        showNotice(
-          'No face detected! Please ensure your face is well-lit and looking directly at the camera.',
-          'warning'
-        );
+        showNotice('No face detected. Please position face clearly in the camera.', 'warning');
         setIsExtractingFace(false);
         return;
       }
 
       const thumbUrl = extractFaceThumbnail(enrollVideoRef.current, detection.box);
-      const result = {
+      const pose = estimateHeadPose(detection.landmarks, enrollMirrored);
+
+      const capturedData = {
         thumbnailUrl: thumbUrl,
         embeddingVector: detection.descriptor,
+        pose,
       };
 
-      setCapturedFace(result);
-      setFormImage(thumbUrl);
-      showNotice('Face verified! Face recognition profile successfully created.');
+      setCapturedAngles((prev) => ({
+        ...prev,
+        [currentAngleStep]: capturedData,
+      }));
+
+      if (currentAngleStep === 'front') {
+        playSnapSound(false);
+        setCurrentAngleStep('left');
+        showNotice('Frontal photo captured! Now slowly turn your head to the left (~30° to 45°).');
+      } else if (currentAngleStep === 'left') {
+        playSnapSound(false);
+        setCurrentAngleStep('right');
+        showNotice('Left profile captured! Now slowly turn your head to the right (~30° to 45°).');
+      } else if (currentAngleStep === 'right') {
+        playSnapSound(true);
+        showNotice('All 3 angles captured! Face recognition profile is complete and ready.');
+      }
     } catch (err) {
-      console.error('Snap face failed:', err);
-      showNotice('Failed to capture face profile: ' + err.message, 'error');
+      console.error('Snap angle failed:', err);
+      showNotice('Failed to capture angle: ' + err.message, 'error');
     } finally {
       setIsExtractingFace(false);
     }
   };
 
-  const handlePhotoUpload = async (e) => {
-    const file = e.target.files[0];
+  const handleSlotUpload = (targetStep, e) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     setIsExtractingFace(true);
@@ -179,10 +337,10 @@ export function RosterPage() {
       const img = new Image();
       img.onload = async () => {
         try {
-          const detection = await detectSingleFaceWithDescriptor(img);
+          const detection = await detectSingleFaceWithDescriptor(img, 320, 0.45);
           if (!detection) {
             showNotice(
-              'No human face detected in uploaded photo. Please upload a clear portrait photo.',
+              `No human face detected in uploaded photo for ${targetStep} profile.`,
               'warning'
             );
             setIsExtractingFace(false);
@@ -190,14 +348,19 @@ export function RosterPage() {
           }
 
           const thumbUrl = extractFaceThumbnail(img, detection.box);
-          const result = {
-            thumbnailUrl: thumbUrl,
-            embeddingVector: detection.descriptor,
-          };
+          const pose = estimateHeadPose(detection.landmarks, false);
 
-          setCapturedFace(result);
-          setFormImage(thumbUrl);
-          showNotice('Photo processed! Face recognition profile created.');
+          setCapturedAngles((prev) => ({
+            ...prev,
+            [targetStep]: {
+              thumbnailUrl: thumbUrl,
+              embeddingVector: detection.descriptor,
+              pose,
+            },
+          }));
+
+          playSnapSound(targetStep === 'right');
+          showNotice(`Extracted ${targetStep} profile photo successfully!`);
         } catch (err) {
           console.error('Photo face detection failed:', err);
           showNotice('Could not extract face profile from image: ' + err.message, 'error');
@@ -212,30 +375,38 @@ export function RosterPage() {
 
   const handleAddStudent = async (e) => {
     e.preventDefault();
-    if (!capturedFace || !capturedFace.embeddingVector) {
+
+    const { front, left, right } = capturedAngles;
+    if (!front || !left || !right) {
       showNotice(
-        'Please capture a face from camera or upload a student portrait photo before saving.',
+        'All 3 angles (Front, Left Profile, Right Profile) are strictly required for reliable face recognition.',
         'warning'
       );
       return;
     }
 
     try {
-      const embedding = capturedFace.embeddingVector;
-      const imageUrl = capturedFace.thumbnailUrl || formImage || null;
+      // Concatenate 3 128-D vectors into one 384-element float array (3 x 128 = 384 floats)
+      const combinedEmbedding = [
+        ...front.embeddingVector,
+        ...left.embeddingVector,
+        ...right.embeddingVector,
+      ];
 
       await api.post('/roster/batch', {
         students: [
           {
             name: formName,
             studentIdCode: formCode,
-            imageUrl,
-            embedding,
+            imageUrl: front.thumbnailUrl,
+            imageLeftUrl: left.thumbnailUrl,
+            imageRightUrl: right.thumbnailUrl,
+            embedding: combinedEmbedding,
           },
         ],
       });
 
-      showNotice(`Student ${formName} enrolled with active face recognition profile.`);
+      showNotice(`Student ${formName} enrolled with 3-angle face recognition profile.`);
       closeAddModal();
       fetchRoster();
     } catch (err) {
@@ -246,23 +417,89 @@ export function RosterPage() {
   const closeAddModal = () => {
     stopEnrollCamera();
     setShowAddModal(false);
-    setCapturedFace(null);
+    setCapturedAngles({ front: null, left: null, right: null });
+    setCurrentAngleStep('front');
+    setLivePose(null);
+    setHoldProgress(0);
+    setEditStudent(null);
     setFormName('');
     setFormCode('');
     setFormImage('');
+  };
+
+  const openEditModal = (student) => {
+    setEditStudent(student);
+    setFormName(student.name);
+    setFormCode(student.studentIdCode || '');
+    setFormImage(student.imageUrl || '');
+
+    const frontVec =
+      student.embeddingVectors?.front ||
+      (student.embeddingVector && student.embeddingVector.length >= 384
+        ? student.embeddingVector.slice(0, 128)
+        : student.embeddingVector);
+    const leftVec =
+      student.embeddingVectors?.left ||
+      (student.embeddingVector && student.embeddingVector.length >= 384
+        ? student.embeddingVector.slice(128, 256)
+        : null);
+    const rightVec =
+      student.embeddingVectors?.right ||
+      (student.embeddingVector && student.embeddingVector.length >= 384
+        ? student.embeddingVector.slice(256, 384)
+        : null);
+
+    setCapturedAngles({
+      front:
+        student.imageUrl && frontVec
+          ? { thumbnailUrl: student.imageUrl, embeddingVector: frontVec }
+          : null,
+      left:
+        student.imageLeftUrl && leftVec
+          ? { thumbnailUrl: student.imageLeftUrl, embeddingVector: leftVec }
+          : null,
+      right:
+        student.imageRightUrl && rightVec
+          ? { thumbnailUrl: student.imageRightUrl, embeddingVector: rightVec }
+          : null,
+    });
+
+    if (!frontVec) setCurrentAngleStep('front');
+    else if (!leftVec) setCurrentAngleStep('left');
+    else if (!rightVec) setCurrentAngleStep('right');
+    else setCurrentAngleStep('front');
+
+    setShowAddModal(true);
+    setEnrollTab('camera');
+    setTimeout(() => startEnrollCamera(), 100);
   };
 
   const handleUpdateStudent = async (e) => {
     e.preventDefault();
     if (!editStudent) return;
     try {
-      await api.put(`/roster/${editStudent.id}`, {
+      const payload = {
         name: formName,
         studentIdCode: formCode,
-        imageUrl: formImage || null,
-      });
+      };
+
+      const { front, left, right } = capturedAngles;
+      if (front && left && right) {
+        payload.imageUrl = front.thumbnailUrl;
+        payload.imageLeftUrl = left.thumbnailUrl;
+        payload.imageRightUrl = right.thumbnailUrl;
+        payload.embedding = [
+          ...front.embeddingVector,
+          ...left.embeddingVector,
+          ...right.embeddingVector,
+        ];
+      } else if (formImage) {
+        payload.imageUrl = formImage;
+      }
+
+      await api.put(`/roster/${editStudent.id}`, payload);
       showNotice(`Student ${formName} updated.`);
-      setEditStudent(null);
+      closeAddModal();
       fetchRoster();
     } catch (err) {
       showNotice('Failed to update student.', 'error');
@@ -441,10 +678,12 @@ export function RosterPage() {
         <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={() => {
+              setEditStudent(null);
               setFormName('');
               setFormCode('');
               setFormImage('');
-              setCapturedFace(null);
+              setCapturedAngles({ front: null, left: null, right: null });
+              setCurrentAngleStep('front');
               setEnrollTab('camera');
               setShowAddModal(true);
               setTimeout(() => startEnrollCamera(), 100);
@@ -467,16 +706,35 @@ export function RosterPage() {
         </div>
       </div>
 
-      {/* Search Bar */}
-      <div className="relative max-w-md">
-        <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by student name or ID code..."
-          className="w-full pl-10 pr-4 py-2 bg-slate-900/80 border border-slate-800 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
-        />
+      {/* Search Bar & Active Stats */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="relative flex-1 max-w-md">
+          <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by student name or ID code..."
+            className="w-full pl-10 pr-4 py-2 bg-slate-900/80 border border-slate-800 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
+          />
+        </div>
+
+        <div className="flex items-center gap-2 text-xs font-mono">
+          <div className="px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-300 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span>Active (3 Angles):</span>
+            <span className="text-emerald-400 font-bold">
+              {
+                students.filter(
+                  (s) => s.isComplete || (s.embeddingVector && s.embeddingVector.length >= 384)
+                ).length
+              }
+            </span>
+          </div>
+          <div className="px-3 py-1.5 rounded-xl bg-slate-900/80 border border-slate-800 text-slate-400">
+            Total: <span className="text-white font-bold">{students.length}</span>
+          </div>
+        </div>
       </div>
 
       {/* Roster Table */}
@@ -505,80 +763,128 @@ export function RosterPage() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((s) => (
-                  <tr key={s.id} className="hover:bg-slate-800/20 transition">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700/80 overflow-hidden flex items-center justify-center flex-shrink-0">
-                          {s.imageUrl ? (
-                            <img
-                              src={s.imageUrl}
-                              alt={s.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <Users className="w-5 h-5 text-slate-400" />
-                          )}
+                filtered.map((s) => {
+                  const has3Angles =
+                    s.isComplete ||
+                    s.angleCount === 3 ||
+                    (s.embeddingVector && s.embeddingVector.length >= 384);
+
+                  return (
+                    <tr key={s.id} className="hover:bg-slate-800/20 transition">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700/80 overflow-hidden flex items-center justify-center flex-shrink-0">
+                            {s.imageUrl ? (
+                              <img
+                                src={s.imageUrl}
+                                alt={s.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <Users className="w-5 h-5 text-slate-400" />
+                            )}
+                          </div>
+                          <span className="font-semibold text-white">{s.name}</span>
                         </div>
-                        <span className="font-semibold text-white">{s.name}</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-emerald-400 font-mono text-xs">
-                      {s.studentIdCode || '—'}
-                    </td>
-                    <td className="px-6 py-4">
-                      {s.embedding || s.embeddingVector ? (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                          <CheckCircle className="w-3 h-3" />
-                          <span>Face Scan Enrolled</span>
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                          <AlertCircle className="w-3 h-3" />
-                          <span>Pending Capture</span>
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => {
-                            setEditStudent(s);
-                            setFormName(s.name);
-                            setFormCode(s.studentIdCode || '');
-                            setFormImage(s.imageUrl || '');
-                          }}
-                          className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition"
-                          title="Edit Student"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(s.id, s.name)}
-                          className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition"
-                          title="Delete Student"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="px-6 py-4 text-emerald-400 font-mono text-xs">
+                        {s.studentIdCode || '—'}
+                      </td>
+                      <td className="px-6 py-4">
+                        {has3Angles ? (
+                          <div className="flex items-center gap-2.5">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                              <CheckCircle className="w-3 h-3" />
+                              <span>3 Angles Verified</span>
+                            </span>
+                            <div className="flex -space-x-1.5 items-center">
+                              {s.imageUrl && (
+                                <img
+                                  src={s.imageUrl}
+                                  alt="Front"
+                                  title="Frontal Portrait"
+                                  className="w-5 h-5 rounded-full object-cover border border-slate-900 ring-1 ring-emerald-500/50"
+                                />
+                              )}
+                              {s.imageLeftUrl && (
+                                <img
+                                  src={s.imageLeftUrl}
+                                  alt="Left"
+                                  title="Left Profile (~35°)"
+                                  className="w-5 h-5 rounded-full object-cover border border-slate-900 ring-1 ring-emerald-500/50"
+                                />
+                              )}
+                              {s.imageRightUrl && (
+                                <img
+                                  src={s.imageRightUrl}
+                                  alt="Right"
+                                  title="Right Profile (~35°)"
+                                  className="w-5 h-5 rounded-full object-cover border border-slate-900 ring-1 ring-emerald-500/50"
+                                />
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => openEditModal(s)}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20 hover:bg-amber-500/20 transition cursor-pointer"
+                            title="Click to complete 3 angles"
+                          >
+                            <AlertCircle className="w-3 h-3" />
+                            <span>Incomplete ({s.angleCount || 0}/3) • Inactive</span>
+                          </button>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => openEditModal(s)}
+                            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition"
+                            title="Edit Student Face Profile"
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(s.id, s.name)}
+                            className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition"
+                            title="Delete Student"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Add / Enroll Student Modal with Live Camera Snap */}
+      {/* Add / Edit Student Multi-Angle Enrollment Modal */}
       {showAddModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
-          <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl my-6">
+          <div className="w-full max-w-xl bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl my-6">
             <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-              <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                <Camera className="w-5 h-5 text-emerald-400" />
-                <span>Enroll Student Face</span>
-              </h2>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                  <Camera className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                    <span>{editStudent ? 'Edit Student Profile' : 'Enroll Student Face'}</span>
+                    <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+                      3 Angles
+                    </span>
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Capture Front, Left, and Right profiles for reliable recognition.
+                  </p>
+                </div>
+              </div>
+
               <div className="flex bg-slate-950 p-1 rounded-xl text-xs font-semibold border border-slate-800">
                 <button
                   type="button"
@@ -606,16 +912,93 @@ export function RosterPage() {
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
-                  Manual Form
+                  Manual Upload
                 </button>
               </div>
             </div>
 
-            <form onSubmit={handleAddStudent} className="space-y-4">
+            {/* 3-Angle Step Tabs */}
+            <div className="grid grid-cols-3 gap-2 p-1.5 bg-slate-950 rounded-xl border border-slate-800/80 mb-3.5">
+              {ANGLE_STEPS.map((step) => {
+                const isCaptured = Boolean(capturedAngles[step.id]);
+                const isActive = currentAngleStep === step.id;
+                return (
+                  <button
+                    key={step.id}
+                    type="button"
+                    onClick={() => setCurrentAngleStep(step.id)}
+                    className={`flex items-center gap-2 p-2 rounded-lg text-left transition relative ${
+                      isActive
+                        ? 'bg-slate-800/90 text-white ring-1 ring-emerald-500/60 shadow-sm'
+                        : isCaptured
+                        ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'
+                        : 'bg-slate-900/50 text-slate-400 hover:text-slate-200'
+                    }`}
+                  >
+                    {isCaptured ? (
+                      <div className="w-7 h-7 rounded-md overflow-hidden border border-emerald-500 flex-shrink-0">
+                        <img
+                          src={capturedAngles[step.id].thumbnailUrl}
+                          alt={step.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div
+                        className={`w-7 h-7 rounded-md flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${
+                          isActive
+                            ? 'bg-emerald-500 text-slate-950'
+                            : 'bg-slate-800 text-slate-400'
+                        }`}
+                      >
+                        {step.id === 'front' ? '1' : step.id === 'left' ? '2' : '3'}
+                      </div>
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[12px] font-bold truncate flex items-center gap-1">
+                        <span>{step.shortName}</span>
+                        {isCaptured && <Check className="w-3 h-3 text-emerald-400 inline" />}
+                      </div>
+                      <div className="text-[10px] text-slate-400 truncate font-mono">
+                        {step.targetDeg}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            <form
+              onSubmit={editStudent ? handleUpdateStudent : handleAddStudent}
+              className="space-y-4"
+            >
               {enrollTab === 'camera' && (
                 <div className="space-y-3">
+                  {/* Step Guidance Header */}
+                  <div className="flex items-center justify-between px-3.5 py-2.5 bg-slate-950/70 border border-slate-800 rounded-xl text-xs">
+                    <div className="flex items-center gap-2 text-slate-300">
+                      {currentAngleStep === 'front' && (
+                        <UserCheck className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                      )}
+                      {currentAngleStep === 'left' && (
+                        <ArrowLeft className="w-4 h-4 text-emerald-400 flex-shrink-0 animate-pulse" />
+                      )}
+                      {currentAngleStep === 'right' && (
+                        <ArrowRight className="w-4 h-4 text-emerald-400 flex-shrink-0 animate-pulse" />
+                      )}
+                      <span>
+                        <strong className="text-white">
+                          {ANGLE_STEPS.find((s) => s.id === currentAngleStep)?.prompt}
+                        </strong>
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-mono text-emerald-400 px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20">
+                      Hold 0.6s to auto-snap
+                    </span>
+                  </div>
+
                   {/* Live Camera Viewport */}
-                  <div className="relative w-full aspect-[4/3] bg-slate-950 rounded-xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                  <div className="relative w-full aspect-[4/3] bg-slate-950 rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center">
                     <video
                       ref={enrollVideoRef}
                       className={`w-full h-full object-cover ${
@@ -625,10 +1008,66 @@ export function RosterPage() {
 
                     {/* Face Target Guide Oval */}
                     <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                      <div className="w-44 h-56 border-2 border-dashed border-emerald-400/60 rounded-[50%] flex items-center justify-center">
-                        <span className="text-xs text-emerald-400 font-semibold bg-slate-950/80 px-2.5 py-0.5 rounded-full">
-                          Position Face Here
-                        </span>
+                      <div
+                        className={`w-44 h-56 rounded-[50%] transition-all duration-200 border-2 flex flex-col items-center justify-center ${
+                          livePose && isPoseMatchingTarget(livePose, currentAngleStep)
+                            ? 'border-emerald-400 ring-4 ring-emerald-500/30 bg-emerald-500/5'
+                            : livePose && livePose.pose === 'overrotated'
+                            ? 'border-rose-400 ring-4 ring-rose-500/30'
+                            : livePose
+                            ? 'border-amber-400/80 border-dashed'
+                            : 'border-slate-500/40 border-dashed'
+                        }`}
+                      >
+                        <div className="bg-slate-950/85 backdrop-blur-md px-3 py-1 rounded-full text-xs font-semibold border border-slate-700/80 flex items-center gap-1.5 shadow-lg">
+                          {livePose && isPoseMatchingTarget(livePose, currentAngleStep) ? (
+                            <>
+                              <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                              <span className="text-emerald-400">Angle Matched! Hold still...</span>
+                            </>
+                          ) : (
+                            <span className="text-slate-300">
+                              {ANGLE_STEPS.find((s) => s.id === currentAngleStep)?.targetDeg}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Auto-Snap Hold Progress Overlay */}
+                    {holdProgress > 0 && (
+                      <div className="absolute bottom-12 left-6 right-6 pointer-events-none">
+                        <div className="bg-slate-950/90 backdrop-blur-md p-2 rounded-xl border border-emerald-500/40 shadow-xl flex items-center gap-3">
+                          <div className="text-[11px] font-mono text-emerald-400 font-bold whitespace-nowrap">
+                            Holding... {holdProgress}%
+                          </div>
+                          <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-emerald-400 transition-all duration-100 ease-linear rounded-full"
+                              style={{ width: `${holdProgress}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Real-time pose feedback badge */}
+                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs font-mono pointer-events-none">
+                      <div className="px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur-md border border-slate-800 text-slate-300">
+                        {livePose ? (
+                          <span
+                            className={
+                              isPoseMatchingTarget(livePose, currentAngleStep)
+                                ? 'text-emerald-400 font-bold'
+                                : 'text-amber-400'
+                            }
+                          >
+                            Pose: {livePose.feedback} ({livePose.yaw > 0 ? '+' : ''}
+                            {livePose.yaw}°)
+                          </span>
+                        ) : (
+                          <span className="text-slate-500">Align face inside the oval</span>
+                        )}
                       </div>
                     </div>
 
@@ -636,95 +1075,152 @@ export function RosterPage() {
                     <button
                       type="button"
                       onClick={() => setEnrollMirrored(!enrollMirrored)}
-                      className="absolute top-3 right-3 p-2 bg-slate-900/80 hover:bg-slate-900 text-slate-300 rounded-lg border border-slate-700 text-xs flex items-center gap-1.5"
+                      className="absolute top-3 right-3 p-2 bg-slate-900/80 hover:bg-slate-900 text-slate-300 rounded-lg border border-slate-700 text-xs flex items-center gap-1.5 shadow cursor-pointer"
                     >
                       <FlipHorizontal className="w-3.5 h-3.5" />
                       <span>{enrollMirrored ? 'Mirrored' : 'Normal'}</span>
                     </button>
                   </div>
 
-                  {/* Snap and Preview Bar */}
-                  <div className="flex items-center justify-between gap-3 bg-slate-950/60 p-3 rounded-xl border border-slate-800">
+                  {/* Manual Snap & Retake Bar */}
+                  <div className="flex items-center gap-3">
                     <button
                       type="button"
                       disabled={isExtractingFace}
-                      onClick={handleSnapFace}
-                      className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-slate-950 font-bold rounded-xl text-sm transition-all duration-200 active:scale-95 shadow-sm"
+                      onClick={() => snapCurrentAngle()}
+                      className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-slate-950 font-bold rounded-xl text-sm transition-all duration-200 active:scale-95 shadow-sm cursor-pointer"
                     >
                       {isExtractingFace ? (
                         <>
                           <RefreshCw className="w-4 h-4 animate-spin" />
-                          <span>Extracting Neural Biometrics...</span>
+                          <span>Extracting Biometrics...</span>
                         </>
                       ) : (
                         <>
                           <Camera className="w-4 h-4" />
-                          <span>Snap Face & Extract Biometrics</span>
+                          <span>
+                            Manual Snap (
+                            {ANGLE_STEPS.find((s) => s.id === currentAngleStep)?.shortName})
+                          </span>
                         </>
                       )}
                     </button>
 
-                    {capturedFace && (
-                      <div className="w-12 h-12 rounded-lg border border-emerald-500 overflow-hidden flex-shrink-0 relative">
-                        <img
-                          src={capturedFace.thumbnailUrl}
-                          alt="Captured face"
-                          className="w-full h-full object-cover"
-                        />
-                        <div className="absolute top-0 right-0 w-3 h-3 bg-emerald-400 rounded-full border border-slate-900" />
-                      </div>
+                    {capturedAngles[currentAngleStep] && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCapturedAngles((prev) => ({
+                            ...prev,
+                            [currentAngleStep]: null,
+                          }));
+                          showNotice(
+                            `Reset ${currentAngleStep} angle. Position your face to retake.`
+                          );
+                        }}
+                        className="px-3.5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold rounded-xl border border-slate-700 flex items-center gap-1.5 transition cursor-pointer"
+                        title="Retake this angle"
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Retake</span>
+                      </button>
                     )}
                   </div>
-
-                  {capturedFace && (
-                    <div className="p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2">
-                      <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                      <span>
-                        Face Profile Confirmed ({capturedFace.embeddingVector.length} biometric points)
-                      </span>
-                    </div>
-                  )}
                 </div>
               )}
 
               {enrollTab === 'manual' && (
                 <div className="space-y-3">
-                  <div className="p-4 rounded-xl border border-dashed border-slate-700 bg-slate-950/50 text-center space-y-2">
-                    <div className="flex justify-center">
-                      <Upload className="w-8 h-8 text-emerald-400" />
-                    </div>
-                    <p className="text-xs text-slate-300 font-medium">
-                      Upload a student portrait photo to generate a face profile
-                    </p>
-                    <label className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-semibold cursor-pointer transition">
-                      <span>Choose Portrait Photo</span>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={handlePhotoUpload}
-                      />
-                    </label>
-                  </div>
+                  <p className="text-xs text-slate-400">
+                    Upload 3 reference portrait photos for each required angle.
+                  </p>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    {ANGLE_STEPS.map((step) => {
+                      const captured = capturedAngles[step.id];
+                      return (
+                        <div
+                          key={step.id}
+                          className="p-3.5 rounded-xl border border-slate-800 bg-slate-950/60 text-center flex flex-col items-center justify-between min-h-[160px]"
+                        >
+                          <div className="w-full">
+                            <div className="text-xs font-bold text-white mb-0.5">
+                              {step.name}
+                            </div>
+                            <div className="text-[10px] text-slate-400 font-mono mb-2">
+                              {step.targetDeg}
+                            </div>
+                          </div>
 
-                  {capturedFace && (
-                    <div className="flex items-center gap-3 p-3 bg-slate-950/60 rounded-xl border border-emerald-500/40">
-                      <img
-                        src={capturedFace.thumbnailUrl}
-                        alt="Enrolled portrait"
-                        className="w-12 h-12 rounded-lg object-cover border border-emerald-500"
-                      />
-                      <div className="text-xs">
-                        <div className="font-semibold text-emerald-400 flex items-center gap-1.5">
-                          <CheckCircle className="w-3.5 h-3.5" />
-                          <span>Face Extracted Successfully</span>
+                          {captured ? (
+                            <div className="relative w-16 h-16 rounded-xl overflow-hidden border border-emerald-500 shadow-sm my-1">
+                              <img
+                                src={captured.thumbnailUrl}
+                                alt={step.name}
+                                className="w-full h-full object-cover"
+                              />
+                              <div className="absolute top-1 right-1 w-3 h-3 bg-emerald-400 rounded-full border border-slate-950" />
+                            </div>
+                          ) : (
+                            <div className="w-16 h-16 rounded-xl border border-dashed border-slate-700 flex items-center justify-center text-slate-500 my-1">
+                              <Upload className="w-5 h-5 text-slate-400" />
+                            </div>
+                          )}
+
+                          <label className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-lg text-xs font-semibold cursor-pointer transition">
+                            <span>{captured ? 'Replace' : 'Upload'}</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(e) => handleSlotUpload(step.id, e)}
+                            />
+                          </label>
                         </div>
-                        <div className="text-slate-400 mt-0.5">
-                          Face recognition profile ready for enrollment
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Status Banner */}
+              {capturedAngles.front && capturedAngles.left && capturedAngles.right ? (
+                <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between text-xs text-emerald-400">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                    <span>All 3 Angles Captured (384 Biometric Dimensions Ready)</span>
+                  </div>
+                  <div className="flex -space-x-2">
+                    <img
+                      src={capturedAngles.front.thumbnailUrl}
+                      alt="Front"
+                      className="w-6 h-6 rounded-full object-cover border border-slate-900 ring-1 ring-emerald-500"
+                    />
+                    <img
+                      src={capturedAngles.left.thumbnailUrl}
+                      alt="Left"
+                      className="w-6 h-6 rounded-full object-cover border border-slate-900 ring-1 ring-emerald-500"
+                    />
+                    <img
+                      src={capturedAngles.right.thumbnailUrl}
+                      alt="Right"
+                      className="w-6 h-6 rounded-full object-cover border border-slate-900 ring-1 ring-emerald-500"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-2 text-xs text-amber-400">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>
+                    Missing angles:{' '}
+                    {[
+                      !capturedAngles.front && 'Frontal',
+                      !capturedAngles.left && 'Left Profile',
+                      !capturedAngles.right && 'Right Profile',
+                    ]
+                      .filter(Boolean)
+                      .join(', ')}
+                    . All 3 are strictly required for active recognition.
+                  </span>
                 </div>
               )}
 
@@ -755,93 +1251,24 @@ export function RosterPage() {
                     className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
                   />
                 </div>
-
-                {enrollTab === 'manual' && (
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-400 mb-1">
-                      Photo URL (Optional)
-                    </label>
-                    <input
-                      type="url"
-                      value={formImage}
-                      onChange={(e) => setFormImage(e.target.value)}
-                      placeholder="https://cdn.verity.internal/photos/student.jpg"
-                      className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
-                    />
-                  </div>
-                )}
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
                 <button
                   type="button"
                   onClick={closeAddModal}
-                  className="px-4 py-2 text-sm text-slate-400 hover:text-white"
+                  className="px-4 py-2 text-sm text-slate-400 hover:text-white cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-xl text-sm transition-all duration-200 active:scale-[0.98] shadow-sm"
+                  disabled={
+                    !capturedAngles.front || !capturedAngles.left || !capturedAngles.right
+                  }
+                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-bold rounded-xl text-sm transition-all duration-200 active:scale-[0.98] shadow-sm cursor-pointer"
                 >
-                  Save & Enroll in Roster
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Student Modal */}
-      {editStudent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
-            <h2 className="text-lg font-bold text-white mb-4">Edit Student</h2>
-            <form onSubmit={handleUpdateStudent} className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">Full Name</label>
-                <input
-                  type="text"
-                  required
-                  value={formName}
-                  onChange={(e) => setFormName(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">
-                  Student ID Code
-                </label>
-                <input
-                  type="text"
-                  value={formCode}
-                  onChange={(e) => setFormCode(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">Photo URL</label>
-                <input
-                  type="url"
-                  value={formImage}
-                  onChange={(e) => setFormImage(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setEditStudent(null)}
-                  className="px-4 py-2 text-sm text-slate-400 hover:text-white"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-xl text-sm transition-all duration-200 active:scale-[0.98] shadow-sm"
-                >
-                  Save Changes
+                  {editStudent ? 'Save Changes' : 'Save & Enroll in Roster'}
                 </button>
               </div>
             </form>

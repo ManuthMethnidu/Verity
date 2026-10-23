@@ -1,14 +1,14 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
-  LayoutDashboard,
+  SquaresFour as LayoutDashboard,
   Users,
   Camera,
-  Settings,
-  ClipboardList,
-  LogOut,
+  Gear as Settings,
+  ClipboardText as ClipboardList,
+  SignOut as LogOut,
   ShieldCheck,
-} from 'lucide-react';
+} from '@phosphor-icons/react';
 import { signOut, getCurrentUser } from '../auth/auth.js';
 
 export function Sidebar({ mobileOpen, onClose }) {
